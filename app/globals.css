@@ -71,26 +71,37 @@ body { background: #F5F6F7; }
 /* nav */
 .ml-nav{position:fixed;inset:0 0 auto 0;z-index:60;transition:background .4s,box-shadow .4s,backdrop-filter .4s;}
 .ml-nav.scrolled{background:rgba(245,246,247,.82);backdrop-filter:saturate(1.4) blur(14px);box-shadow:0 1px 0 var(--line-2);}
-.ml-nav-in{display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:20px;height:72px;max-width:var(--wrap);margin:0 auto;padding:0 28px;}
+.ml-nav-in{display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:20px;height:72px;max-width:1320px;margin:0 auto;padding:0 28px;}
 .ml-lockup{display:flex;align-items:center;gap:11px;flex:0 0 auto;}
 .ml-lockup-mark{height:38px;width:auto;display:block;}
 .ml-lockup-word{height:21px;width:auto;display:block;}
 @media(max-width:900px){.ml-lockup-mark{height:32px;}.ml-lockup-word{height:18px;}}
 @media(max-width:380px){.ml-lockup-word{display:none;}}
-.ml-navlinks{display:flex;flex-wrap:nowrap;align-items:center;gap:clamp(14px,2.1vw,30px);min-width:0;}
-.ml-navlink{font-size:14.5px;font-weight:500;color:var(--muted);position:relative;padding:6px 0;white-space:nowrap;transition:color .25s;}
+.ml-navlinks{display:flex;flex-wrap:nowrap;align-items:center;gap:clamp(12px,1.5vw,22px);min-width:0;overflow:hidden;}
+.ml-navlink{font-size:14px;font-weight:500;color:var(--muted);position:relative;padding:6px 0;white-space:nowrap;transition:color .25s;}
 .ml-navlink::after{content:"";position:absolute;left:0;right:100%;bottom:0;height:1.5px;background:var(--orange);transition:right .3s cubic-bezier(.2,.8,.2,1);}
 .ml-navlink:hover{color:var(--ink);}
 .ml-navlink:hover::after{right:0;}
 .ml-nav-cta{display:flex;flex-wrap:nowrap;align-items:center;gap:clamp(10px,1.2vw,16px);flex:0 0 auto;}
 .ml-mobile-btn{display:none;}
-/* keep the top bar on a single line on narrower laptops instead of wrapping the labels */
-@media(max-width:1180px){
-  .ml-navlink{font-size:13.5px;}
-  .ml-nav .ml-btn{padding:12px 16px;font-size:14px;}
+/* the eight nav labels plus the right-hand cluster only just fit, and the Spanish
+   labels are wider — tighten progressively, then hand the links to the mobile
+   menu before they can run under the language switch */
+@media(max-width:1280px){
+  .ml-navlink{font-size:13px;}
+  .ml-navlinks{gap:clamp(9px,1.2vw,16px);}
+  .ml-nav .ml-btn{padding:11px 15px;font-size:13.5px;}
+  .ml-nav .ml-loginlink{font-size:13.5px;}
+  .ml-nav .ml-langsw{padding:4px 5px;}
+  .ml-nav .ml-langsw > svg{display:none;}
+  .ml-nav .ml-langsw button{padding:3px 6px;}
 }
-@media(max-width:1040px){
+@media(max-width:1180px){
   .ml-nav .ml-loginlink{display:none;}
+}
+@media(max-width:1120px){
+  .ml-navlinks{display:none;}
+  .ml-mobile-btn{display:inline-flex;align-items:center;padding:8px;}
 }
 
 .ml-mobile{position:fixed;inset:0;z-index:55;background:var(--paper);padding:96px 28px 40px;display:flex;flex-direction:column;gap:6px;transform:translateY(-8px);opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
