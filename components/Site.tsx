@@ -275,11 +275,11 @@ export default function Site() {
             ))}
           </div>
           <div className="ml-nav-cta">
-            <LangSwitch />
             <a className="ml-loginlink" href="/login">{t.login}</a>
             <a className="ml-btn ml-btn--primary" href="#demo" onClick={(e) => { e.preventDefault(); go("demo"); }}>
               {t.bookDemo} <ArrowRight />
             </a>
+            <LangSwitch />
             <button className="ml-mobile-btn" aria-label="Open menu" onClick={() => setMobileOpen((o) => !o)}>
               {mobileOpen ? <X /> : <Menu />}
             </button>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Newsreader, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
+import { SITE_URL } from "@/lib/site";
 
 const serif = Newsreader({
   subsets: ["latin"],
@@ -17,7 +18,7 @@ const sans = Hanken_Grotesk({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://mundolingu.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "MundoLingu — English & Spanish, made personal",
     template: "%s — MundoLingu",

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { siteUrl } from "@/lib/site";
 
 export async function POST() {
   const supabase = await createClient();
@@ -27,7 +28,7 @@ export async function POST() {
     await admin.from("profiles").update({ stripe_customer_id: customerId }).eq("id", user.id);
   }
 
-  const site = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const site = siteUrl(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000");
   const coupon = process.env.STRIPE_FIRST_MONTH_COUPON;
 
   const session = await stripe.checkout.sessions.create({

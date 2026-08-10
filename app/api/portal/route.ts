@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { siteUrl } from "@/lib/site";
 
 export async function POST() {
   const supabase = await createClient();
@@ -20,7 +21,7 @@ export async function POST() {
   if (!profile?.stripe_customer_id)
     return NextResponse.json({ error: "No membership found." }, { status: 400 });
 
-  const site = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const site = siteUrl(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000");
   const portal = await stripe.billingPortal.sessions.create({
     customer: profile.stripe_customer_id,
     return_url: `${site}/members`,
