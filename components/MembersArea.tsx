@@ -165,13 +165,11 @@ export default function MembersArea() {
         </div>
 
         {tab === "lessons" && (
-          <div className="mem-grid">
-            {LESSONS.map((l) => (
-              <div className="mem-card" key={l.title}>
-                <div className="mem-thumb"><span className="play"><Play size={20} fill="currentColor" /></span></div>
-                <div className="mem-cb"><h3>{l.title}</h3><div className="meta">{l.meta}</div></div>
-              </div>
-            ))}
+          <div className="mem-soon">
+            <div className="mem-soon-badge"><Play size={26} fill="currentColor" /></div>
+            <h3>Video lessons are on the way</h3>
+            <p>We&apos;re filming a full library of lessons right now — they&apos;ll appear here soon. In the meantime, jump into a live class or grab this month&apos;s workbook.</p>
+            <button className="mem-soon-btn" onClick={() => setTab("live")}>See live classes</button>
           </div>
         )}
 
