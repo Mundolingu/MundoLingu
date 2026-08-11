@@ -1,10 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 const CONFIGURED = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+// Reasons handed over by /auth/callback when an email link doesn't work out.
+const LINK_ERRORS: Record<string, string> = {
+  expired: "That link has expired. Please request a new one, then try again.",
+  invalid: "That link didn't work — it may have already been used. Please log in below.",
+  incomplete: "That link was incomplete. Open it again from your email, or log in below.",
+};
+
+// Supabase's own messages are written for developers. Say it in plain language instead.
+function friendly(message: string): string {
+  const m = (message || "").toLowerCase();
+  if (m.includes("invalid login credentials"))
+    return "That email and password don't match an account. Check for typos, or create an account below.";
+  if (m.includes("email not confirmed"))
+    return "Please confirm your email first — check your inbox for the link we sent you.";
+  if (m.includes("user already registered") || m.includes("already been registered"))
+    return "You already have an account with this email — log in instead.";
+  if (m.includes("password should be at least"))
+    return "Please choose a password with at least 6 characters.";
+  if (m.includes("rate limit") || m.includes("too many"))
+    return "Too many attempts just now. Please wait a minute and try again.";
+  return message;
+}
 
 export default function LoginForm() {
   const router = useRouter();
@@ -14,6 +37,16 @@ export default function LoginForm() {
   const [msg, setMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Read on mount rather than with useSearchParams so this page can stay static.
+  useEffect(() => {
+    try {
+      const reason = new URLSearchParams(window.location.search).get("error");
+      if (!reason) return;
+      setMsg(LINK_ERRORS[reason] || LINK_ERRORS.invalid);
+      window.history.replaceState(null, "", window.location.pathname);
+    } catch {}
+  }, []);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setMsg(null);
@@ -21,14 +54,28 @@ export default function LoginForm() {
     const supabase = createClient();
 
     if (mode === "signup") {
-      const { error } = await supabase.auth.signUp({
+      const { data: signUp, error } = await supabase.auth.signUp({
         email,
         password,
         options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
       });
       if (error) {
         setLoading(false);
-        setMsg(error.message);
+        setMsg(friendly(error.message));
+        return;
+      }
+      // Supabase returns a user with no identities (and no error) when the email is
+      // already taken. Without this check people wait for an email that never arrives.
+      if (signUp.user && Array.isArray(signUp.user.identities) && signUp.user.identities.length === 0) {
+        setLoading(false);
+        setMode("signin");
+        setMsg("You already have an account with this email — log in below.");
+        return;
+      }
+      if (signUp.session) {
+        setLoading(false);
+        router.push("/members");
+        router.refresh();
         return;
       }
       const { data } = await supabase.auth.getSession();
@@ -43,7 +90,7 @@ export default function LoginForm() {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       setLoading(false);
       if (error) {
-        setMsg(error.message);
+        setMsg(friendly(error.message));
         return;
       }
       router.push("/members");
