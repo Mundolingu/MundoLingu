@@ -10,7 +10,7 @@ export async function POST(req: Request) {
 
   if (data.company) return NextResponse.json({ ok: true }); // honeypot: silently drop bots
 
-  const { name, email, phone, age, language, reason, timezone, days, times } = data;
+  const { name, email, country, phone, age, language, reason, timezone, days, times } = data;
   if (!name || !email || !phone || !reason) {
     return NextResponse.json({ ok: false, error: "Please fill in all the fields." }, { status: 400 });
   }
@@ -30,6 +30,7 @@ export async function POST(req: Request) {
   const rows: [string, string][] = [
     ["Name", name],
     ["Email", email],
+    ["Country", country || "\u2014"],
     ["Phone", phone],
     ["Age", String(age ?? "")],
     ["Wants to learn", language || "—"],

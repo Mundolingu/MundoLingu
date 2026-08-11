@@ -60,7 +60,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <style>{`[data-reveal]{opacity:1 !important;transform:none !important;}`}</style>
         </noscript>
       </head>
-      <body className={`${serif.variable} ${sans.variable}`}>{children}</body>
+      <body className={`${serif.variable} ${sans.variable}`}>
+        {children}
+        {process.env.NEXT_PUBLIC_CF_ANALYTICS_TOKEN ? (
+          <script
+            defer
+            src="https://static.cloudflareinsights.com/beacon.min.js"
+            data-cf-beacon={JSON.stringify({ token: process.env.NEXT_PUBLIC_CF_ANALYTICS_TOKEN })}
+          />
+        ) : null}
+      </body>
     </html>
   );
 }

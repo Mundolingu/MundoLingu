@@ -276,3 +276,12 @@ You now get an email automatically for both key actions — no need to check Sup
 Both use Resend, so they just need `RESEND_API_KEY` set (and `DEMO_NOTIFY_EMAIL`,
 which defaults to mundolingu@gmail.com). The hand-in link also uses your Supabase
 `SUPABASE_SERVICE_ROLE_KEY`, which you already have set.
+
+
+---
+
+## New: level test, Instagram, analytics
+
+- **Free English level test** at `/level-test` (linked in the nav as "Level test"). Visitors get their CEFR level (A1-C1) and can book a demo - each lead is emailed to you (uses your Resend key, no extra setup).
+- **Instagram band** on the homepage linking to @mundolingu. (For a live photo feed later, a free widget like Behold or SnapWidget can be embedded here.)
+- **Free analytics (optional):** create a free Cloudflare account -> Web Analytics -> add your site -> copy the token -> in Netlify set `NEXT_PUBLIC_CF_ANALYTICS_TOKEN` to that token and redeploy. Then you'll see your visitor numbers.
