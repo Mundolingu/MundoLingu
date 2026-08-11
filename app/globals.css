@@ -574,3 +574,12 @@ body { background: #F5F6F7; }
 /* instagram live feed embed */
 .ml-ig-embed{width:100%;border-radius:16px;overflow:hidden;min-height:360px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line-2);}
 .ml-ig-embed iframe{width:100%;height:100%;min-height:360px;border:none;display:block;}
+
+/* join: two payment methods (Mexico pesos + international Revolut) */
+.join-s1{text-align:left;font-weight:700;font-size:15.5px;color:var(--ink);margin:4px 0 12px;}
+.join-pay{display:flex;flex-direction:column;gap:14px;text-align:left;margin-bottom:16px;}
+.join-method{background:var(--paper);border-radius:14px;padding:18px 20px;box-shadow:inset 0 0 0 1px var(--line-2);}
+.join-method-head{display:flex;align-items:center;gap:9px;margin-bottom:5px;}
+.join-flag{font-size:20px;line-height:1;}
+.join-method-head h3{font-size:16px;font-weight:700;margin:0;color:var(--ink);}
+.join-method-price{font-size:13.5px;font-weight:700;color:var(--orange-deep);margin-bottom:12px;}
