@@ -7,6 +7,9 @@ import DemoForm from "@/components/DemoForm";
 // Add your full WhatsApp number (country code, no +, spaces or dashes), e.g. "5215512345678".
 const WHATSAPP_NUMBER = "971504296090";
 
+// Show your latest Instagram posts: get a widget URL (see guide) and set NEXT_PUBLIC_IG_EMBED in Netlify.
+const INSTAGRAM_EMBED_URL = process.env.NEXT_PUBLIC_IG_EMBED || "";
+
 type Lang = "en" | "es";
 
 const NAV: { id: string; en: string; es: string; page?: boolean; route?: string }[] = [
@@ -275,11 +278,11 @@ export default function Site() {
             ))}
           </div>
           <div className="ml-nav-cta">
-            <LangSwitch />
             <a className="ml-loginlink" href="/login">{t.login}</a>
             <a className="ml-btn ml-btn--primary" href="#demo" onClick={(e) => { e.preventDefault(); go("demo"); }}>
               {t.bookDemo} <ArrowRight />
             </a>
+            <LangSwitch />
             <button className="ml-mobile-btn" aria-label="Open menu" onClick={() => setMobileOpen((o) => !o)}>
               {mobileOpen ? <X /> : <Menu />}
             </button>
@@ -538,7 +541,13 @@ export default function Site() {
                   <p className="ml-lead" data-reveal>{t.igLead}</p>
                   <a className="ml-btn ml-btn--primary" href="https://instagram.com/mundolingu" target="_blank" rel="noreferrer" data-reveal style={{ marginTop: "28px" }}>{t.igBtn} <ArrowRight /></a>
                 </div>
-                <div className="ml-ig-tiles" data-reveal><span /><span /><span /><span /></div>
+                {INSTAGRAM_EMBED_URL ? (
+                  <div className="ml-ig-embed" data-reveal>
+                    <iframe src={INSTAGRAM_EMBED_URL} title="Instagram feed" />
+                  </div>
+                ) : (
+                  <div className="ml-ig-tiles" data-reveal><span /><span /><span /><span /></div>
+                )}
               </div>
             </section>
 
