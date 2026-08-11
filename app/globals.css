@@ -550,3 +550,17 @@ body { background: #F5F6F7; }
 .mem-soon p{color:var(--muted);font-size:16px;line-height:1.6;margin:0 auto 24px;max-width:44ch;}
 .mem-soon-btn{background:var(--orange);color:var(--navy);font-weight:600;font-size:15px;border:none;cursor:pointer;padding:13px 24px;border-radius:11px;transition:background .25s,transform .25s;}
 .mem-soon-btn:hover{background:var(--orange-deep);color:#fff;transform:translateY(-2px);}
+
+
+/* ================= hub: video modal + thumbnails ================= */
+.mem-loading{text-align:center;color:var(--faint);padding:60px 20px;font-size:15px;}
+.mem-card{cursor:pointer;}
+.mem-thumb{position:relative;overflow:hidden;}
+.mem-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.mem-thumb .play{position:relative;z-index:2;}
+.mem-modal{position:fixed;inset:0;background:rgba(8,20,40,.82);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;}
+.mem-modal-in{position:relative;width:100%;max-width:900px;}
+.mem-modal-x{position:absolute;top:-46px;right:0;background:rgba(255,255,255,.16);color:#fff;border:none;border-radius:10px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s;}
+.mem-modal-x:hover{background:rgba(255,255,255,.3);}
+.mem-modal-video{position:relative;width:100%;padding-top:56.25%;border-radius:16px;overflow:hidden;background:#000;box-shadow:0 40px 100px -30px rgba(0,0,0,.7);}
+.mem-modal-video iframe{position:absolute;inset:0;width:100%;height:100%;border:none;}

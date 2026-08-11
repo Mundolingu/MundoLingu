@@ -285,3 +285,17 @@ which defaults to mundolingu@gmail.com). The hand-in link also uses your Supabas
 - **Free English level test** at `/level-test` (linked in the nav as "Level test"). Visitors get their CEFR level (A1-C1) and can book a demo - each lead is emailed to you (uses your Resend key, no extra setup).
 - **Instagram band** on the homepage linking to @mundolingu. (For a live photo feed later, a free widget like Behold or SnapWidget can be embedded here.)
 - **Free analytics (optional):** create a free Cloudflare account -> Web Analytics -> add your site -> copy the token -> in Netlify set `NEXT_PUBLIC_CF_ANALYTICS_TOKEN` to that token and redeploy. Then you'll see your visitor numbers.
+
+
+---
+
+## Managing your hub from Supabase (no code)
+
+After re-running `supabase/schema.sql` once, everything in the members hub is managed by adding rows in Supabase -> Table Editor:
+
+- **Lessons** (`lessons` table): `title`, `level` (e.g. "12 min - A2"), `video_url` (an unlisted YouTube link), `sort`. Members see a video card; clicking plays it in a pop-up player.
+- **Live classes** (`live_classes` table): `title`, `starts_at` (date & time), `join_url` (Zoom/Meet link), `note` (optional). Members see upcoming classes with a Join button.
+- **Events** (`events` table): `event_date`, `title`, `description`.
+- **Workbooks** (`workbooks` table): `title`, `label` (e.g. "March"), `pdf_url` (link to the PDF, e.g. from Supabase Storage), `sort`. Members can download and hand in their work.
+
+Each area shows a friendly "coming soon" state until you add rows.
