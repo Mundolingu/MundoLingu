@@ -283,8 +283,17 @@ which defaults to mundolingu@gmail.com). The hand-in link also uses your Supabas
 ## New: level test, Instagram, analytics
 
 - **Free English level test** at `/level-test` (linked in the nav as "Level test"). Visitors get their CEFR level (A1-C1) and can book a demo - each lead is emailed to you (uses your Resend key, no extra setup).
-- **Instagram band** on the homepage linking to @mundolingu. (For a live photo feed later, a free widget like Behold or SnapWidget can be embedded here.)
+- **Live Instagram feed** in the homepage "Follow the journey" band. The four squares show your latest posts and reels, each linking straight to the post. To switch it on, see "Connect your Instagram feed" below. Until then the squares stay as plain brand-coloured tiles that link to your profile - nothing looks broken.
 - **Free analytics (optional):** create a free Cloudflare account -> Web Analytics -> add your site -> copy the token -> in Netlify set `NEXT_PUBLIC_CF_ANALYTICS_TOKEN` to that token and redeploy. Then you'll see your visitor numbers.
+
+### Connect your Instagram feed
+
+1. Go to [developers.facebook.com](https://developers.facebook.com) and create an app with **Instagram** added to it.
+2. Connect the @mundolingu account and generate a **long-lived Instagram access token** (these last 60 days and can be refreshed).
+3. In Netlify -> Site configuration -> Environment variables, add `INSTAGRAM_ACCESS_TOKEN` with that token, then redeploy.
+4. If the token belongs to a business account managed through the Facebook Graph API, also add `INSTAGRAM_USER_ID` with your Instagram account ID.
+
+The feed is cached for 30 minutes, so it stays fast and never hits Instagram's rate limits. If the token ever expires, the tiles quietly fall back to the plain version instead of showing an error.
 
 
 ---
@@ -297,5 +306,7 @@ After re-running `supabase/schema.sql` once, everything in the members hub is ma
 - **Live classes** (`live_classes` table): `title`, `starts_at` (date & time), `join_url` (Zoom/Meet link), `note` (optional). Members see upcoming classes with a Join button.
 - **Events** (`events` table): `event_date`, `title`, `description`.
 - **Workbooks** (`workbooks` table): `title`, `label` (e.g. "March"), `pdf_url` (link to the PDF, e.g. from Supabase Storage), `sort`. Members can download and hand in their work.
+
+**Workbook covers:** the members library already ships with the A1, A2, B1 and B2 cover artwork (in `public/workbooks/`). Just make sure the level appears in the workbook's `title` or `label` - e.g. a workbook titled "A1 Starter", or labelled "A1", automatically picks up the A1 cover. For anything else, put an image link in the `cover_url` column. Until you add any workbook rows, the library shows all four levels with their covers as a "coming soon" shelf.
 
 Each area shows a friendly "coming soon" state until you add rows.

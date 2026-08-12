@@ -31,10 +31,51 @@ function fmtWhen(iso: string): string {
   } catch { return ""; }
 }
 
+// --- Workbook library ---------------------------------------------------
+// Cover art for each CEFR level, so a workbook titled "A1 Starter" (or
+// labelled "A1") automatically shows its own cover on the shelf.
+const LEVEL_COVERS: Record<string, string> = {
+  A1: "/workbooks/a1.png",
+  A2: "/workbooks/a2.png",
+  B1: "/workbooks/b1.png",
+  B2: "/workbooks/b2.png",
+};
+
+// Shown when no workbooks have been added yet, so the shelf still looks like
+// a library rather than an empty page.
+const DEFAULT_LIBRARY = [
+  { id: "lvl-a1", level: "A1", title: "A1 Starter", label: "A1", blurb: "Beginner" },
+  { id: "lvl-a2", level: "A2", title: "A2 Explorador", label: "A2", blurb: "Elementary" },
+  { id: "lvl-b1", level: "B1", title: "B1 Conector", label: "B1", blurb: "Intermediate" },
+  { id: "lvl-b2", level: "B2", title: "B2 Comunicador", label: "B2", blurb: "Upper intermediate" },
+];
+
+function levelOf(wb: any): string | null {
+  const hay = `${wb?.label ?? ""} ${wb?.title ?? ""} ${wb?.level ?? ""}`.toUpperCase();
+  const m = hay.match(/\b([AB][12]|C[12])\b/);
+  return m ? m[1] : null;
+}
+
+function coverOf(wb: any): string | null {
+  if (wb?.cover_url) return wb.cover_url;
+  const level = levelOf(wb);
+  return level ? LEVEL_COVERS[level] ?? null : null;
+}
+
+// Covers are large print-quality files; let the Netlify Image CDN serve a
+// right-sized, modern-format version of anything hosted on this site.
+function coverSrc(src: string, size = 560): string {
+  if (!src.startsWith("/")) return src;
+  return `/.netlify/images?url=${encodeURIComponent(src)}&w=${size}&h=${size}&fit=cover`;
+}
+
 function HandInCard({ wb }: { wb: any }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<"idle" | "uploading" | "done" | "error">("idle");
   const [err, setErr] = useState("");
+
+  const cover = coverOf(wb);
+  const level = levelOf(wb);
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files && e.target.files[0];
@@ -64,15 +105,43 @@ function HandInCard({ wb }: { wb: any }) {
     }
   }
 
+  const shelf = (
+    <div className={"mem-book-top" + (cover ? " has-cover" : "")}>
+      {cover ? (
+        <img className="mem-book-cover" src={coverSrc(cover)} alt={`${wb.title} cover`} loading="lazy" decoding="async" />
+      ) : (
+        <span className="mo">{wb.label || "Workbook"}</span>
+      )}
+      {level ? <span className="mem-book-level">{level}</span> : null}
+    </div>
+  );
+
+  // Placeholder shelf entries (shown before any workbooks are added) get the
+  // cover art but no download or hand-in yet.
+  if (wb.placeholder) {
+    return (
+      <div className="mem-book">
+        {shelf}
+        <div className="mem-bb">
+          <h3>{wb.title}</h3>
+          {wb.blurb ? <span className="mem-book-blurb">{wb.blurb}</span> : null}
+          <span className="dl dl--soon">Coming soon</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mem-book">
-      <div className="mem-book-top">
-        {wb.cover_url ? <img className="mem-book-cover" src={wb.cover_url} alt="" /> : null}
-        <span className="mo">{wb.label || "Workbook"}</span>
-      </div>
+      {shelf}
       <div className="mem-bb">
         <h3>{wb.title}</h3>
-        <a className="dl" href={wb.pdf_url || "#"} target="_blank" rel="noreferrer"><Download size={15} /> Download PDF</a>
+        {wb.blurb ? <span className="mem-book-blurb">{wb.blurb}</span> : null}
+        {wb.pdf_url ? (
+          <a className="dl" href={wb.pdf_url} target="_blank" rel="noreferrer"><Download size={15} /> Download PDF</a>
+        ) : (
+          <span className="dl dl--soon">Coming soon</span>
+        )}
         <input ref={inputRef} type="file" accept=".pdf,.doc,.docx,image/*" style={{ display: "none" }} onChange={onFile} />
         <button className="handin" onClick={() => inputRef.current && inputRef.current.click()} disabled={state === "uploading" || state === "done"}>
           {state === "uploading" ? "Uploading…" : state === "done" ? "Handed in \u2713" : (<><Upload size={14} /> Hand in your work</>)}
@@ -229,20 +298,23 @@ export default function MembersArea() {
             )}
 
             {tab === "workbooks" && (
-              workbooks.length ? (
-                <div>
-                  <div className="mem-grid">
-                    {workbooks.map((wb) => (<HandInCard wb={wb} key={wb.id} />))}
-                  </div>
-                  <p className="mem-caption">Download each workbook, then hand in your completed work right here.</p>
+              <div>
+                <div className="mem-library-head">
+                  <BookOpen size={18} />
+                  <h2>The workbook library</h2>
                 </div>
-              ) : (
-                <div className="mem-soon">
-                  <div className="mem-soon-badge"><BookOpen size={26} /></div>
-                  <h3>Workbooks are on the way</h3>
-                  <p>Your downloadable workbooks will appear here soon.</p>
+                <div className="mem-grid mem-grid--shelf">
+                  {(workbooks.length
+                    ? workbooks
+                    : DEFAULT_LIBRARY.map((b) => ({ ...b, placeholder: true }))
+                  ).map((wb) => (<HandInCard wb={wb} key={wb.id} />))}
                 </div>
-              )
+                <p className="mem-caption">
+                  {workbooks.length
+                    ? "Download each workbook, then hand in your completed work right here."
+                    : "Your workbooks are being finished off — each one will be downloadable here as soon as it lands."}
+                </p>
+              </div>
             )}
           </>
         )}

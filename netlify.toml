@@ -7,3 +7,12 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# Allow the Netlify Image CDN to resize Instagram thumbnails for the
+# "Follow the journey" tiles.
+[images]
+  remote_images = [
+    "https://.*\\.cdninstagram\\.com/.*",
+    "https://.*\\.fbcdn\\.net/.*",
+    "https://scontent\\..*/.*"
+  ]
