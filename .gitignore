@@ -1,0 +1,19 @@
+# dependencies
+node_modules/
+
+# next.js build output
+.next/
+out/
+
+# netlify build artifacts
+.netlify/plugins/
+.netlify/state.json
+
+# environment
+.env
+.env.local
+.env.*.local
+
+# misc
+.DS_Store
+*.log
