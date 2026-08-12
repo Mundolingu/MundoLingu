@@ -85,3 +85,51 @@ drop policy if exists "Members upload their submissions" on storage.objects;
 create policy "Members upload their submissions"
   on storage.objects for insert to authenticated
   with check (bucket_id = 'submissions' and (storage.foldername(name))[1] = auth.uid()::text);
+
+
+-- =========================================================
+-- Manage-your-hub tables: add rows in Supabase Table Editor
+-- (Re-run this whole file safely; it only adds what's missing.)
+-- =========================================================
+
+-- VIDEO LESSONS. Columns: title, level (e.g. "12 min · A2"), video_url (YouTube link), sort
+create table if not exists public.lessons (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  level text,
+  video_url text,
+  sort int default 0,
+  created_at timestamptz not null default now()
+);
+alter table public.lessons enable row level security;
+drop policy if exists "Members view lessons" on public.lessons;
+create policy "Members view lessons" on public.lessons for select to authenticated using (true);
+
+-- LIVE CLASSES. Columns: title, starts_at (date & time), join_url (Zoom/Meet link), note (optional)
+create table if not exists public.live_classes (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  starts_at timestamptz not null,
+  join_url text,
+  note text,
+  created_at timestamptz not null default now()
+);
+alter table public.live_classes enable row level security;
+drop policy if exists "Members view live classes" on public.live_classes;
+create policy "Members view live classes" on public.live_classes for select to authenticated using (true);
+
+-- WORKBOOKS. Columns: title, label (e.g. "March"), pdf_url (link to the PDF), sort
+create table if not exists public.workbooks (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  label text,
+  pdf_url text,
+  sort int default 0,
+  created_at timestamptz not null default now()
+);
+alter table public.workbooks enable row level security;
+drop policy if exists "Members view workbooks" on public.workbooks;
+create policy "Members view workbooks" on public.workbooks for select to authenticated using (true);
+
+-- Optional cover image for workbooks
+alter table public.workbooks add column if not exists cover_url text;
