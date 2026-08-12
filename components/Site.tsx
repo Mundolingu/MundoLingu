@@ -161,6 +161,7 @@ const UI = {
     igTitle: "Follow the journey.", igLead: "Daily tips, student wins, and behind-the-scenes with our teachers — come say hi on Instagram.", igBtn: "Follow on Instagram",
     finalEyebrow: "Book a free demo", finalTitle: "Your bigger life is one conversation away.", finalLead: "A free 15-minute demo. Meet a teacher, find your level, and leave with a plan — in English or Spanish. No pressure, no commitment.", demoAlt: "Prefer to start on your own?",
     teamEyebrow: "The MundoLingu team", teamTitle: "The people behind your progress.", teamLead: "A small, dedicated team of teachers and mentors — each one here to help you speak with confidence, in English or Spanish.",
+    meetWholeTeam: "Meet the whole team",
     bookWith: "Book a demo with", readyToMeet: "Ready to meet yours?", applyTitle: "Want to teach with us?", applyBody: "We're always looking for passionate English and Spanish teachers who care about real progress. Send your CV and a few words about yourself — if you're a great fit, we'll be in touch.", applyBtn: "Send your CV",
     footTag: "English & Spanish, made personal. Online lessons that turn a language into an opportunity.", explore: "Explore", contact: "Contact", footBar: "© 2026 MundoLingu · Online — Mexico · Latin America · Europe · Dubai",
   },
@@ -186,6 +187,7 @@ const UI = {
     igTitle: "Sigue el camino.", igLead: "Consejos diarios, logros de estudiantes y el detrás de cámaras con nuestros profes. Ven a saludarnos en Instagram.", igBtn: "Síguenos en Instagram",
     finalEyebrow: "Reserva una clase gratis", finalTitle: "Tu vida más grande está a una conversación de distancia.", finalLead: "Una clase de prueba gratis de 15 minutos. Conoce a un profe, descubre tu nivel y sal con un plan, en inglés o español. Sin presión, sin compromiso.", demoAlt: "¿Prefieres empezar por tu cuenta?",
     teamEyebrow: "El equipo de MundoLingu", teamTitle: "Las personas detrás de tu progreso.", teamLead: "Un equipo pequeño y dedicado de profes y mentores, cada uno aquí para ayudarte a hablar con confianza, en inglés o español.",
+    meetWholeTeam: "Conoce a todo el equipo",
     bookWith: "Reserva una clase con", readyToMeet: "¿Quieres conocer al tuyo?", applyTitle: "¿Quieres enseñar con nosotros?", applyBody: "Siempre buscamos profes apasionados de inglés y español a quienes les importe el progreso real. Envía tu CV y unas líneas sobre ti; si encajas, te contactamos.", applyBtn: "Envía tu CV",
     footTag: "Inglés y español, hechos personales. Clases online que convierten un idioma en una oportunidad.", explore: "Explora", contact: "Contacto", footBar: "© 2026 MundoLingu · Online — México · Latinoamérica · Europa · Dubái",
   },
@@ -450,6 +452,28 @@ export default function Site() {
               </div>
             </section>
 
+            {/* TEAM PREVIEW */}
+            <section className="ml-section ml-section--dark ml-team-preview" id="team-preview">
+              <div className="ml-wrap ml-team-preview-grid">
+                <div>
+                  <span className="ml-eyebrow" data-reveal>{t.teamEyebrow}</span>
+                  <h2 className="ml-h2" data-reveal>{t.teamTitle}</h2>
+                  <p className="ml-lead" data-reveal>{t.teamLead}</p>
+                  <a className="ml-btn ml-btn--team" href="#team" onClick={(e) => { e.preventDefault(); goTeam(); }} data-reveal>
+                    {t.meetWholeTeam} <ArrowRight />
+                  </a>
+                </div>
+                <div className="ml-team-preview-portraits" data-reveal>
+                  {TEACHERS[lang].map((teacher) => (
+                    <div className="ml-team-preview-person" key={teacher.name}>
+                      <img src={teacher.photo} alt={teacher.name} />
+                      <span>{teacher.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
             {/* STORIES */}
             <section className="ml-section" id="stories">
               <div className="ml-wrap">
@@ -474,14 +498,18 @@ export default function Site() {
                 <p className="ml-lead" data-reveal>{t.membLead}</p>
                 <div className="ml-memb-grid">
                   <div className="ml-benefits" data-reveal>
-                    {BENEFITS[lang].map((b) => (<div className="ml-benefit" key={b}><Check /> {b}</div>))}
+                    {BENEFITS[lang].map((b, index) => index === 0 ? (
+                      <a className="ml-benefit ml-benefit--link" href="/members" key={b}><Check /> {b} <ArrowUpRight /></a>
+                    ) : (
+                      <div className="ml-benefit" key={b}><Check /> {b}</div>
+                    ))}
                   </div>
                   <div className="ml-price-card" data-reveal>
                     <div className="rel">
                       <div className="ml-plan-tag" style={{ color: "var(--cyan)" }}>{t.membTag}</div>
                       <div className="ml-price-tag" style={{ marginTop: 14 }}>$10 <small>{t.firstMonth}</small></div>
                       <div className="ml-price-sub">{t.membSub}</div>
-                      <a className="ml-btn ml-btn--primary" href="#demo" onClick={(e) => { e.preventDefault(); go("demo"); }}>{t.joinMembership} <ArrowRight /></a>
+                      <a className="ml-btn ml-btn--primary" href="/members">{t.joinMembership} <ArrowRight /></a>
                       <div className="ml-price-note">{t.tryFirst}</div>
                     </div>
                   </div>
@@ -501,7 +529,7 @@ export default function Site() {
                     <p className="for">{t.planCommunityFor}</p>
                     <div className="ml-plan-price">$10 <small>{t.planCommunityPrice}</small></div>
                     <ul>{t.planCommunityList.map((li) => (<li key={li}><Check /> {li}</li>))}</ul>
-                    <a className="ml-btn ml-btn--ghost" href="#membership" onClick={(e) => { e.preventDefault(); go("membership"); }}>{t.joinMembership} <ArrowRight /></a>
+                    <a className="ml-btn ml-btn--ghost" href="/members">{t.joinMembership} <ArrowRight /></a>
                   </div>
                   <div className="ml-plan ml-plan--feature" data-reveal style={{ transitionDelay: "0.08s" }}>
                     <span className="ml-plan-tag">{t.planPrivateTag}</span>
