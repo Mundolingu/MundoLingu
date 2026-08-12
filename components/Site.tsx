@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ArrowRight, ArrowUpRight, Check, Instagram, Mail, MessageCircle, Menu, X, Globe } from "lucide-react";
 import DemoForm from "@/components/DemoForm";
+import InstagramFeed from "@/components/InstagramFeed";
 
 // Add your full WhatsApp number (country code, no +, spaces or dashes), e.g. "5215512345678".
 const WHATSAPP_NUMBER = "971504296090";
@@ -546,7 +547,9 @@ export default function Site() {
                     <iframe src={INSTAGRAM_EMBED_URL} title="Instagram feed" />
                   </div>
                 ) : (
-                  <div className="ml-ig-tiles" data-reveal><span /><span /><span /><span /></div>
+                  <div data-reveal>
+                    <InstagramFeed lang={lang} />
+                  </div>
                 )}
               </div>
             </section>

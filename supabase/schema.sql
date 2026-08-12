@@ -131,5 +131,12 @@ alter table public.workbooks enable row level security;
 drop policy if exists "Members view workbooks" on public.workbooks;
 create policy "Members view workbooks" on public.workbooks for select to authenticated using (true);
 
--- Optional cover image for workbooks
+-- Optional cover image for workbooks.
+-- Leave this empty for A1/A2/B1/B2 workbooks: the members library shows the
+-- matching cover art from /public/workbooks automatically, based on the level
+-- found in the workbook's title or label (e.g. "A1 Starter" -> the A1 cover).
 alter table public.workbooks add column if not exists cover_url text;
+
+-- Optional explicit level ("A1", "A2", "B1", "B2") if the title and label
+-- don't already contain it.
+alter table public.workbooks add column if not exists level text;
