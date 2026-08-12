@@ -12,8 +12,8 @@ type Tile = {
 };
 
 const COPY = {
-  en: { loading: "Loading the latest from Instagram…", view: "View on Instagram", reel: "Reel" },
-  es: { loading: "Cargando lo último de Instagram…", view: "Ver en Instagram", reel: "Reel" },
+  en: { view: "View on Instagram", reel: "Reel" },
+  es: { view: "Ver en Instagram", reel: "Reel" },
 };
 
 // Instagram serves originals at full resolution; run them through the Netlify
@@ -24,7 +24,10 @@ function thumb(url: string) {
 
 export default function InstagramFeed({ lang = "en" }: { lang?: "en" | "es" }) {
   const t = COPY[lang] ?? COPY.en;
-  const [posts, setPosts] = useState<Tile[] | null>(null);
+  // Start with the plain brand squares already on screen. No feed is connected
+  // yet, so showing a loading state first would mean a shimmer that resolves to
+  // exactly what it replaced. Real posts swap in only once there are some.
+  const [posts, setPosts] = useState<Tile[]>([]);
 
   useEffect(() => {
     let active = true;
@@ -40,18 +43,6 @@ export default function InstagramFeed({ lang = "en" }: { lang?: "en" | "es" }) {
       active = false;
     };
   }, []);
-
-  // Still loading — show the four squares gently pulsing so the layout never jumps.
-  if (posts === null) {
-    return (
-      <div className="ml-ig-tiles" aria-busy="true" aria-label={t.loading}>
-        <span className="ml-ig-skeleton" />
-        <span className="ml-ig-skeleton" />
-        <span className="ml-ig-skeleton" />
-        <span className="ml-ig-skeleton" />
-      </div>
-    );
-  }
 
   // No feed connected yet (or Instagram is unreachable) — keep the original
   // brand-coloured squares linking through to the profile.

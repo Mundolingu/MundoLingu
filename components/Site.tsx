@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { ArrowRight, ArrowUpRight, Check, Instagram, Mail, MessageCircle, Menu, X, Globe } from "lucide-react";
 import DemoForm from "@/components/DemoForm";
 import InstagramFeed from "@/components/InstagramFeed";
+import { cdnImage, cdnSrcSet } from "@/lib/img";
 
 // Add your full WhatsApp number (country code, no +, spaces or dashes), e.g. "5215512345678".
 const WHATSAPP_NUMBER = "971504296090";
@@ -139,8 +140,16 @@ const TEACHERS: { [k in Lang]: { name: string; teaches: string; meta: string; ph
   ],
 };
 
-const UI = {
-  en: {
+// The workbook covers members get in the hub. Shown on the homepage too, so the
+// membership is something you can actually look at before you pay for it.
+const SHELF: { level: string; name: string; cover: string }[] = [
+  { level: "A1", name: "Starter", cover: "/workbooks/a1.png" },
+  { level: "A2", name: "Explorador", cover: "/workbooks/a2.png" },
+  { level: "B1", name: "Conector", cover: "/workbooks/b1.png" },
+  { level: "B2", name: "Comunicador", cover: "/workbooks/b2.png" },
+];
+
+const UI = {  en: {
     login: "Log in", memberLogin: "Member login", bookDemo: "Book a free demo", exploreMembership: "Explore the membership",
     iWantToLearn: "I want to learn", learnEnglish: "English", learnSpanish: "Spanish",
     heroFoot: "Free 15-minute demo · meet a teacher · zero pressure", liveLesson: "Live lesson", confidence: "Confidence",
@@ -150,6 +159,8 @@ const UI = {
     founderQuote: "“Whether your next step is a promotion, a move abroad, or simply the courage to speak — we'll build the path with you.”", founderBy: "Jurgen · Founder, MundoLingu",
     methodEyebrow: "How it works", methodTitle: "A journey, not a course.",
     storiesEyebrow: "Student stories", storiesTitle: "Real people. Real change.",
+    facesEyebrow: "Your teachers", facesTitle: "Real people, on your side.", facesLead: "Not a faceless platform — a small team who will know your name, your goal, and how you learn.", facesCta: "Meet the whole team",
+    shelfTitle: "The workbook library, included.", shelfLead: "Levels A1 to B2 — printable, practical, and built around the conversations you actually want to have.",
     membEyebrow: "The membership", membTitle: "Your language journey starts here.", membLead: "Everything you need to keep going — in English or Spanish — with a community moving right alongside you.",
     membTag: "Membership", firstMonth: "first month", membSub: "then $15 / month · cancel anytime · English or Spanish", joinMembership: "Join the membership", tryFirst: "Prefer to try first? Start with a free demo lesson.",
     pricingEyebrow: "Pricing", pricingTitle: "Choose the path that fits your goal.",
@@ -175,6 +186,8 @@ const UI = {
     founderQuote: "“Ya sea un ascenso, una mudanza al extranjero o simplemente el valor de hablar, construiremos el camino contigo.”", founderBy: "Jurgen · Fundador, MundoLingu",
     methodEyebrow: "Cómo funciona", methodTitle: "Un camino, no un curso.",
     storiesEyebrow: "Historias de estudiantes", storiesTitle: "Personas reales. Cambios reales.",
+    facesEyebrow: "Tus profesores", facesTitle: "Personas reales, de tu lado.", facesLead: "No una plataforma sin cara: un equipo pequeño que sabrá tu nombre, tu meta y cómo aprendes.", facesCta: "Conoce al equipo completo",
+    shelfTitle: "La biblioteca de cuadernos, incluida.", shelfLead: "Niveles A1 a B2: imprimibles, prácticos y creados en torno a las conversaciones que de verdad quieres tener.",
     membEyebrow: "La membresía", membTitle: "Tu viaje con el idioma empieza aquí.", membLead: "Todo lo que necesitas para seguir avanzando, en inglés o español, con una comunidad que avanza a tu lado.",
     membTag: "Membresía", firstMonth: "el primer mes", membSub: "luego $15/mes · cancela cuando quieras · inglés o español", joinMembership: "Únete a la membresía", tryFirst: "¿Prefieres probar primero? Empieza con una clase gratis.",
     pricingEyebrow: "Precios", pricingTitle: "Elige el camino que encaja con tu meta.",
@@ -467,6 +480,45 @@ export default function Site() {
               </div>
             </section>
 
+            {/* TEACHERS */}
+            <section className="ml-section ml-section--tight" id="faces">
+              <div className="ml-wrap">
+                <span className="ml-eyebrow" data-reveal>{t.facesEyebrow}</span>
+                <h2 className="ml-h2" data-reveal>{t.facesTitle}</h2>
+                <p className="ml-lead" data-reveal>{t.facesLead}</p>
+                <div className="ml-faces">
+                  {TEACHERS[lang].map((tc, i) => {
+                    const photo = tc.photo;
+                    if (!photo) return null;
+                    return (
+                      <a
+                        className="ml-face"
+                        key={tc.name}
+                        href="/team"
+                        data-reveal
+                        style={{ transitionDelay: i * 0.07 + "s" }}
+                      >
+                        <img
+                          src={cdnImage(photo, 320, 400)}
+                          srcSet={cdnSrcSet(photo, 320, 400)}
+                          alt={tc.name}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                        <span className="ml-face-cap">
+                          <b>{tc.name.split(" ")[0]}</b>
+                          <small>{tc.teaches}</small>
+                        </span>
+                      </a>
+                    );
+                  })}
+                </div>
+                <a className="ml-btn ml-btn--ghost ml-faces-cta" href="/team" data-reveal>
+                  {t.facesCta} <ArrowRight />
+                </a>
+              </div>
+            </section>
+
             {/* MEMBERSHIP */}
             <section className="ml-section ml-section--tight" id="membership" style={{ background: "var(--paper-2)" }}>
               <div className="ml-wrap">
@@ -485,6 +537,34 @@ export default function Site() {
                       <a className="ml-btn ml-btn--primary" href="#demo" onClick={(e) => { e.preventDefault(); go("demo"); }}>{t.joinMembership} <ArrowRight /></a>
                       <div className="ml-price-note">{t.tryFirst}</div>
                     </div>
+                  </div>
+                </div>
+
+                <div className="ml-shelf-block">
+                  <div className="ml-shelf-head" data-reveal>
+                    <h3>{t.shelfTitle}</h3>
+                    <p>{t.shelfLead}</p>
+                  </div>
+                  <div className="ml-shelf">
+                    {SHELF.map((bk, i) => (
+                      <figure
+                        className="ml-shelf-item"
+                        key={bk.level}
+                        data-reveal
+                        style={{ transitionDelay: i * 0.07 + "s" }}
+                      >
+                        <img
+                          src={cdnImage(bk.cover, 320, 320)}
+                          srcSet={cdnSrcSet(bk.cover, 320, 320)}
+                          alt={`MundoLingu ${bk.level} ${bk.name} workbook`}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                        <figcaption>
+                          <b>{bk.level}</b> {bk.name}
+                        </figcaption>
+                      </figure>
+                    ))}
                   </div>
                 </div>
               </div>

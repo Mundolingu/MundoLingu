@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Play, Download, Upload, X, Video, Calendar, BookOpen } from "lucide-react";
+import { cdnImage, cdnSrcSet } from "@/lib/img";
 
 const TABS = [
   { id: "lessons", label: "Lessons" },
@@ -62,13 +63,6 @@ function coverOf(wb: any): string | null {
   return level ? LEVEL_COVERS[level] ?? null : null;
 }
 
-// Covers are large print-quality files; let the Netlify Image CDN serve a
-// right-sized, modern-format version of anything hosted on this site.
-function coverSrc(src: string, size = 560): string {
-  if (!src.startsWith("/")) return src;
-  return `/.netlify/images?url=${encodeURIComponent(src)}&w=${size}&h=${size}&fit=cover`;
-}
-
 function HandInCard({ wb }: { wb: any }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<"idle" | "uploading" | "done" | "error">("idle");
@@ -108,7 +102,7 @@ function HandInCard({ wb }: { wb: any }) {
   const shelf = (
     <div className={"mem-book-top" + (cover ? " has-cover" : "")}>
       {cover ? (
-        <img className="mem-book-cover" src={coverSrc(cover)} alt={`${wb.title} cover`} loading="lazy" decoding="async" />
+        <img className="mem-book-cover" src={cdnImage(cover, 560, 560)} srcSet={cdnSrcSet(cover, 560, 560)} alt={`${wb.title} cover`} loading="lazy" decoding="async" />
       ) : (
         <span className="mo">{wb.label || "Workbook"}</span>
       )}
@@ -154,39 +148,56 @@ function HandInCard({ wb }: { wb: any }) {
 
 export default function MembersArea() {
   const [tab, setTab] = useState("lessons");
-  const [loading, setLoading] = useState(true);
+  const [ready, setReady] = useState<Record<string, boolean>>({});
   const [lessons, setLessons] = useState<any[]>([]);
   const [live, setLive] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [workbooks, setWorkbooks] = useState<any[]>([]);
   const [playing, setPlaying] = useState<string | null>(null);
   const router = useRouter();
+  const started = useRef<Record<string, boolean>>({});
 
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const supabase = createClient();
-        const [ls, lv, ev, wb] = await Promise.all([
-          supabase.from("lessons").select("*").order("sort", { ascending: true }),
-          supabase.from("live_classes").select("*").order("starts_at", { ascending: true }),
-          supabase.from("events").select("*").order("event_date", { ascending: true }),
-          supabase.from("workbooks").select("*").order("sort", { ascending: true }),
-        ]);
-        if (!active) return;
-        setLessons(ls.data || []);
+  // Only the tab you are actually looking at is fetched. Waiting on all four
+  // tables meant the hub sat on "Loading your content…" until the slowest one
+  // came back; now the first screen needs a single query.
+  const loadTab = useCallback(async (id: string) => {
+    if (started.current[id]) return;
+    started.current[id] = true;
+    try {
+      const supabase = createClient();
+      if (id === "lessons") {
+        const { data } = await supabase.from("lessons").select("*").order("sort", { ascending: true });
+        setLessons(data || []);
+      } else if (id === "live") {
+        const { data } = await supabase.from("live_classes").select("*").order("starts_at", { ascending: true });
         const now = Date.now();
-        setLive((lv.data || []).filter((c: any) => new Date(c.starts_at).getTime() > now - 2 * 3600 * 1000));
-        setEvents((ev.data || []).map((row: any) => {
+        setLive((data || []).filter((c: any) => new Date(c.starts_at).getTime() > now - 2 * 3600 * 1000));
+      } else if (id === "events") {
+        const { data } = await supabase.from("events").select("*").order("event_date", { ascending: true });
+        setEvents((data || []).map((row: any) => {
           const d = new Date(String(row.event_date) + "T00:00:00");
           return { day: String(d.getDate()).padStart(2, "0"), mon: d.toLocaleString("en-US", { month: "short" }), title: row.title, desc: row.description || "" };
         }));
-        setWorkbooks(wb.data || []);
-      } catch {}
-      if (active) setLoading(false);
-    })();
-    return () => { active = false; };
+      } else if (id === "workbooks") {
+        const { data } = await supabase.from("workbooks").select("*").order("sort", { ascending: true });
+        setWorkbooks(data || []);
+      }
+    } catch {
+      // Leave the tab empty rather than blocking the hub on a failed table.
+    }
+    setReady((r) => ({ ...r, [id]: true }));
   }, []);
+
+  useEffect(() => { loadTab(tab); }, [tab, loadTab]);
+
+  // Once the visible tab has landed, quietly warm the rest so switching is instant.
+  useEffect(() => {
+    if (!ready[tab]) return;
+    const idle = setTimeout(() => TABS.forEach((t) => loadTab(t.id)), 400);
+    return () => clearTimeout(idle);
+  }, [ready, tab, loadTab]);
+
+  const loading = !ready[tab];
 
   function openLesson(l: any) {
     const emb = ytEmbed(l.video_url);
