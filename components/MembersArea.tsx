@@ -3,11 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Play, Download, Upload, X, Video, Calendar, BookOpen } from "lucide-react";
+import { Play, Download, Upload, X, Video, Calendar, BookOpen, Briefcase, MapPin, ArrowUpRight } from "lucide-react";
 
 const TABS = [
   { id: "lessons", label: "Lessons" },
   { id: "live", label: "Live classes" },
+  { id: "opportunities", label: "Opportunities" },
   { id: "events", label: "Events" },
   { id: "workbooks", label: "Workbooks" },
 ];
@@ -24,6 +25,11 @@ function ytEmbed(url: string): string | null {
 function ytThumb(url: string): string | null {
   const id = ytId(url);
   return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
+}
+function fmtDay(iso: string): string {
+  try {
+    return new Date(String(iso) + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  } catch { return ""; }
 }
 function fmtWhen(iso: string): string {
   try {
@@ -89,6 +95,7 @@ export default function MembersArea() {
   const [lessons, setLessons] = useState<any[]>([]);
   const [live, setLive] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
+  const [opportunities, setOpportunities] = useState<any[]>([]);
   const [workbooks, setWorkbooks] = useState<any[]>([]);
   const [playing, setPlaying] = useState<string | null>(null);
   const router = useRouter();
@@ -98,11 +105,12 @@ export default function MembersArea() {
     (async () => {
       try {
         const supabase = createClient();
-        const [ls, lv, ev, wb] = await Promise.all([
+        const [ls, lv, ev, wb, op] = await Promise.all([
           supabase.from("lessons").select("*").order("sort", { ascending: true }),
           supabase.from("live_classes").select("*").order("starts_at", { ascending: true }),
           supabase.from("events").select("*").order("event_date", { ascending: true }),
           supabase.from("workbooks").select("*").order("sort", { ascending: true }),
+          supabase.from("opportunities").select("*").order("sort", { ascending: true }),
         ]);
         if (!active) return;
         setLessons(ls.data || []);
@@ -113,6 +121,8 @@ export default function MembersArea() {
           return { day: String(d.getDate()).padStart(2, "0"), mon: d.toLocaleString("en-US", { month: "short" }), title: row.title, desc: row.description || "" };
         }));
         setWorkbooks(wb.data || []);
+        const today = new Date().toISOString().slice(0, 10);
+        setOpportunities((op.data || []).filter((o: any) => !o.deadline || String(o.deadline) >= today));
       } catch {}
       if (active) setLoading(false);
     })();
@@ -145,7 +155,7 @@ export default function MembersArea() {
 
       <main className="mem-wrap">
         <h1 className="mem-hello">Welcome back.</h1>
-        <p className="mem-hello-sub">Your lessons, live classes, events, and workbooks — all in one place.</p>
+        <p className="mem-hello-sub">Your lessons, live classes, opportunities, events, and workbooks — all in one place.</p>
 
         <div className="mem-tabs" role="tablist">
           {TABS.map((t) => (
@@ -205,6 +215,39 @@ export default function MembersArea() {
                   <div className="mem-soon-badge"><Video size={26} /></div>
                   <h3>No live classes scheduled yet</h3>
                   <p>New live classes are added regularly — check back soon, or grab this month&apos;s workbook in the meantime.</p>
+                </div>
+              )
+            )}
+
+            {tab === "opportunities" && (
+              opportunities.length ? (
+                <div>
+                  <p className="mem-opp-intro">Real openings shared with MundoLingu members only — roles, internships, scholarships and programmes where your English or Spanish is the door in.</p>
+                  {opportunities.map((o) => (
+                    <div className="mem-opp" key={o.id}>
+                      <div className="mem-opp-main">
+                        <div className="mem-opp-top">
+                          {o.kind ? <span className="mem-opp-kind">{o.kind}</span> : null}
+                          {o.deadline ? <span className="mem-opp-deadline">Apply by {fmtDay(o.deadline)}</span> : null}
+                        </div>
+                        <h4>{o.title}</h4>
+                        <div className="mem-opp-meta">
+                          {o.org ? <span>{o.org}</span> : null}
+                          {o.location ? <span><MapPin size={13} /> {o.location}</span> : null}
+                        </div>
+                        {o.description ? <p>{o.description}</p> : null}
+                      </div>
+                      {o.apply_url ? (
+                        <a className="mem-opp-apply" href={o.apply_url} target="_blank" rel="noreferrer">Apply <ArrowUpRight size={15} /></a>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="mem-soon">
+                  <div className="mem-soon-badge"><Briefcase size={26} /></div>
+                  <h3>Opportunities are on the way</h3>
+                  <p>Jobs, internships, scholarships and programmes where your English or Spanish opens the door — shared here with members first. The next ones land soon.</p>
                 </div>
               )
             )}

@@ -133,3 +133,22 @@ create policy "Members view workbooks" on public.workbooks for select to authent
 
 -- Optional cover image for workbooks
 alter table public.workbooks add column if not exists cover_url text;
+
+-- OPPORTUNITIES (members-only). Columns: title, org, location, kind (e.g. "Job",
+-- "Internship", "Scholarship"), description, deadline (date, optional),
+-- apply_url (where members apply), sort
+create table if not exists public.opportunities (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  org text,
+  location text,
+  kind text,
+  description text,
+  deadline date,
+  apply_url text,
+  sort int default 0,
+  created_at timestamptz not null default now()
+);
+alter table public.opportunities enable row level security;
+drop policy if exists "Members view opportunities" on public.opportunities;
+create policy "Members view opportunities" on public.opportunities for select to authenticated using (true);

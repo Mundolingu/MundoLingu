@@ -100,8 +100,8 @@ const STORIES = {
 };
 
 const BENEFITS = {
-  en: ["Exclusive workbooks", "Weekly study plans", "Guided learning roadmaps", "Speaking practice sessions", "Grammar lessons", "Vocabulary packs", "Member-only video lessons", "Weekly challenges", "Accountability check-ins", "A community moving with you", "Live group sessions", "Discounts on private lessons"],
-  es: ["Cuadernos exclusivos", "Planes de estudio semanales", "Hojas de ruta guiadas", "Sesiones de práctica oral", "Clases de gramática", "Packs de vocabulario", "Videoclases solo para miembros", "Retos semanales", "Seguimiento y motivación", "Una comunidad que avanza contigo", "Sesiones grupales en vivo", "Descuentos en clases privadas"],
+  en: ["Exclusive workbooks", "Weekly study plans", "Guided learning roadmaps", "Speaking practice sessions", "Grammar lessons", "Vocabulary packs", "Member-only video lessons", "Weekly challenges", "Accountability check-ins", "A community moving with you", "Live group sessions", "Discounts on private lessons", "A members-only opportunities board"],
+  es: ["Cuadernos exclusivos", "Planes de estudio semanales", "Hojas de ruta guiadas", "Sesiones de práctica oral", "Clases de gramática", "Packs de vocabulario", "Videoclases solo para miembros", "Retos semanales", "Seguimiento y motivación", "Una comunidad que avanza contigo", "Sesiones grupales en vivo", "Descuentos en clases privadas", "Un tablón de oportunidades solo para miembros"],
 };
 
 const FAQ = {
