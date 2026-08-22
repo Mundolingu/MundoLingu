@@ -297,5 +297,6 @@ After re-running `supabase/schema.sql` once, everything in the members hub is ma
 - **Live classes** (`live_classes` table): `title`, `starts_at` (date & time), `join_url` (Zoom/Meet link), `note` (optional). Members see upcoming classes with a Join button.
 - **Events** (`events` table): `event_date`, `title`, `description`.
 - **Workbooks** (`workbooks` table): `title`, `label` (e.g. "March"), `pdf_url` (link to the PDF, e.g. from Supabase Storage), `sort`. Members can download and hand in their work.
+- **Opportunities** (`opportunities` table): `title`, `org` (company or organisation), `location`, `kind` (e.g. "Job", "Internship", "Scholarship"), `description`, `deadline` (optional date), `apply_url`, `sort`. Members see a card with an Apply button. This tab is members-only, so it never appears on the public site; anything with a `deadline` in the past hides itself automatically.
 
 Each area shows a friendly "coming soon" state until you add rows.
