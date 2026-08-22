@@ -1,5 +1,19 @@
 -- Run this in Supabase -> SQL Editor (once).
 
+-- =========================================================
+-- TIME ZONE — read this before adding classes or events.
+-- =========================================================
+-- Every time you type into Supabase is treated as UAE (Dubai) time, and the
+-- members area shows it in BOTH UAE and Mexico City time automatically.
+--
+-- This line makes Postgres read a plain "2026-09-01 18:00" as 6pm in Dubai
+-- instead of 6pm UTC, so you never have to think about offsets:
+alter database postgres set timezone to 'Asia/Dubai';
+-- (Reload the Supabase dashboard afterwards so the change takes effect. If your
+--  project refuses this command, just type the offset yourself instead —
+--  "2026-09-01 18:00+04" — and everything still lines up.)
+
+
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   email text,
@@ -54,6 +68,12 @@ create table if not exists public.events (
   description text,
   created_at timestamptz not null default now()
 );
+
+-- Events can now have a time, not just a day. Fill in `starts_at` (date & time,
+-- typed in UAE time) and the members area shows both UAE and Mexico City times.
+-- Leave `starts_at` empty for an all-day event and only `event_date` is shown.
+alter table public.events add column if not exists starts_at timestamptz;
+alter table public.events alter column event_date drop not null;
 alter table public.events enable row level security;
 drop policy if exists "Members can view events" on public.events;
 create policy "Members can view events"
@@ -105,7 +125,8 @@ alter table public.lessons enable row level security;
 drop policy if exists "Members view lessons" on public.lessons;
 create policy "Members view lessons" on public.lessons for select to authenticated using (true);
 
--- LIVE CLASSES. Columns: title, starts_at (date & time), join_url (Zoom/Meet link), note (optional)
+-- LIVE CLASSES. Columns: title, starts_at (date & time, typed in UAE time),
+-- join_url (Zoom/Meet link), note (optional). Members see it in UAE + Mexico time.
 create table if not exists public.live_classes (
   id uuid primary key default gen_random_uuid(),
   title text not null,

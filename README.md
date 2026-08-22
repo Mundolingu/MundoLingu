@@ -170,7 +170,8 @@ Do these in order. Take your time — this is the involved part.
   `components/MembersArea.tsx`. That is your monthly routine — no other code.
 - **Videos:** put your video links (YouTube unlisted or Vimeo) into the `LESSONS`
   list and embed them.
-- **Events & live classes:** edit the `EVENTS` and `LIVE_UPCOMING` lists.
+- **Events & live classes:** add rows to the `events` and `live_classes` tables in
+  Supabase (times are typed in UAE time and shown in UAE + Mexico time).
 - (Later, these lists can be moved into a Supabase table so you edit them without
   touching code — a small next step whenever you want it.)
 
@@ -248,7 +249,8 @@ lesson" buttons open it.
 
 **2. Events calendar you manage.** Re-run `supabase/schema.sql` in Supabase's SQL
 Editor (it only adds what's missing). It creates an `events` table. To add or change
-events, go to Supabase -> **Table Editor -> events** and add rows (`event_date`,
+events, go to Supabase -> **Table Editor -> events** and add rows (`starts_at`
+or `event_date`,
 `title`, `description`). The members calendar updates automatically. Until you add
 any, it shows sample events.
 
@@ -294,8 +296,26 @@ which defaults to mundolingu@gmail.com). The hand-in link also uses your Supabas
 After re-running `supabase/schema.sql` once, everything in the members hub is managed by adding rows in Supabase -> Table Editor:
 
 - **Lessons** (`lessons` table): `title`, `level` (e.g. "12 min - A2"), `video_url` (an unlisted YouTube link), `sort`. Members see a video card; clicking plays it in a pop-up player.
-- **Live classes** (`live_classes` table): `title`, `starts_at` (date & time), `join_url` (Zoom/Meet link), `note` (optional). Members see upcoming classes with a Join button.
-- **Events** (`events` table): `event_date`, `title`, `description`.
+- **Live classes** (`live_classes` table): `title`, `starts_at` (date & time, typed in **UAE time**), `join_url` (Zoom/Meet link), `note` (optional). Members see upcoming classes with a Join button.
+- **Events** (`events` table): `title`, `description`, and either `starts_at` (date & time, typed in **UAE time**) or `event_date` on its own for an all-day event.
+
+### Times: UAE and Mexico
+
+You only ever enter a time once, in **UAE (Dubai) time**. The members area
+automatically prints every live class and timed event on both clocks, each with
+its own date, because the ten-hour gap often puts Dubai and Mexico City on
+different days:
+
+> **UAE** Tue, Sep 1 · 6:00 PM  **MEXICO** Tue, Sep 1 · 8:00 AM
+
+Re-running `supabase/schema.sql` sets the database timezone to `Asia/Dubai`, so a
+plain `2026-09-01 18:00` typed into the Table Editor means 6pm in Dubai. Reload
+the Supabase dashboard after running it. If you would rather be explicit, type
+the offset — `2026-09-01 18:00+04` — and you get the same result.
+
+The two zones live in one place, `lib/time.ts` (`UAE_TZ` / `MX_TZ`), if you ever
+need to add or change a country. Daylight saving in Mexico City is handled for
+you.
 - **Workbooks** (`workbooks` table): `title`, `label` (e.g. "March"), `pdf_url` (link to the PDF, e.g. from Supabase Storage), `sort`. Members can download and hand in their work.
 
 Each area shows a friendly "coming soon" state until you add rows.

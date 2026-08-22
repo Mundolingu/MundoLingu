@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Play, Download, Upload, X, Video, Calendar, BookOpen } from "lucide-react";
+import { dualWhen, parseWhen, hasTime, dayNumber, monthShort, UAE_TZ } from "@/lib/time";
 
 const TABS = [
   { id: "lessons", label: "Lessons" },
@@ -25,10 +26,21 @@ function ytThumb(url: string): string | null {
   const id = ytId(url);
   return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
 }
-function fmtWhen(iso: string): string {
-  try {
-    return new Date(iso).toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
-  } catch { return ""; }
+
+// Shows one moment twice: once on the UAE clock, once on the Mexico City clock.
+function Times({ value, tone }: { value: string | null | undefined; tone?: "dark" }) {
+  const lines = dualWhen(value);
+  if (!lines.length) return null;
+  return (
+    <div className={"mem-times" + (tone === "dark" ? " on-dark" : "")}>
+      {lines.map((l) => (
+        <span className="mem-tz" key={l.label + l.text}>
+          {l.label ? <b>{l.label}</b> : null}
+          {l.text}
+        </span>
+      ))}
+    </div>
+  );
 }
 
 function HandInCard({ wb }: { wb: any }) {
@@ -101,17 +113,33 @@ export default function MembersArea() {
         const [ls, lv, ev, wb] = await Promise.all([
           supabase.from("lessons").select("*").order("sort", { ascending: true }),
           supabase.from("live_classes").select("*").order("starts_at", { ascending: true }),
-          supabase.from("events").select("*").order("event_date", { ascending: true }),
+          supabase.from("events").select("*"),
           supabase.from("workbooks").select("*").order("sort", { ascending: true }),
         ]);
         if (!active) return;
         setLessons(ls.data || []);
         const now = Date.now();
-        setLive((lv.data || []).filter((c: any) => new Date(c.starts_at).getTime() > now - 2 * 3600 * 1000));
-        setEvents((ev.data || []).map((row: any) => {
-          const d = new Date(String(row.event_date) + "T00:00:00");
-          return { day: String(d.getDate()).padStart(2, "0"), mon: d.toLocaleString("en-US", { month: "short" }), title: row.title, desc: row.description || "" };
+        setLive((lv.data || []).filter((c: any) => {
+          const d = parseWhen(c.starts_at);
+          return d ? d.getTime() > now - 2 * 3600 * 1000 : false;
         }));
+        setEvents((ev.data || [])
+          .map((row: any) => {
+            // `starts_at` (date & time) wins; `event_date` stays supported for date-only rows.
+            const when = row.starts_at || row.event_date || null;
+            const d = parseWhen(when);
+            return {
+              id: row.id,
+              when,
+              at: d ? d.getTime() : Number.MAX_SAFE_INTEGER,
+              day: d ? dayNumber(d, UAE_TZ) : "",
+              mon: d ? monthShort(d, UAE_TZ) : "",
+              timed: hasTime(when),
+              title: row.title,
+              desc: row.description || "",
+            };
+          })
+          .sort((a: any, b: any) => a.at - b.at));
         setWorkbooks(wb.data || []);
       } catch {}
       if (active) setLoading(false);
@@ -189,13 +217,14 @@ export default function MembersArea() {
                     <div>
                       <small>Next live class</small>
                       <h3>{live[0].title}</h3>
-                      <p>{fmtWhen(live[0].starts_at)}{live[0].note ? ` — ${live[0].note}` : ""}</p>
+                      <Times value={live[0].starts_at} tone="dark" />
+                      {live[0].note ? <p>{live[0].note}</p> : null}
                     </div>
                     {live[0].join_url ? <a className="mem-join" href={live[0].join_url} target="_blank" rel="noreferrer">Join the class</a> : null}
                   </div>
                   {live.slice(1).map((c) => (
                     <div className="mem-row" key={c.id}>
-                      <div><h4>{c.title}</h4><span>{fmtWhen(c.starts_at)}</span></div>
+                      <div><h4>{c.title}</h4><Times value={c.starts_at} /></div>
                       {c.join_url ? <a className="rj" href={c.join_url} target="_blank" rel="noreferrer">Join</a> : null}
                     </div>
                   ))}
@@ -213,9 +242,13 @@ export default function MembersArea() {
               events.length ? (
                 <div>
                   {events.map((ev, i) => (
-                    <div className="mem-event" key={ev.title + i}>
+                    <div className="mem-event" key={ev.id || ev.title + i}>
                       <div className="mem-date"><b>{ev.day}</b><span>{ev.mon}</span></div>
-                      <div><h4>{ev.title}</h4><p>{ev.desc}</p></div>
+                      <div>
+                        <h4>{ev.title}</h4>
+                        {ev.timed ? <Times value={ev.when} /> : null}
+                        {ev.desc ? <p>{ev.desc}</p> : null}
+                      </div>
                     </div>
                   ))}
                 </div>
