@@ -1,0 +1,24 @@
+// The types in this file are kept isolated from the implementation so that an
+// import of `@netlify/edge-functions` doesn't have any runtime dependencies.
+import type { Context } from "../context.ts";
+
+declare global {
+  // Using `var` so that the declaration is hoisted in such a way that we can
+  // reference it before it's initialized.
+  var Netlify: NetlifyGlobal;
+}
+
+interface Env {
+  delete: (key: string) => void;
+  get: (key: string) => string | undefined;
+  has: (key: string) => boolean;
+  set: (key: string, value: string) => void;
+  toObject: () => { [index: string]: string };
+}
+
+export interface NetlifyGlobal {
+  context: Context | null;
+  env: Env;
+}
+
+// denoCacheMetadata={"headers":{"content-length":"670","accept-ranges":"bytes","content-type":"application/typescript; charset=utf-8","x-nf-request-id":"01KZREEFCWNT1A8T9SAZ6GEAS0","age":"10350","etag":"\"a3e0c5a93dc68b21bdcee4552bfd8ef0-ssl\"","server":"Netlify","cache-status":"\"Netlify Edge\"; hit; ttl=31525650","cache-control":"public,max-age=0,must-revalidate","date":"Tue, 11 Aug 2026 12:58:34 GMT","strict-transport-security":"max-age=31536000; includeSubDomains; preload"},"url":"https://edge.netlify.com/bootstrap/globals/types.ts","time":1786453114}
