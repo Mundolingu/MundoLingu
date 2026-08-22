@@ -3,8 +3,10 @@
 -- =========================================================
 -- TIME ZONE — read this before adding classes or events.
 -- =========================================================
--- Every time you type into Supabase is treated as UAE (Dubai) time, and the
--- members area shows it in BOTH UAE and Mexico City time automatically.
+-- Every time you type into Supabase is treated as UAE (Dubai) time. That is the
+-- ONLY time that is ever stored. The website converts it on the fly and shows it
+-- for UAE, Mexico, the USA, Europe and Asia — daylight saving included — so you
+-- never add a second column, or a second row, for another country.
 --
 -- This line makes Postgres read a plain "2026-09-01 18:00" as 6pm in Dubai
 -- instead of 6pm UTC, so you never have to think about offsets:
@@ -70,7 +72,7 @@ create table if not exists public.events (
 );
 
 -- Events can now have a time, not just a day. Fill in `starts_at` (date & time,
--- typed in UAE time) and the members area shows both UAE and Mexico City times.
+-- typed in UAE time) and the members area shows every region's clock.
 -- Leave `starts_at` empty for an all-day event and only `event_date` is shown.
 alter table public.events add column if not exists starts_at timestamptz;
 alter table public.events alter column event_date drop not null;
@@ -147,7 +149,7 @@ drop policy if exists "Members view lessons" on public.lessons;
 create policy "Members view lessons" on public.lessons for select to authenticated using (true);
 
 -- LIVE CLASSES. Columns: title, starts_at (date & time, typed in UAE time),
--- join_url (Zoom/Meet link), note (optional). Members see it in UAE + Mexico time.
+-- join_url (Zoom/Meet link), note (optional). Members see every region's clock.
 create table if not exists public.live_classes (
   id uuid primary key default gen_random_uuid(),
   title text not null,
@@ -175,3 +177,162 @@ create policy "Members view workbooks" on public.workbooks for select to authent
 
 -- Optional cover image for workbooks
 alter table public.workbooks add column if not exists cover_url text;
+
+
+-- =========================================================
+-- OPPORTUNITIES — the paid job board for companies
+-- (Re-run this whole file safely; it only adds what's missing.)
+-- =========================================================
+
+-- Who is allowed to run the board. Flip this to true for yourself once, in
+-- Table Editor -> profiles, and you get the admin screen at /admin/opportunities.
+alter table public.profiles add column if not exists is_admin boolean not null default false;
+
+-- Used by the policies below. `security definer` so a policy can check the flag
+-- without every table needing its own read access to profiles.
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer set search_path = public
+as $$
+  select coalesce((select p.is_admin from public.profiles p where p.id = auth.uid()), false);
+$$;
+
+create table if not exists public.opportunities (
+  id uuid primary key default gen_random_uuid(),
+
+  -- What the job is
+  title text not null,
+  company_name text not null,
+  -- The account that owns the listing (a company logging in, or you posting on
+  -- their behalf). Kept on auth.users so there is no second accounts system.
+  company_id uuid references auth.users(id) on delete set null,
+  description text,
+  requirements text,
+  category text,
+
+  -- Where it is
+  location text,
+  country text,
+  work_type text check (work_type in ('remote', 'on-site', 'hybrid')),
+
+  -- Who it is for
+  language_requirements text,
+  english_level text,
+  salary text,
+
+  -- How to apply
+  application_url text,
+  application_email text,
+  deadline date,
+
+  -- Publishing + payment. A listing only goes public once status = 'published',
+  -- which is how an unpaid draft stays invisible until the invoice clears.
+  status text not null default 'draft' check (status in ('draft', 'published', 'archived')),
+  is_paid boolean not null default false,
+  payment_status text not null default 'unpaid' check (payment_status in ('unpaid', 'pending', 'paid', 'refunded')),
+  payment_id text,
+  published_at timestamptz,
+  expires_at timestamptz,
+
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+-- The board is read as "live listings, newest first", then narrowed by the
+-- filters on the page, so those are the columns worth indexing.
+create index if not exists opportunities_live_idx on public.opportunities (status, published_at desc);
+create index if not exists opportunities_expires_idx on public.opportunities (expires_at);
+create index if not exists opportunities_company_idx on public.opportunities (company_id);
+create index if not exists opportunities_country_idx on public.opportunities (country);
+create index if not exists opportunities_category_idx on public.opportunities (category);
+create index if not exists opportunities_work_type_idx on public.opportunities (work_type);
+
+-- Keep the moderation and payment columns honest. A company can write its own
+-- listing, but it cannot publish itself, mark itself paid, or hand the listing to
+-- somebody else — only an admin (or a trusted server-side job, where there is no
+-- auth.uid(): the Stripe webhook, the SQL Editor, the Table Editor) can do that.
+create or replace function public.opportunities_before_insert()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  if auth.uid() is not null and not public.is_admin() then
+    new.company_id := auth.uid();
+    new.status := 'draft';
+    new.is_paid := false;
+    new.payment_status := 'unpaid';
+    new.payment_id := null;
+    new.published_at := null;
+  end if;
+  if new.status = 'published' and new.published_at is null then
+    new.published_at := now();
+  end if;
+  return new;
+end;
+$$;
+
+create or replace function public.opportunities_before_update()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  new.updated_at := now();
+  if auth.uid() is not null and not public.is_admin() then
+    new.company_id := old.company_id;
+    new.status := old.status;
+    new.is_paid := old.is_paid;
+    new.payment_status := old.payment_status;
+    new.payment_id := old.payment_id;
+    new.published_at := old.published_at;
+    new.expires_at := old.expires_at;
+  end if;
+  if new.status = 'published' and new.published_at is null then
+    new.published_at := now();
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists opportunities_insert_guard on public.opportunities;
+create trigger opportunities_insert_guard
+  before insert on public.opportunities
+  for each row execute function public.opportunities_before_insert();
+
+drop trigger if exists opportunities_update_guard on public.opportunities;
+create trigger opportunities_update_guard
+  before update on public.opportunities
+  for each row execute function public.opportunities_before_update();
+
+alter table public.opportunities enable row level security;
+
+-- Everyone, logged in or not, sees published listings that have not expired.
+drop policy if exists "Anyone can view live opportunities" on public.opportunities;
+create policy "Anyone can view live opportunities"
+  on public.opportunities for select to anon, authenticated
+  using (status = 'published' and (expires_at is null or expires_at > now()));
+
+-- A company also sees its own drafts; an admin sees everything.
+drop policy if exists "Owners and admins view their opportunities" on public.opportunities;
+create policy "Owners and admins view their opportunities"
+  on public.opportunities for select to authenticated
+  using (company_id = auth.uid() or public.is_admin());
+
+drop policy if exists "Owners and admins add opportunities" on public.opportunities;
+create policy "Owners and admins add opportunities"
+  on public.opportunities for insert to authenticated
+  with check (company_id = auth.uid() or public.is_admin());
+
+drop policy if exists "Owners and admins edit their opportunities" on public.opportunities;
+create policy "Owners and admins edit their opportunities"
+  on public.opportunities for update to authenticated
+  using (company_id = auth.uid() or public.is_admin())
+  with check (company_id = auth.uid() or public.is_admin());
+
+drop policy if exists "Owners and admins remove their opportunities" on public.opportunities;
+create policy "Owners and admins remove their opportunities"
+  on public.opportunities for delete to authenticated
+  using (company_id = auth.uid() or public.is_admin());

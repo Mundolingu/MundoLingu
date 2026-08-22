@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Play, Download, Upload, X, Video, Calendar, BookOpen, Repeat } from "lucide-react";
-import { dualFor, parseWhen, hasTime, dayNumber, monthShort, weekdayLong, UAE_TZ, WEEK_MS } from "@/lib/time";
+import { parseWhen, hasTime, dayNumber, monthShort, weekdayLong, UAE_TZ, WEEK_MS } from "@/lib/time";
+import ZoneTimes from "@/components/ZoneTimes";
 
 const TABS = [
   { id: "lessons", label: "Lessons" },
@@ -25,22 +26,6 @@ function ytEmbed(url: string): string | null {
 function ytThumb(url: string): string | null {
   const id = ytId(url);
   return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
-}
-
-// Shows one moment twice: once on the UAE clock, once on the Mexico City clock.
-function Times({ date, timed = true, tone }: { date: Date | null; timed?: boolean; tone?: "dark" }) {
-  const lines = date ? dualFor(date, timed) : [];
-  if (!lines.length) return null;
-  return (
-    <div className={"mem-times" + (tone === "dark" ? " on-dark" : "")}>
-      {lines.map((l) => (
-        <span className="mem-tz" key={l.label + l.text}>
-          {l.label ? <b>{l.label}</b> : null}
-          {l.text}
-        </span>
-      ))}
-    </div>
-  );
 }
 
 // How far ahead a repeating event is listed, and how many of its dates to show.
@@ -264,18 +249,23 @@ export default function MembersArea() {
               live.length ? (
                 <div>
                   <div className="mem-live-hero">
-                    <div>
+                    <div className="mem-live-main">
                       <small>Next live class</small>
                       <h3>{live[0].title}</h3>
-                      <Times date={parseWhen(live[0].starts_at)} tone="dark" />
                       {live[0].note ? <p>{live[0].note}</p> : null}
                     </div>
                     {live[0].join_url ? <a className="mem-join" href={live[0].join_url} target="_blank" rel="noreferrer">Join the class</a> : null}
+                    <ZoneTimes date={parseWhen(live[0].starts_at)} tone="dark" className="mem-live-zones" />
                   </div>
+                  {live.length > 1 ? <h4 className="mem-subhead">Also coming up</h4> : null}
                   {live.slice(1).map((c) => (
                     <div className="mem-row" key={c.id}>
-                      <div><h4>{c.title}</h4><Times date={parseWhen(c.starts_at)} /></div>
+                      <div className="mem-row-main">
+                        <h4>{c.title}</h4>
+                        {c.note ? <p>{c.note}</p> : null}
+                      </div>
                       {c.join_url ? <a className="rj" href={c.join_url} target="_blank" rel="noreferrer">Join</a> : null}
+                      <ZoneTimes date={parseWhen(c.starts_at)} className="mem-row-zones" />
                     </div>
                   ))}
                 </div>
@@ -294,13 +284,13 @@ export default function MembersArea() {
                   {events.map((ev) => (
                     <div className="mem-event" key={ev.key}>
                       <div className="mem-date"><b>{ev.day}</b><span>{ev.mon}</span></div>
-                      <div>
+                      <div className="mem-event-main">
                         <h4>
                           {ev.title}
                           {ev.repeatLabel ? <span className="mem-repeat"><Repeat size={11} /> {ev.repeatLabel}</span> : null}
                         </h4>
-                        {ev.timed ? <Times date={ev.date} /> : null}
                         {ev.desc ? <p>{ev.desc}</p> : null}
+                        <ZoneTimes date={ev.date} timed={ev.timed} />
                       </div>
                     </div>
                   ))}

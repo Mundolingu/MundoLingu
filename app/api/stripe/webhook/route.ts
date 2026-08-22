@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { LISTING_DAYS } from "@/lib/opportunities";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,9 +26,39 @@ export async function POST(req: Request) {
       .eq("stripe_customer_id", customerId);
   };
 
+  // A paid job listing goes live here rather than in the browser, so an advert
+  // can only appear once Stripe confirms the money arrived.
+  const publishListing = async (opportunityId: string, paymentId: string) => {
+    const { data: listing } = await admin
+      .from("opportunities")
+      .select("deadline, expires_at")
+      .eq("id", opportunityId)
+      .maybeSingle();
+    const runsUntil =
+      listing?.expires_at ||
+      (listing?.deadline ? `${String(listing.deadline).slice(0, 10)}T23:59:59+04:00` : null) ||
+      new Date(Date.now() + LISTING_DAYS * 86400000).toISOString();
+    await admin
+      .from("opportunities")
+      .update({
+        is_paid: true,
+        payment_status: "paid",
+        payment_id: paymentId,
+        status: "published",
+        published_at: new Date().toISOString(),
+        expires_at: runsUntil,
+      })
+      .eq("id", opportunityId);
+  };
+
   switch (event.type) {
     case "checkout.session.completed": {
       const s = event.data.object as Stripe.Checkout.Session;
+      const opportunityId = s.metadata?.opportunity_id;
+      if (opportunityId) {
+        await publishListing(opportunityId, s.id);
+        break;
+      }
       if (s.customer) await setMember(s.customer as string, true, "active");
       break;
     }

@@ -20,6 +20,7 @@ const NAV: { id: string; en: string; es: string; page?: boolean; route?: string 
   { id: "pricing", en: "Pricing", es: "Precios" },
   { id: "faq", en: "FAQ", es: "Preguntas" },
   { id: "level-test", en: "Level test", es: "Test de nivel", route: "/level-test" },
+  { id: "opportunities", en: "Opportunities", es: "Oportunidades", route: "/opportunities" },
   { id: "blog", en: "Blog", es: "Blog", route: "/blog" },
 ];
 

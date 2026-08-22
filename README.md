@@ -171,7 +171,7 @@ Do these in order. Take your time — this is the involved part.
 - **Videos:** put your video links (YouTube unlisted or Vimeo) into the `LESSONS`
   list and embed them.
 - **Events & live classes:** add rows to the `events` and `live_classes` tables in
-  Supabase (times are typed in UAE time and shown in UAE + Mexico time).
+  Supabase (times are typed in UAE time and shown on five clocks — see below).
 - (Later, these lists can be moved into a Supabase table so you edit them without
   touching code — a small next step whenever you want it.)
 
@@ -298,6 +298,7 @@ After re-running `supabase/schema.sql` once, everything in the members hub is ma
 - **Lessons** (`lessons` table): `title`, `level` (e.g. "12 min - A2"), `video_url` (an unlisted YouTube link), `sort`. Members see a video card; clicking plays it in a pop-up player.
 - **Live classes** (`live_classes` table): `title`, `starts_at` (date & time, typed in **UAE time**), `join_url` (Zoom/Meet link), `note` (optional). Members see upcoming classes with a Join button.
 - **Events** (`events` table): `title`, `description`, and either `starts_at` (date & time, typed in **UAE time**) or `event_date` on its own for an all-day event. Optional `repeat` / `repeat_until` for weekly events — see below.
+- **Workbooks** (`workbooks` table): `title`, `label` (e.g. "March"), `pdf_url` (link to the PDF, e.g. from Supabase Storage), `sort`. Members can download and hand in their work.
 
 ### Repeating events
 
@@ -317,23 +318,81 @@ time, which members in Mexico see as Saturday 1:00 PM. Re-running
 `supabase/schema.sql` creates it if it is not there yet, and never duplicates it.
 Change the day or time by editing that one row in the Table Editor.
 
-### Times: UAE and Mexico
+### Times: one entry, five clocks
 
-You only ever enter a time once, in **UAE (Dubai) time**. The members area
-automatically prints every live class and timed event on both clocks, each with
-its own date, because the ten-hour gap often puts Dubai and Mexico City on
-different days:
+You only ever enter a time once, in **UAE (Dubai) time** — that is the master
+time and the only one stored in the database. Every live class and timed event
+is then converted in the browser and shown on five clocks:
 
-> **UAE** Tue, Sep 1 · 6:00 PM  **MEXICO** Tue, Sep 1 · 8:00 AM
+> 🇦🇪 UAE 6:00 PM  ·  🇲🇽 Mexico 8:00 AM  ·  🇺🇸 USA 10:00 AM  ·  🇪🇺 Europe 4:00 PM  ·  🌏 Asia 11:00 PM
+
+When a conversion lands on a different calendar day it is labelled `+1d` or
+`-1d`, and hovering (or a screen reader) gives the full local date and time.
 
 Re-running `supabase/schema.sql` sets the database timezone to `Asia/Dubai`, so a
 plain `2026-09-01 18:00` typed into the Table Editor means 6pm in Dubai. Reload
 the Supabase dashboard after running it. If you would rather be explicit, type
 the offset — `2026-09-01 18:00+04` — and you get the same result.
 
-The two zones live in one place, `lib/time.ts` (`UAE_TZ` / `MX_TZ`), if you ever
-need to add or change a country. Daylight saving in Mexico City is handled for
-you.
-- **Workbooks** (`workbooks` table): `title`, `label` (e.g. "March"), `pdf_url` (link to the PDF, e.g. from Supabase Storage), `sort`. Members can download and hand in their work.
+The zone list lives in exactly one place, the `ZONES` array in `lib/time.ts`.
+Each entry is an [IANA zone name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+(`Asia/Dubai`, `America/Mexico_City`, `America/New_York`, `Europe/Madrid`,
+`Asia/Tokyo`), so daylight saving — which starts and ends on different dates in
+Mexico, the USA and Europe — is applied for you by the browser. Add, remove or
+reorder a country by editing that array; the clocks in Live Classes and Events
+both come from the same `components/ZoneTimes.tsx` component, so they update
+together. Nothing is hard-coded as "UAE minus ten hours".
 
 Each area shows a friendly "coming soon" state until you add rows.
+
+---
+
+## Opportunities board
+
+`/opportunities` is a public job board for members: paid roles that need the
+languages they are learning. It appears in the main navigation, and each listing
+has its own page at `/opportunities/<id>`.
+
+Visitors can search by keyword and filter by country, remote/on-site/hybrid,
+category and English level. Only listings with `status = published`, and whose
+`expires_at` is in the future, are ever visible.
+
+### Turning it on
+
+Run `supabase/schema.sql` in the Supabase **SQL Editor** once. It adds the
+`opportunities` table, its indexes, its row-level-security policies, and an
+`is_admin` column on `profiles`. Until you do, the board shows its empty state
+rather than an error.
+
+### Making yourself an admin
+
+In Supabase -> Table Editor -> `profiles`, find your row and tick `is_admin`.
+That is the same profile row the members area already uses — there is no second
+login or password. Admins can then open **`/admin/opportunities`**, where they
+can create, edit, publish, unpublish, mark paid or unpaid, set an expiry date,
+and delete listings. Everyone else is sent back to the members area.
+
+### Selling listings to companies
+
+A listing carries `is_paid`, `payment_status`, `payment_id` and `expires_at`, so
+you can charge companies to advertise. Two ways to run it:
+
+- **By hand** (works today, nothing to set up): take payment however you like,
+  then hit **Mark paid** and **Publish** in the admin screen. Publishing sets an
+  expiry 30 days out unless you choose your own date.
+- **Through Stripe** (the same account the membership already uses): create a
+  one-off price in Stripe, copy its ID into a `STRIPE_OPPORTUNITY_PRICE_ID`
+  environment variable, and `POST /api/opportunities/checkout` with
+  `{ "opportunityId": "…" }` returns a Checkout URL. The listing only goes live
+  from the Stripe **webhook**, so an abandoned or failed payment can never put an
+  advert on the board. Leave the variable unset and that route politely reports
+  that listing payments are not configured — everything else still works.
+
+### Security
+
+Row-level security does the enforcing, not the interface. Anonymous visitors can
+read published, unexpired listings and nothing else. A signed-in company account
+can see and edit only rows where `company_id` is its own user id. Database
+triggers stop a company from publishing itself or marking its own listing paid —
+those columns are forced back to safe values unless the caller is an admin or the
+service role. Admins can do everything.
