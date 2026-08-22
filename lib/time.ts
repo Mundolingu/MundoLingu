@@ -1,7 +1,8 @@
 // Times for live classes and events are entered in Supabase as UAE (Dubai) clock
-// time — see the notes at the top of supabase/schema.sql. Everything is rendered
-// here in both UAE and Mexico City time so members in either country know exactly
-// when to show up.
+// time — see the notes at the top of supabase/schema.sql. UAE is the single source
+// of truth: nothing else is ever stored. Every other clock on the site is derived
+// from it here, at render time, using real IANA zones so daylight saving is
+// applied automatically for whatever date the class or event falls on.
 
 export const UAE_TZ = "Asia/Dubai";
 export const MX_TZ = "America/Mexico_City";
@@ -9,17 +10,52 @@ export const MX_TZ = "America/Mexico_City";
 export const UAE_LABEL = "UAE";
 export const MX_LABEL = "Mexico";
 
+/**
+ * The regions we publish times for, in reading order. Each one is a real IANA
+ * zone, so offsets and daylight-saving switches come from the system's timezone
+ * database instead of being hardcoded — the gap between Dubai and New York, for
+ * example, is 8h in summer and 9h in winter, and that is handled for us.
+ *
+ * Chosen to match where MundoLingu members actually are (Mexico and Latin
+ * America, Europe, the UAE) with one representative city per region:
+ *   Mexico  → Mexico City (the whole community's reference, no DST since 2022)
+ *   USA     → New York (US Eastern, the usual reference for US times)
+ *   Europe  → Madrid (Central European Time, the Spanish-speaking anchor)
+ *   Asia    → Tokyo (a stable, widely understood East-Asian reference)
+ * Add or change a region here and it updates everywhere it is shown.
+ */
+export type Zone = { key: string; flag: string; label: string; tz: string };
+
+export const ZONES: Zone[] = [
+  { key: "uae", flag: "🇦🇪", label: "UAE", tz: UAE_TZ },
+  { key: "mexico", flag: "🇲🇽", label: "Mexico", tz: MX_TZ },
+  { key: "usa", flag: "🇺🇸", label: "USA", tz: "America/New_York" },
+  { key: "europe", flag: "🇪🇺", label: "Europe", tz: "Europe/Madrid" },
+  { key: "asia", flag: "🌏", label: "Asia", tz: "Asia/Tokyo" },
+];
+
 const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
-const HAS_OFFSET = /(Z|[+-]\d{2}:?\d{2})$/;
+// Accepts every shape Postgres/PostgREST hands back or an admin may type:
+// "…Z", "…+00:00", "…+0400" and the short "…+04" the Table Editor allows.
+const HAS_OFFSET = /(Z|[+-]\d{2}(:?\d{2})?)$/;
 
 // Dubai is UTC+4 all year (no daylight saving), so the offset is safe to hardcode.
 const UAE_OFFSET = "+04:00";
 
+/** "+04" / "+0400" / "+04:00" all become "+04:00" — only that form parses everywhere. */
+function canonicalOffset(offset: string): string {
+  if (offset === "Z") return "Z";
+  const digits = offset.slice(1).replace(":", "");
+  return `${offset[0]}${digits.slice(0, 2)}:${digits.length > 2 ? digits.slice(2, 4) : "00"}`;
+}
+
 function normalize(raw: string): string {
   if (DATE_ONLY.test(raw)) return `${raw}T00:00:00${UAE_OFFSET}`;
   const iso = raw.replace(" ", "T");
+  const offset = iso.match(HAS_OFFSET);
   // A value stored without a zone means "the time I typed in Supabase", i.e. UAE time.
-  return HAS_OFFSET.test(iso) ? iso : `${iso}${UAE_OFFSET}`;
+  if (!offset) return `${iso}${UAE_OFFSET}`;
+  return iso.slice(0, iso.length - offset[0].length) + canonicalOffset(offset[0]);
 }
 
 /** Turn a Supabase `timestamptz` / `date` value into a real instant. */
@@ -69,23 +105,48 @@ export function weekdayLong(d: Date, tz: string): string {
   return fmt(d, tz, { weekday: "long" });
 }
 
-export type ZonedWhen = { label: string; text: string };
+export type ZonedWhen = { key: string; flag: string; label: string; tz: string; time: string; day: string; full: string; dayShift: number };
 
-/**
- * The same moment written out for both audiences. Each line carries its own date
- * because the 10-hour gap regularly puts Dubai and Mexico City on different days.
- */
-export function dualFor(d: Date, timed: boolean): ZonedWhen[] {
-  if (!timed) return [{ label: "", text: formatDay(d, UAE_TZ) }];
-  return [
-    { label: UAE_LABEL, text: formatDayTime(d, UAE_TZ) },
-    { label: MX_LABEL, text: formatDayTime(d, MX_TZ) },
-  ];
+/** Calendar day in a zone as YYYY-MM-DD, so two zones can be compared safely. */
+function isoDay(d: Date, tz: string): string {
+  try {
+    return new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+  } catch {
+    return "";
+  }
 }
 
-export function dualWhen(value: string | null | undefined): ZonedWhen[] {
+/** Whole days between two YYYY-MM-DD strings (b - a). */
+function dayGap(a: string, b: string): number {
+  if (!a || !b) return 0;
+  const ms = Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`);
+  return Number.isNaN(ms) ? 0 : Math.round(ms / 86400000);
+}
+
+/**
+ * The same instant on every clock we publish. `dayShift` says whether that region
+ * is already on the next day (+1) or still on the previous one (-1) compared with
+ * the UAE date — a 23:00 Dubai class is 04:00 the *next* morning in Tokyo, and
+ * members need to see that rather than guess it.
+ */
+export function zonedTimes(d: Date, zones: Zone[] = ZONES): ZonedWhen[] {
+  const base = isoDay(d, UAE_TZ);
+  return zones.map((z) => ({
+    key: z.key,
+    flag: z.flag,
+    label: z.label,
+    tz: z.tz,
+    time: formatTime(d, z.tz),
+    day: formatDay(d, z.tz),
+    full: formatDayTime(d, z.tz),
+    dayShift: dayGap(base, isoDay(d, z.tz)),
+  }));
+}
+
+/** Same as `zonedTimes`, straight from a raw Supabase value. */
+export function zonedWhen(value: string | null | undefined): ZonedWhen[] {
   const d = parseWhen(value);
-  return d ? dualFor(d, hasTime(value)) : [];
+  return d ? zonedTimes(d) : [];
 }
 
 /** One week, in milliseconds. Dubai has no daylight saving, so adding this to an
