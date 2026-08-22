@@ -297,7 +297,25 @@ After re-running `supabase/schema.sql` once, everything in the members hub is ma
 
 - **Lessons** (`lessons` table): `title`, `level` (e.g. "12 min - A2"), `video_url` (an unlisted YouTube link), `sort`. Members see a video card; clicking plays it in a pop-up player.
 - **Live classes** (`live_classes` table): `title`, `starts_at` (date & time, typed in **UAE time**), `join_url` (Zoom/Meet link), `note` (optional). Members see upcoming classes with a Join button.
-- **Events** (`events` table): `title`, `description`, and either `starts_at` (date & time, typed in **UAE time**) or `event_date` on its own for an all-day event.
+- **Events** (`events` table): `title`, `description`, and either `starts_at` (date & time, typed in **UAE time**) or `event_date` on its own for an all-day event. Optional `repeat` / `repeat_until` for weekly events — see below.
+
+### Repeating events
+
+Set an event's `repeat` column to `weekly` and it runs on the same weekday, at
+the same UAE time, every week. You add the row once; the members area lists its
+next six dates (up to three months ahead) and rolls forward on its own, so there
+is nothing to top up each month. Past dates drop off automatically, and a class
+stays on the list while it is actually running.
+
+The `starts_at` you enter is simply the **first** time it runs — it sets both the
+weekday and the time. Leave `repeat` empty for a normal one-off event. Set
+`repeat_until` to the last date if the series should stop; leave it empty to run
+indefinitely.
+
+**Conversation Club** is set up this way already: every Saturday at 23:00 UAE
+time, which members in Mexico see as Saturday 1:00 PM. Re-running
+`supabase/schema.sql` creates it if it is not there yet, and never duplicates it.
+Change the day or time by editing that one row in the Table Editor.
 
 ### Times: UAE and Mexico
 

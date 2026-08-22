@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Play, Download, Upload, X, Video, Calendar, BookOpen } from "lucide-react";
-import { dualWhen, parseWhen, hasTime, dayNumber, monthShort, UAE_TZ } from "@/lib/time";
+import { Play, Download, Upload, X, Video, Calendar, BookOpen, Repeat } from "lucide-react";
+import { dualFor, parseWhen, hasTime, dayNumber, monthShort, weekdayLong, UAE_TZ, WEEK_MS } from "@/lib/time";
 
 const TABS = [
   { id: "lessons", label: "Lessons" },
@@ -28,8 +28,8 @@ function ytThumb(url: string): string | null {
 }
 
 // Shows one moment twice: once on the UAE clock, once on the Mexico City clock.
-function Times({ value, tone }: { value: string | null | undefined; tone?: "dark" }) {
-  const lines = dualWhen(value);
+function Times({ date, timed = true, tone }: { date: Date | null; timed?: boolean; tone?: "dark" }) {
+  const lines = date ? dualFor(date, timed) : [];
   if (!lines.length) return null;
   return (
     <div className={"mem-times" + (tone === "dark" ? " on-dark" : "")}>
@@ -41,6 +41,70 @@ function Times({ value, tone }: { value: string | null | undefined; tone?: "dark
       ))}
     </div>
   );
+}
+
+// How far ahead a repeating event is listed, and how many of its dates to show.
+const HORIZON_MS = 90 * 24 * 60 * 60 * 1000;
+const MAX_OCCURRENCES = 6;
+
+type EventItem = {
+  key: string;
+  at: number;
+  date: Date;
+  timed: boolean;
+  day: string;
+  mon: string;
+  title: string;
+  desc: string;
+  repeatLabel: string;
+};
+
+function buildItem(row: any, date: Date, timed: boolean, repeatLabel: string, n: number): EventItem {
+  return {
+    key: `${row.id || row.title}-${n}`,
+    at: date.getTime(),
+    date,
+    timed,
+    day: dayNumber(date, UAE_TZ),
+    mon: monthShort(date, UAE_TZ),
+    title: row.title,
+    desc: row.description || "",
+    repeatLabel,
+  };
+}
+
+/**
+ * Turns one events row into the dates members should actually see. A row with
+ * `repeat = 'weekly'` becomes its next few Saturdays (or whichever weekday it
+ * was first set on); anything else is a single date. Past dates drop off.
+ */
+function expandEvent(row: any, now: number): EventItem[] {
+  // `starts_at` (date & time) wins; `event_date` stays supported for date-only rows.
+  const when = row.starts_at || row.event_date || null;
+  const anchor = parseWhen(when);
+  if (!anchor) return [];
+
+  const timed = hasTime(when);
+  // Keep a class visible while it is running: 2h for a timed event, the whole day otherwise.
+  const grace = timed ? 2 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
+  const cutoff = now - grace;
+
+  if (String(row.repeat || "").trim().toLowerCase() !== "weekly") {
+    return anchor.getTime() > cutoff ? [buildItem(row, anchor, timed, "", 0)] : [];
+  }
+
+  const until = parseWhen(row.repeat_until);
+  const label = `Every ${weekdayLong(anchor, UAE_TZ)}`;
+  // Jump straight to the first date that has not passed yet.
+  const skipped = Math.max(0, Math.ceil((cutoff - anchor.getTime()) / WEEK_MS));
+  const out: EventItem[] = [];
+  for (let i = 0; i < MAX_OCCURRENCES; i++) {
+    const t = anchor.getTime() + (skipped + i) * WEEK_MS;
+    if (t - now > HORIZON_MS) break;
+    if (until && t > until.getTime()) break;
+    out.push(buildItem(row, new Date(t), timed, label, skipped + i));
+  }
+  return out;
 }
 
 function HandInCard({ wb }: { wb: any }) {
@@ -100,7 +164,7 @@ export default function MembersArea() {
   const [loading, setLoading] = useState(true);
   const [lessons, setLessons] = useState<any[]>([]);
   const [live, setLive] = useState<any[]>([]);
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<EventItem[]>([]);
   const [workbooks, setWorkbooks] = useState<any[]>([]);
   const [playing, setPlaying] = useState<string | null>(null);
   const router = useRouter();
@@ -124,22 +188,8 @@ export default function MembersArea() {
           return d ? d.getTime() > now - 2 * 3600 * 1000 : false;
         }));
         setEvents((ev.data || [])
-          .map((row: any) => {
-            // `starts_at` (date & time) wins; `event_date` stays supported for date-only rows.
-            const when = row.starts_at || row.event_date || null;
-            const d = parseWhen(when);
-            return {
-              id: row.id,
-              when,
-              at: d ? d.getTime() : Number.MAX_SAFE_INTEGER,
-              day: d ? dayNumber(d, UAE_TZ) : "",
-              mon: d ? monthShort(d, UAE_TZ) : "",
-              timed: hasTime(when),
-              title: row.title,
-              desc: row.description || "",
-            };
-          })
-          .sort((a: any, b: any) => a.at - b.at));
+          .flatMap((row: any) => expandEvent(row, now))
+          .sort((a, b) => a.at - b.at));
         setWorkbooks(wb.data || []);
       } catch {}
       if (active) setLoading(false);
@@ -217,14 +267,14 @@ export default function MembersArea() {
                     <div>
                       <small>Next live class</small>
                       <h3>{live[0].title}</h3>
-                      <Times value={live[0].starts_at} tone="dark" />
+                      <Times date={parseWhen(live[0].starts_at)} tone="dark" />
                       {live[0].note ? <p>{live[0].note}</p> : null}
                     </div>
                     {live[0].join_url ? <a className="mem-join" href={live[0].join_url} target="_blank" rel="noreferrer">Join the class</a> : null}
                   </div>
                   {live.slice(1).map((c) => (
                     <div className="mem-row" key={c.id}>
-                      <div><h4>{c.title}</h4><Times value={c.starts_at} /></div>
+                      <div><h4>{c.title}</h4><Times date={parseWhen(c.starts_at)} /></div>
                       {c.join_url ? <a className="rj" href={c.join_url} target="_blank" rel="noreferrer">Join</a> : null}
                     </div>
                   ))}
@@ -241,12 +291,15 @@ export default function MembersArea() {
             {tab === "events" && (
               events.length ? (
                 <div>
-                  {events.map((ev, i) => (
-                    <div className="mem-event" key={ev.id || ev.title + i}>
+                  {events.map((ev) => (
+                    <div className="mem-event" key={ev.key}>
                       <div className="mem-date"><b>{ev.day}</b><span>{ev.mon}</span></div>
                       <div>
-                        <h4>{ev.title}</h4>
-                        {ev.timed ? <Times value={ev.when} /> : null}
+                        <h4>
+                          {ev.title}
+                          {ev.repeatLabel ? <span className="mem-repeat"><Repeat size={11} /> {ev.repeatLabel}</span> : null}
+                        </h4>
+                        {ev.timed ? <Times date={ev.date} /> : null}
                         {ev.desc ? <p>{ev.desc}</p> : null}
                       </div>
                     </div>

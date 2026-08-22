@@ -374,6 +374,7 @@ body { background: #F5F6F7; }
 .mem-times.on-dark .mem-tz b{color:var(--cyan);}
 .mem-event .mem-times{margin-bottom:4px;}
 .mem-row .mem-tz{color:var(--muted);}
+.mem-repeat{display:inline-flex;align-items:center;gap:4px;vertical-align:middle;margin-left:9px;font-family:var(--sans);font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--teal-text);background:rgba(18,163,160,.10);border-radius:999px;padding:3px 9px;}
 .mem-event p{font-size:14px;color:var(--muted);margin:0;}
 .mem-book{background:var(--paper-2);border-radius:16px;box-shadow:inset 0 0 0 1px var(--line-2);overflow:hidden;display:flex;flex-direction:column;transition:transform .3s,box-shadow .3s;}
 .mem-book:hover{transform:translateY(-3px);box-shadow:0 24px 50px -30px rgba(12,28,60,.3);}

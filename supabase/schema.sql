@@ -74,6 +74,27 @@ create table if not exists public.events (
 -- Leave `starts_at` empty for an all-day event and only `event_date` is shown.
 alter table public.events add column if not exists starts_at timestamptz;
 alter table public.events alter column event_date drop not null;
+
+-- REPEATING EVENTS. Set `repeat` to 'weekly' and the event shows up on the same
+-- weekday, at the same UAE time, every week — the members area lists its next
+-- few dates automatically, so you only ever add the row once. Leave `repeat`
+-- empty for a normal one-off event. `repeat_until` is optional: set it to the
+-- last date you want it to run, or leave it empty to keep going indefinitely.
+alter table public.events add column if not exists repeat text;
+alter table public.events add column if not exists repeat_until timestamptz;
+
+-- The weekly Conversation Club: every Saturday, 23:00 UAE time
+-- (= 1:00 PM Saturday in Mexico City). The date below is just the first
+-- Saturday it runs; the members area rolls it forward week by week.
+insert into public.events (title, description, starts_at, repeat)
+select
+  'Conversation Club',
+  'Our weekly drop-in speaking session. No slides, no homework — just come and talk.',
+  timestamptz '2026-08-22 23:00+04',
+  'weekly'
+where not exists (
+  select 1 from public.events where lower(title) = 'conversation club'
+);
 alter table public.events enable row level security;
 drop policy if exists "Members can view events" on public.events;
 create policy "Members can view events"
