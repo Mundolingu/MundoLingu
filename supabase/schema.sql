@@ -54,6 +54,16 @@ create table if not exists public.events (
   description text,
   created_at timestamptz not null default now()
 );
+
+-- Optional start time for an event, in UAE time (the master zone).
+-- Without it an event is shown as "All day"; with it, the site converts the
+-- event into all five zones exactly as it does for live classes. Add either
+-- column and the site picks it up automatically:
+--   start_time  a plain UAE wall-clock time, e.g. 18:00
+--   starts_at   a full timestamp, if you would rather store the instant
+alter table public.events add column if not exists start_time time;
+alter table public.events add column if not exists starts_at timestamptz;
+
 alter table public.events enable row level security;
 drop policy if exists "Members can view events" on public.events;
 create policy "Members can view events"

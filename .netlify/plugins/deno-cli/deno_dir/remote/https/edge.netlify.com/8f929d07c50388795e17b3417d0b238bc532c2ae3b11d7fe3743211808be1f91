@@ -1,0 +1,18 @@
+import type { Context } from "./context.ts";
+
+interface EdgeFunction {
+  (
+    request: Request,
+    context: Context,
+  ):
+    | Response
+    | Promise<Response>
+    | URL
+    | Promise<URL>
+    | void
+    | Promise<void>;
+}
+
+export type { EdgeFunction };
+
+// denoCacheMetadata={"headers":{"content-type":"application/typescript; charset=utf-8","date":"Tue, 11 Aug 2026 12:58:34 GMT","server":"Netlify","strict-transport-security":"max-age=31536000; includeSubDomains; preload","content-length":"257","age":"10350","x-nf-request-id":"01KZREEFCW12XA10C2R60XRZ2P","cache-control":"public,max-age=0,must-revalidate","cache-status":"\"Netlify Edge\"; hit; ttl=31525650","etag":"\"0d08fe89604a8f16daf0cf4f88de16db-ssl\"","accept-ranges":"bytes"},"url":"https://edge.netlify.com/bootstrap/edge_function.ts","time":1786453114}

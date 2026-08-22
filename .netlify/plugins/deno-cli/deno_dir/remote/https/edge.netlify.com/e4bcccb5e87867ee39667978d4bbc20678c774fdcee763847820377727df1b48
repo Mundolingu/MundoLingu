@@ -1,0 +1,71 @@
+type Cache = "off" | "manual";
+
+type Path = `/${string}`;
+
+type OnError = "fail" | "bypass" | Path;
+
+type HTTPMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS";
+
+type RateLimitAggregator = "domain" | "ip";
+
+type RateLimitAction = "rate_limit" | "rewrite";
+
+/**
+ * Netlify Custom Rate Limits inline configuration options.
+ */
+interface RateLimitConfig {
+  action?: RateLimitAction;
+  aggregateBy?: RateLimitAggregator | RateLimitAggregator[];
+  to?: string;
+  windowSize: number;
+}
+
+/**
+ * Netlify Edge Function inline configuration options.
+ *
+ * @see {@link https://docs.netlify.com/edge-functions/declarations/#declare-edge-functions-inline}
+ */
+export interface Config {
+  cache?: Cache;
+  excludedPath?: Path | Path[];
+  excludedPattern?: string | string[];
+  onError?: OnError;
+  path?: Path | Path[];
+  pattern?: string | string[];
+  method?: HTTPMethod | HTTPMethod[];
+  rateLimit?: RateLimitConfig;
+  header?: Record<string, boolean | string>;
+}
+
+/**
+ * Framework-generated Netlify Edge Function inline configuration options.
+ *
+ * @see {@link https://docs.netlify.com/edge-functions/create-integration/#generate-declarations}
+ */
+export interface IntegrationsConfig extends Config {
+  name?: string;
+  generator?: string;
+}
+
+/**
+ * A function configuration in the `manifest.json` file for framework-generated Netlify
+ * Edge Functions.
+ *
+ * @see {@link https://docs.netlify.com/edge-functions/declarations/#declare-edge-functions-inline}
+ */
+export interface ManifestFunction extends IntegrationsConfig {
+  function: string;
+}
+
+/**
+ * The `manifest.json` file for framework-generated Netlify Edge Functions.
+ *
+ * @see {@link https://docs.netlify.com/edge-functions/create-integration/#generate-declarations}
+ */
+export interface Manifest {
+  version: 1;
+  functions: ManifestFunction[];
+  import_map?: string;
+}
+
+// denoCacheMetadata={"headers":{"cache-status":"\"Netlify Edge\"; hit; ttl=31525650","accept-ranges":"bytes","content-type":"application/typescript; charset=utf-8","cache-control":"public,max-age=0,must-revalidate","x-nf-request-id":"01KZREEFCW3V6TM7AQCXDZSQJJ","date":"Tue, 11 Aug 2026 12:58:34 GMT","server":"Netlify","strict-transport-security":"max-age=31536000; includeSubDomains; preload","age":"10350","etag":"\"7b4c0dd7e54c415aa51176eb90304ee9-ssl-df\"","vary":"Accept-Encoding"},"url":"https://edge.netlify.com/bootstrap/config.ts","time":1786453114}
