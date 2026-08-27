@@ -13,6 +13,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -21,6 +22,11 @@ export default function LoginForm() {
     const supabase = createClient();
 
     if (mode === "signup") {
+      if (!acceptedTerms) {
+        setLoading(false);
+        setMsg("Please accept the Terms & Conditions to create your account.");
+        return;
+      }
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -81,6 +87,20 @@ export default function LoginForm() {
                 <input id="password" type="password" required value={password}
                   onChange={(e) => setPassword(e.target.value)} placeholder="Your password" autoComplete="current-password" />
               </div>
+              {mode === "signup" && (
+                <label className="login-terms">
+                  <input
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    required
+                  />
+                  <span>
+                    I agree to the{" "}
+                    <a href="/terms" target="_blank" rel="noreferrer">Terms &amp; Conditions</a>
+                  </span>
+                </label>
+              )}
               <button className="login-btn" type="submit" disabled={loading}>
                 {loading ? "Please wait…" : mode === "signin" ? "Log in" : "Create account"}
               </button>
@@ -88,11 +108,12 @@ export default function LoginForm() {
             {msg && <p className="login-note" style={{ color: "#b23b13" }}>{msg}</p>}
             <p className="login-alt">
               {mode === "signin" ? (
-                <>New here? <a onClick={() => { setMode("signup"); setMsg(null); }} style={{ cursor: "pointer" }}>Create an account</a></>
+                <>New here? <a onClick={() => { setMode("signup"); setMsg(null); setAcceptedTerms(false); }} style={{ cursor: "pointer" }}>Create an account</a></>
               ) : (
-                <>Already a member? <a onClick={() => { setMode("signin"); setMsg(null); }} style={{ cursor: "pointer" }}>Log in</a></>
+                <>Already a member? <a onClick={() => { setMode("signin"); setMsg(null); setAcceptedTerms(false); }} style={{ cursor: "pointer" }}>Log in</a></>
               )}
             </p>
+            <p className="login-note"><a href="/terms">Terms &amp; Conditions</a></p>
           </>
         )}
       </div>

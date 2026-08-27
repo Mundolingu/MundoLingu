@@ -766,3 +766,93 @@ body { background: #F5F6F7; }
   .mem-tabs{flex-wrap:wrap;overflow-x:visible;gap:2px;}
   .mem-tab{padding:10px 12px;font-size:14px;}
 }
+
+
+/* ================= members: timezone, status & timing ================= */
+/* Uses the existing tokens and card idiom only — no new colours or fonts. */
+
+.mem-greet{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;}
+.mem-greet-t{min-width:0;}
+.mem-greet .mem-hello-sub{margin-bottom:0;}
+.mem-greet + .mem-tabs{margin-top:28px;}
+
+.mem-tz{box-sizing:border-box;position:relative;display:inline-flex;align-items:center;gap:8px;flex:none;max-width:100%;min-width:0;
+  margin-top:6px;padding:10px 14px;border-radius:12px;background:var(--paper-2);
+  box-shadow:inset 0 0 0 1px var(--line-2);font-size:13.5px;font-weight:600;color:var(--ink);
+  cursor:pointer;transition:box-shadow .25s,transform .25s;}
+.mem-tz:hover{box-shadow:inset 0 0 0 1.3px var(--line);transform:translateY(-1px);}
+.mem-tz:focus-within{box-shadow:inset 0 0 0 1.6px var(--orange);}
+.mem-tz > svg{flex:none;color:var(--teal-text);}
+.mem-tz .mem-tz-label{color:var(--faint);font-weight:500;white-space:nowrap;}
+.mem-tz .mem-tz-value{display:inline-flex;align-items:center;gap:6px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mem-tz .mem-tz-flag{font-size:15px;line-height:1;}
+.mem-tz .mem-tz-off{color:var(--faint);font-weight:500;font-size:12px;}
+.mem-tz::after{content:"\25BE";color:var(--faint);font-size:11px;flex:none;}
+/* The real control sits invisibly on top: every phone already knows how to
+   present a native <select>, which keeps long zone names off the layout. */
+.mem-tz select{position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:none;
+  opacity:0;cursor:pointer;font-size:16px;-webkit-appearance:none;appearance:none;}
+.mem-tz select:disabled{cursor:progress;}
+
+.mem-status{display:inline-flex;align-items:center;gap:5px;margin-left:9px;padding:3px 9px;border-radius:100px;
+  font-family:var(--sans);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  vertical-align:middle;white-space:nowrap;}
+.mem-status.is-upcoming{background:rgba(18,163,160,.12);color:var(--teal-text);}
+.mem-status.is-soon{background:rgba(242,107,42,.14);color:var(--orange-deep);}
+.mem-status.is-live{background:#D92B36;color:#fff;}
+.mem-status.is-ended{background:rgba(12,28,60,.07);color:var(--faint);}
+.mem-status-dot{width:6px;height:6px;border-radius:50%;background:#fff;animation:mem-livepulse 1.6s ease-in-out infinite;}
+@keyframes mem-livepulse{0%,100%{opacity:1;}50%{opacity:.25;}}
+@media(prefers-reduced-motion:reduce){.mem-status-dot{animation:none;}}
+.mem-live-hero .mem-status.is-upcoming{background:rgba(55,199,212,.16);color:var(--cyan);}
+.mem-live-hero .mem-status.is-soon{background:rgba(242,107,42,.24);color:#FFB68F;}
+.mem-live-hero .mem-status.is-ended{background:rgba(255,255,255,.12);color:var(--d-muted);}
+
+.mem-when{display:flex;flex-direction:column;gap:3px;font-size:14px;line-height:1.5;color:var(--muted);margin:4px 0 0;}
+.mem-when .mem-when-main{display:flex;flex-direction:column;gap:2px;}
+.mem-when .mem-when-date{font-size:14.5px;font-weight:600;color:var(--ink);}
+.mem-when .mem-when-local{font-size:14px;color:var(--muted);}
+.mem-when .mem-when-local b{font-weight:700;color:var(--ink);}
+.mem-when .mem-when-local i{font-style:normal;color:var(--faint);}
+.mem-when .mem-when-alt{font-size:12.5px;color:var(--faint);}
+.mem-when.is-compact{font-size:13px;margin-top:3px;}
+.mem-when.is-compact .mem-when-local{font-size:13.5px;}
+.mem-live-hero .mem-when{color:var(--d-muted);}
+.mem-live-hero .mem-when .mem-when-date{color:var(--d-text);}
+.mem-live-hero .mem-when .mem-when-local{color:var(--d-muted);}
+.mem-live-hero .mem-when .mem-when-local b{color:#fff;}
+.mem-live-hero .mem-when .mem-when-local i,
+.mem-live-hero .mem-when .mem-when-alt{color:var(--d-muted);}
+
+.mem-count{font-size:13.5px;font-weight:600;color:var(--teal-text);margin:10px 0 0;}
+.mem-live-hero .mem-count{color:var(--cyan);font-size:13.5px;margin:10px 0 0;max-width:none;}
+.mem-live-hero .mem-when + .mem-count{margin-top:10px;}
+.mem-row .mem-row-note{display:block;font-size:12.5px;color:var(--faint);margin-top:5px;}
+.mem-event .rj{display:inline-block;margin-top:8px;font-size:14px;font-weight:600;color:var(--teal-text);text-decoration:none;}
+.mem-event .mem-when{margin-bottom:4px;}
+
+.mem-legal{margin-top:44px;font-size:13px;color:var(--faint);}
+.mem-legal a{color:var(--faint);text-decoration:underline;}
+.mem-legal a:hover{color:var(--ink);}
+
+@media(max-width:560px){
+  .mem-greet{flex-direction:column;gap:14px;}
+  .mem-tz{margin-top:0;width:100%;justify-content:flex-start;}
+  .mem-tz .mem-tz-value{flex:1;}
+}
+@media(max-width:400px){
+  .mem-tz .mem-tz-label{display:none;}
+}
+
+/* ================= terms & conditions ================= */
+.terms-meta{font-size:13.5px;color:var(--faint);margin:0 0 30px;}
+.blog-body section{scroll-margin-top:80px;}
+.blog-body a{color:var(--teal-text);font-weight:600;text-decoration:underline;}
+
+.login-terms{display:flex;align-items:flex-start;gap:10px;margin:2px 0 18px;
+  font-size:13px;line-height:1.45;color:var(--muted);text-align:left;font-weight:500;cursor:pointer;}
+.login-terms input{flex:none;width:16px;height:16px;margin:2px 0 0;accent-color:var(--orange);cursor:pointer;}
+.login-terms a{color:var(--teal-text);font-weight:600;text-decoration:underline;}
+
+.ml-footer .ml-foot-legal{color:var(--d-muted);font-size:13px;text-decoration:none;transition:color .25s;}
+.ml-footer .ml-foot-legal:hover{color:#fff;text-decoration:underline;}

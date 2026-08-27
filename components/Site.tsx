@@ -162,7 +162,7 @@ const UI = {
     finalEyebrow: "Book a free demo", finalTitle: "Your bigger life is one conversation away.", finalLead: "A free 15-minute demo. Meet a teacher, find your level, and leave with a plan — in English or Spanish. No pressure, no commitment.", demoAlt: "Prefer to start on your own?",
     teamEyebrow: "The MundoLingu team", teamTitle: "The people behind your progress.", teamLead: "A small, dedicated team of teachers and mentors — each one here to help you speak with confidence, in English or Spanish.",
     bookWith: "Book a demo with", readyToMeet: "Ready to meet yours?", applyTitle: "Want to teach with us?", applyBody: "We're always looking for passionate English and Spanish teachers who care about real progress. Send your CV and a few words about yourself — if you're a great fit, we'll be in touch.", applyBtn: "Send your CV",
-    footTag: "English & Spanish, made personal. Online lessons that turn a language into an opportunity.", explore: "Explore", contact: "Contact", footBar: "© 2026 MundoLingu · Online — Mexico · Latin America · Europe · Dubai",
+    terms: "Terms & Conditions", footTag: "English & Spanish, made personal. Online lessons that turn a language into an opportunity.", explore: "Explore", contact: "Contact", footBar: "© 2026 MundoLingu · Online — Mexico · Latin America · Europe · Dubai",
   },
   es: {
     login: "Entrar", memberLogin: "Acceso de miembros", bookDemo: "Reserva una clase gratis", exploreMembership: "Explora la membresía",
@@ -187,7 +187,7 @@ const UI = {
     finalEyebrow: "Reserva una clase gratis", finalTitle: "Tu vida más grande está a una conversación de distancia.", finalLead: "Una clase de prueba gratis de 15 minutos. Conoce a un profe, descubre tu nivel y sal con un plan, en inglés o español. Sin presión, sin compromiso.", demoAlt: "¿Prefieres empezar por tu cuenta?",
     teamEyebrow: "El equipo de MundoLingu", teamTitle: "Las personas detrás de tu progreso.", teamLead: "Un equipo pequeño y dedicado de profes y mentores, cada uno aquí para ayudarte a hablar con confianza, en inglés o español.",
     bookWith: "Reserva una clase con", readyToMeet: "¿Quieres conocer al tuyo?", applyTitle: "¿Quieres enseñar con nosotros?", applyBody: "Siempre buscamos profes apasionados de inglés y español a quienes les importe el progreso real. Envía tu CV y unas líneas sobre ti; si encajas, te contactamos.", applyBtn: "Envía tu CV",
-    footTag: "Inglés y español, hechos personales. Clases online que convierten un idioma en una oportunidad.", explore: "Explora", contact: "Contacto", footBar: "© 2026 MundoLingu · Online — México · Latinoamérica · Europa · Dubái",
+    terms: "Términos y Condiciones", footTag: "Inglés y español, hechos personales. Clases online que convierten un idioma en una oportunidad.", explore: "Explora", contact: "Contacto", footBar: "© 2026 MundoLingu · Online — México · Latinoamérica · Europa · Dubái",
   },
 };
 
@@ -588,7 +588,10 @@ export default function Site() {
               <a href="mailto:mundolingu@gmail.com"><Mail /> mundolingu@gmail.com</a>
             </div>
           </div>
-          <div className="ml-foot-bar"><span>{t.footBar}</span></div>
+          <div className="ml-foot-bar">
+            <span>{t.footBar}</span>
+            <a className="ml-foot-legal" href="/terms">{t.terms}</a>
+          </div>
         </div>
       </footer>
 
