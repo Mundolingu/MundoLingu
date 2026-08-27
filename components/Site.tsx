@@ -112,6 +112,7 @@ const FAQ = {
     { q: "How does the membership work?", a: "Monthly access to resources, live group speaking sessions, weekly plans and community. It's $10 for the first month, then $15 after — cancel anytime." },
     { q: "How do I choose or change my teacher?", a: "We match you with the right teacher after your demo. If you'd like a different fit later, you can switch anytime — no awkwardness." },
     { q: "Where are your students based?", a: "Across Mexico and Latin America, and increasingly Europe and Dubai. Everything is online and scheduled around your life." },
+    { q: "What if I need to cancel or move a lesson?", a: "With more than 24 hours' notice you can reschedule or cancel free of charge, and the lesson stays in your package. With less than 24 hours' notice, or a no-show without a valid reason, the lesson counts as taken — and you have a fair-use allowance of two of those per package. Life happens, so we always look at it in good faith. The full policy is in our Terms & Conditions." },
   ],
   es: [
     { q: "¿Enseñan inglés y español?", a: "Sí. Inglés para hispanohablantes, y español para angloparlantes, profesionales y expatriados, incluso en Europa y Dubái. El mismo método personalizado, en cualquier dirección." },
@@ -120,6 +121,7 @@ const FAQ = {
     { q: "¿Cómo funciona la membresía?", a: "Acceso mensual a recursos, sesiones grupales de conversación en vivo, planes semanales y comunidad. Son $10 el primer mes, luego $15, y cancelas cuando quieras." },
     { q: "¿Cómo elijo o cambio de profe?", a: "Te asignamos al profe indicado después de tu prueba. Si más adelante prefieres otro, puedes cambiar cuando quieras, sin problema." },
     { q: "¿De dónde son tus estudiantes?", a: "De México y Latinoamérica, y cada vez más de Europa y Dubái. Todo es online y se adapta a tu horario." },
+    { q: "¿Y si necesito cancelar o mover una clase?", a: "Con más de 24 horas de antelación puedes cambiar el horario o cancelar sin costo, y la clase permanece en tu paquete. Con menos de 24 horas, o si no te presentas sin un motivo válido, la clase se cuenta como realizada, y tienes un margen de uso razonable de dos veces por paquete. La vida pasa, así que siempre lo valoramos de buena fe. La política completa está en nuestros Términos y Condiciones." },
   ],
 };
 
@@ -163,6 +165,7 @@ const UI = {
     teamEyebrow: "The MundoLingu team", teamTitle: "The people behind your progress.", teamLead: "A small, dedicated team of teachers and mentors — each one here to help you speak with confidence, in English or Spanish.",
     bookWith: "Book a demo with", readyToMeet: "Ready to meet yours?", applyTitle: "Want to teach with us?", applyBody: "We're always looking for passionate English and Spanish teachers who care about real progress. Send your CV and a few words about yourself — if you're a great fit, we'll be in touch.", applyBtn: "Send your CV",
     footTag: "English & Spanish, made personal. Online lessons that turn a language into an opportunity.", explore: "Explore", contact: "Contact", footBar: "© 2026 MundoLingu · Online — Mexico · Latin America · Europe · Dubai",
+    terms: "Terms & Conditions", termsFine: "Booking a lesson or joining the membership means you agree to our",
   },
   es: {
     login: "Entrar", memberLogin: "Acceso de miembros", bookDemo: "Reserva una clase gratis", exploreMembership: "Explora la membresía",
@@ -188,6 +191,7 @@ const UI = {
     teamEyebrow: "El equipo de MundoLingu", teamTitle: "Las personas detrás de tu progreso.", teamLead: "Un equipo pequeño y dedicado de profes y mentores, cada uno aquí para ayudarte a hablar con confianza, en inglés o español.",
     bookWith: "Reserva una clase con", readyToMeet: "¿Quieres conocer al tuyo?", applyTitle: "¿Quieres enseñar con nosotros?", applyBody: "Siempre buscamos profes apasionados de inglés y español a quienes les importe el progreso real. Envía tu CV y unas líneas sobre ti; si encajas, te contactamos.", applyBtn: "Envía tu CV",
     footTag: "Inglés y español, hechos personales. Clases online que convierten un idioma en una oportunidad.", explore: "Explora", contact: "Contacto", footBar: "© 2026 MundoLingu · Online — México · Latinoamérica · Europa · Dubái",
+    terms: "Términos y Condiciones", termsFine: "Al reservar una clase o unirte a la membresía, aceptas nuestros",
   },
 };
 
@@ -483,6 +487,7 @@ export default function Site() {
                       <div className="ml-price-sub">{t.membSub}</div>
                       <a className="ml-btn ml-btn--primary" href="#demo" onClick={(e) => { e.preventDefault(); go("demo"); }}>{t.joinMembership} <ArrowRight /></a>
                       <div className="ml-price-note">{t.tryFirst}</div>
+                      <div className="ml-price-legal"><a href="/terms">{t.terms}</a></div>
                     </div>
                   </div>
                 </div>
@@ -529,6 +534,7 @@ export default function Site() {
                     </div>
                   ))}
                 </div>
+                <p className="ml-legal-note" data-reveal>{t.termsFine} <a href="/terms">{t.terms}</a>.</p>
               </div>
             </section>
 
@@ -588,7 +594,10 @@ export default function Site() {
               <a href="mailto:mundolingu@gmail.com"><Mail /> mundolingu@gmail.com</a>
             </div>
           </div>
-          <div className="ml-foot-bar"><span>{t.footBar}</span></div>
+          <div className="ml-foot-bar">
+            <span>{t.footBar}</span>
+            <a className="ml-foot-legal" href="/terms">{t.terms}</a>
+          </div>
         </div>
       </footer>
 

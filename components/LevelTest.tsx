@@ -103,6 +103,10 @@ export default function LevelTest() {
                 <input name="name" type="text" required placeholder="Your name" />
                 <input name="email" type="email" required placeholder="you@email.com" />
                 <button className="lt-btn" type="submit" disabled={sending}>{sending ? "Sending..." : "Book my free demo"} <ArrowRight size={18} /></button>
+                <p className="lt-terms">
+                  By requesting a demo you agree to our{" "}
+                  <a href="/terms" target="_blank" rel="noreferrer">Terms &amp; Conditions</a>.
+                </p>
               </form>
             ) : (
               <div className="lt-thanks">Thanks! We&apos;ll be in touch to set up your free demo. &#127881;</div>

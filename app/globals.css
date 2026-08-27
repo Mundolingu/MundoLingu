@@ -618,7 +618,7 @@ body { background: #F5F6F7; }
 .tz-clocks--dark .tz-sub{color:var(--d-muted);}
 .tz-master-tag{position:absolute;top:10px;right:10px;font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--orange-deep);}
 
-.tz-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:10px;}
+.tz-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:10px;}
 .tz-chip{min-width:0;padding:11px 12px;border-radius:12px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line-2);}
 .tz-row--dark .tz-chip{background:rgba(8,20,40,.45);box-shadow:inset 0 0 0 1px var(--d-line);}
 .tz-chip--master{box-shadow:inset 0 0 0 1.5px rgba(242,107,42,.45);}
@@ -766,3 +766,100 @@ body { background: #F5F6F7; }
   .mem-tabs{flex-wrap:wrap;overflow-x:visible;gap:2px;}
   .mem-tab{padding:10px 12px;font-size:14px;}
 }
+
+/* =========================================================
+   LEGAL PAGES: terms & conditions (bilingual, with sticky TOC)
+   ========================================================= */
+.lg-root{min-height:100vh;background:var(--paper);font-family:var(--sans);color:var(--ink);--wrap:1180px;}
+.lg-root *{box-sizing:border-box;}
+.lg-root a{color:inherit;text-decoration:none;}
+.lg-root :focus-visible{outline:2px solid var(--orange);outline-offset:3px;border-radius:4px;}
+
+.lg-hero{background:var(--navy);color:var(--d-text);position:relative;}
+.lg-hero-in{max-width:var(--wrap);margin:0 auto;padding:76px 28px 66px;}
+.lg-hero-line{height:1px;width:100%;background:linear-gradient(90deg,transparent,var(--teal) 22%,var(--cyan) 50%,var(--orange) 78%,transparent);}
+.lg-eyebrow{font-size:12.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);}
+.lg-title{font-family:var(--serif);font-weight:400;font-size:clamp(36px,6vw,62px);line-height:1.03;letter-spacing:-.025em;margin:16px 0 0;}
+.lg-sub{font-size:clamp(16px,1.5vw,19px);color:var(--d-muted);margin:16px 0 0;}
+.lg-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:30px;}
+.lg-pill{font-size:13px;font-weight:500;letter-spacing:.02em;color:var(--d-muted);padding:8px 15px;border-radius:100px;box-shadow:inset 0 0 0 1px var(--d-line);}
+.lg-dl{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:var(--navy);background:var(--d-text);padding:9px 16px;border-radius:100px;transition:transform .25s,box-shadow .25s;}
+.lg-dl:hover{transform:translateY(-1px);box-shadow:0 14px 28px -16px rgba(0,0,0,.6);}
+
+.lg-body{max-width:var(--wrap);margin:0 auto;padding:60px 28px 92px;display:grid;grid-template-columns:250px 1fr;gap:60px;align-items:start;}
+
+/* The contents list tracks the section in view, so long scrolls keep their place. */
+.lg-toc{position:sticky;top:88px;}
+.lg-toc h2{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:0 0 14px;}
+.lg-toc nav{display:flex;flex-direction:column;}
+.lg-toc a{display:flex;gap:9px;font-size:14px;line-height:1.4;color:var(--muted);padding:7px 0 7px 13px;border-left:1.5px solid var(--line-2);transition:color .25s,border-color .25s;}
+.lg-toc a span{color:var(--faint);font-size:12px;font-variant-numeric:tabular-nums;padding-top:1px;}
+.lg-toc a:hover{color:var(--ink);border-color:var(--line);}
+.lg-toc a.on{color:var(--teal-text);font-weight:600;border-color:var(--teal);}
+.lg-toc a.on span{color:var(--teal);}
+
+.lg-content{max-width:760px;}
+.lg-content .lg-intro{font-family:var(--serif);font-size:clamp(18px,1.9vw,21px);line-height:1.62;color:var(--muted);margin:0 0 8px;}
+.lg-sec{scroll-margin-top:96px;padding:38px 0 6px;border-top:1px solid var(--line-2);margin-top:34px;}
+.lg-sec-h{font-family:var(--serif);font-weight:400;font-size:clamp(23px,2.6vw,29px);line-height:1.2;letter-spacing:-.015em;margin:0 0 18px;display:flex;gap:12px;align-items:baseline;}
+.lg-sec-n{font-size:14px;font-weight:600;color:var(--teal-text);font-variant-numeric:tabular-nums;letter-spacing:.02em;}
+.lg-content p{font-size:17px;line-height:1.76;color:#26364d;margin:0 0 20px;}
+.lg-content ul{margin:0 0 20px;padding-left:0;list-style:none;}
+.lg-content li{position:relative;padding-left:25px;margin-bottom:13px;font-size:17px;line-height:1.7;color:#26364d;}
+.lg-content li::before{content:"";position:absolute;left:2px;top:11px;width:7px;height:7px;border-radius:50%;background:var(--teal);}
+
+/* The cancellation rules are the clause students look up most, so they get a highlight. */
+.lg-callout{background:rgba(242,107,42,.06);border-left:3px solid var(--orange);border-radius:0 16px 16px 0;padding:26px 28px 8px;margin:0 0 22px;}
+.lg-callout h3{font-size:12.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange-deep);margin:0 0 16px;}
+.lg-content .lg-callout p{font-size:16px;line-height:1.7;margin:0 0 16px;}
+.lg-callout b{color:var(--ink);}
+
+.lg-contact{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 8px;}
+.lg-contact a{display:flex;align-items:center;gap:11px;background:var(--paper-2);border-radius:14px;padding:16px 18px;font-size:15px;font-weight:500;box-shadow:inset 0 0 0 1px var(--line-2);transition:transform .25s,box-shadow .25s;}
+.lg-contact a svg{color:var(--teal);flex:none;}
+.lg-contact a span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lg-contact a:hover{transform:translateY(-2px);box-shadow:0 22px 40px -32px rgba(12,28,60,.5),inset 0 0 0 1px var(--line);}
+
+.lg-content .lg-closing{font-family:var(--serif);font-style:italic;font-size:18px;line-height:1.6;color:var(--teal-text);margin:38px 0 0;padding-top:30px;border-top:1px solid var(--line-2);}
+
+.lg-cta{margin-top:52px;background:var(--navy);color:var(--d-text);border-radius:20px;padding:40px 34px;text-align:center;}
+.lg-cta h3{font-family:var(--serif);font-weight:400;font-size:27px;margin:0 0 10px;}
+.lg-content .lg-cta p{color:var(--d-muted);font-size:15.5px;margin:0 auto 24px;max-width:46ch;}
+.lg-cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+
+.lg-foot{background:var(--midnight);color:var(--d-muted);font-size:13px;padding:26px 28px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;}
+.lg-foot a{font-weight:600;color:var(--d-text);}
+.lg-foot a:hover{color:var(--cyan);}
+
+@media(max-width:1000px){
+  /* Below two columns the contents become a card above the text instead of a rail. */
+  .lg-body{grid-template-columns:1fr;gap:34px;padding:44px 24px 76px;}
+  .lg-toc{position:static;background:var(--paper-2);border-radius:16px;padding:22px 22px 16px;box-shadow:inset 0 0 0 1px var(--line-2);}
+  .lg-toc nav{display:grid;grid-template-columns:1fr 1fr;gap:0 20px;}
+  .lg-hero-in{padding:56px 24px 48px;}
+}
+@media(max-width:640px){
+  .lg-toc nav{grid-template-columns:1fr;}
+  .lg-contact{grid-template-columns:1fr;}
+  .lg-callout{padding:22px 20px 6px;}
+}
+
+/* Terms links sit wherever a student books, pays, or signs up. */
+.ml-foot-legal{font-weight:600;color:var(--d-text);transition:color .25s;}
+.ml-foot-legal:hover{color:var(--cyan);}
+.ml-price-legal{text-align:center;margin-top:10px;font-size:12.5px;}
+.ml-price-legal a{color:var(--cyan);font-weight:600;text-decoration:underline;text-underline-offset:2px;}
+.ml-legal-note{text-align:center;font-size:14px;color:var(--faint);margin:34px 0 0;}
+.ml-legal-note a{color:var(--teal-text);font-weight:600;text-decoration:underline;text-underline-offset:2px;}
+.demo-terms{margin:8px 0 0;color:var(--faint);font-size:12.5px;text-align:center;line-height:1.5;}
+.demo-terms a{color:var(--teal-text);font-weight:600;text-decoration:underline;text-underline-offset:2px;}
+.join-terms{margin:16px 0 0;font-size:12.5px;color:var(--faint);line-height:1.55;text-align:center;}
+.join-terms a{color:var(--teal-text);font-weight:600;text-decoration:underline;text-underline-offset:2px;}
+.login-terms{margin:14px 0 0;font-size:12.5px;color:var(--faint);text-align:center;line-height:1.55;}
+.login-terms a{color:var(--teal-text);font-weight:600;text-decoration:underline;text-underline-offset:2px;}
+
+/* Members pay monthly, so the renewal and cancellation rules stay one tap away. */
+.mem-foot{max-width:1080px;margin:0 auto;padding:34px 24px 44px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--faint);}
+.mem-foot a{color:var(--teal-text);font-weight:600;text-decoration:underline;text-underline-offset:2px;}
+.lt-terms{margin:14px 0 0;font-size:12.5px;color:var(--faint);line-height:1.55;}
+.lt-terms a{color:var(--teal-text);font-weight:600;text-decoration:underline;text-underline-offset:2px;}
