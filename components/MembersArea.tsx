@@ -1,9 +1,20 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Play, Download, Upload, X, Video, Calendar, BookOpen } from "lucide-react";
+import TimezoneSelector from "@/components/TimezoneSelector";
+import { StatusPill, WhenLines } from "@/components/ClassTiming";
+import { MASTER_LABEL, detectZone, isValidZone, zoneLabel } from "@/lib/timezones";
+import {
+  DEFAULT_DURATION_MIN,
+  countdownText,
+  dayBadge,
+  dubaiDateTimeToInstant,
+  liveState,
+  toDate,
+} from "@/lib/time";
 
 const TABS = [
   { id: "lessons", label: "Lessons" },
@@ -11,6 +22,8 @@ const TABS = [
   { id: "events", label: "Events" },
   { id: "workbooks", label: "Workbooks" },
 ];
+
+const TZ_STORAGE_KEY = "ml-tz";
 
 // --- YouTube helpers (works with youtu.be/… and youtube.com/watch?v=… links) ---
 function ytId(url: string): string | null {
@@ -25,10 +38,33 @@ function ytThumb(url: string): string | null {
   const id = ytId(url);
   return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
 }
-function fmtWhen(iso: string): string {
-  try {
-    return new Date(iso).toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
-  } catch { return ""; }
+
+/**
+ * The absolute moment a row happens at.
+ *  - live_classes always carry starts_at (timestamptz) — the instant itself.
+ *  - events may carry starts_at, or an event_date + a start_time that is read
+ *    as Dubai wall-clock, or neither (an all-day event).
+ */
+function rowInstant(row: any): Date | null {
+  if (row?.starts_at) return toDate(row.starts_at);
+  if (row?.event_date && row?.start_time) return dubaiDateTimeToInstant(row.event_date, row.start_time);
+  return null;
+}
+
+function rowDuration(row: any): number {
+  const n = Number(row?.duration_minutes);
+  return Number.isFinite(n) && n > 0 ? n : DEFAULT_DURATION_MIN;
+}
+
+/** Day/month badge for an all-day event — a plain date, so no zone shifting. */
+function plainDayBadge(dateStr: string): { day: string; mon: string } {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(dateStr || ""));
+  if (!m) return { day: "--", mon: "" };
+  const utc = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
+  return {
+    day: m[3],
+    mon: new Intl.DateTimeFormat("en-US", { timeZone: "UTC", month: "short" }).format(utc),
+  };
 }
 
 function HandInCard({ wb }: { wb: any }) {
@@ -75,7 +111,7 @@ function HandInCard({ wb }: { wb: any }) {
         <a className="dl" href={wb.pdf_url || "#"} target="_blank" rel="noreferrer"><Download size={15} /> Download PDF</a>
         <input ref={inputRef} type="file" accept=".pdf,.doc,.docx,image/*" style={{ display: "none" }} onChange={onFile} />
         <button className="handin" onClick={() => inputRef.current && inputRef.current.click()} disabled={state === "uploading" || state === "done"}>
-          {state === "uploading" ? "Uploading…" : state === "done" ? "Handed in \u2713" : (<><Upload size={14} /> Hand in your work</>)}
+          {state === "uploading" ? "Uploading…" : state === "done" ? "Handed in ✓" : (<><Upload size={14} /> Hand in your work</>)}
         </button>
         {state === "error" && <span className="handin-err">{err}</span>}
       </div>
@@ -83,7 +119,7 @@ function HandInCard({ wb }: { wb: any }) {
   );
 }
 
-export default function MembersArea() {
+export default function MembersArea({ initialTimezone }: { initialTimezone?: string | null }) {
   const [tab, setTab] = useState("lessons");
   const [loading, setLoading] = useState(true);
   const [lessons, setLessons] = useState<any[]>([]);
@@ -91,7 +127,28 @@ export default function MembersArea() {
   const [events, setEvents] = useState<any[]>([]);
   const [workbooks, setWorkbooks] = useState<any[]>([]);
   const [playing, setPlaying] = useState<string | null>(null);
+  const [tz, setTz] = useState<string | null>(
+    initialTimezone && isValidZone(initialTimezone) ? initialTimezone : null
+  );
+  const [savingTz, setSavingTz] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
   const router = useRouter();
+
+  // Resolve the customer's zone: their saved profile setting wins, then the
+  // last choice made on this device, then whatever the browser reports.
+  useEffect(() => {
+    if (tz) return;
+    let stored: string | null = null;
+    try { stored = localStorage.getItem(TZ_STORAGE_KEY); } catch {}
+    setTz(stored && isValidZone(stored) ? stored : detectZone());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Keeps "LIVE NOW" and the countdown honest without a full refresh.
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -106,18 +163,55 @@ export default function MembersArea() {
         ]);
         if (!active) return;
         setLessons(ls.data || []);
-        const now = Date.now();
-        setLive((lv.data || []).filter((c: any) => new Date(c.starts_at).getTime() > now - 2 * 3600 * 1000));
-        setEvents((ev.data || []).map((row: any) => {
-          const d = new Date(String(row.event_date) + "T00:00:00");
-          return { day: String(d.getDate()).padStart(2, "0"), mon: d.toLocaleString("en-US", { month: "short" }), title: row.title, desc: row.description || "" };
-        }));
+        setLive(lv.data || []);
+        setEvents(ev.data || []);
         setWorkbooks(wb.data || []);
       } catch {}
       if (active) setLoading(false);
     })();
     return () => { active = false; };
   }, []);
+
+  // Which classes to show, and in what state — decided from absolute instants,
+  // never from a rendered local time, so it is identical for every customer.
+  const upcomingLive = useMemo(() => {
+    return live
+      .map((c) => {
+        const instant = rowInstant(c);
+        const duration = rowDuration(c);
+        return { row: c, instant, duration, state: instant ? liveState(instant, duration, now) : null };
+      })
+      .filter((c) => c.instant && c.instant.getTime() + (c.duration + 60) * 60000 > now)
+      .sort((a, b) => (a.instant as Date).getTime() - (b.instant as Date).getTime());
+  }, [live, now]);
+
+  const eventRows = useMemo(() => {
+    return events.map((row) => {
+      const instant = rowInstant(row);
+      const duration = rowDuration(row);
+      return {
+        row,
+        instant,
+        state: instant ? liveState(instant, duration, now) : null,
+      };
+    });
+  }, [events, now]);
+
+  async function changeTz(next: string) {
+    if (!isValidZone(next)) return;
+    setTz(next);
+    try { localStorage.setItem(TZ_STORAGE_KEY, next); } catch {}
+    setSavingTz(true);
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      // Stored on the member's existing profile row — no new account system.
+      if (user) await supabase.from("profiles").update({ timezone: next }).eq("id", user.id);
+    } catch {
+      // The choice still applies for this visit via localStorage.
+    }
+    setSavingTz(false);
+  }
 
   function openLesson(l: any) {
     const emb = ytEmbed(l.video_url);
@@ -144,8 +238,13 @@ export default function MembersArea() {
       </header>
 
       <main className="mem-wrap">
-        <h1 className="mem-hello">Welcome back.</h1>
-        <p className="mem-hello-sub">Your lessons, live classes, events, and workbooks — all in one place.</p>
+        <div className="mem-greet">
+          <div className="mem-greet-t">
+            <h1 className="mem-hello">Welcome back.</h1>
+            <p className="mem-hello-sub">Your lessons, live classes, events, and workbooks — all in one place.</p>
+          </div>
+          {tz ? <TimezoneSelector value={tz} onChange={changeTz} saving={savingTz} /> : null}
+        </div>
 
         <div className="mem-tabs" role="tablist">
           {TABS.map((t) => (
@@ -155,7 +254,7 @@ export default function MembersArea() {
           ))}
         </div>
 
-        {loading ? (
+        {loading || !tz ? (
           <div className="mem-loading">Loading your content…</div>
         ) : (
           <>
@@ -183,22 +282,44 @@ export default function MembersArea() {
             )}
 
             {tab === "live" && (
-              live.length ? (
+              upcomingLive.length ? (
                 <div>
                   <div className="mem-live-hero">
                     <div>
-                      <small>Next live class</small>
-                      <h3>{live[0].title}</h3>
-                      <p>{fmtWhen(live[0].starts_at)}{live[0].note ? ` — ${live[0].note}` : ""}</p>
+                      <small>
+                        Next live class
+                        {upcomingLive[0].state ? <StatusPill state={upcomingLive[0].state} /> : null}
+                      </small>
+                      <h3>{upcomingLive[0].row.title}</h3>
+                      <WhenLines instant={upcomingLive[0].instant as Date} tz={tz} />
+                      <p className="mem-count">
+                        {countdownText(upcomingLive[0].instant as Date, tz, now, upcomingLive[0].duration)}
+                      </p>
+                      {upcomingLive[0].row.note ? <p>{upcomingLive[0].row.note}</p> : null}
                     </div>
-                    {live[0].join_url ? <a className="mem-join" href={live[0].join_url} target="_blank" rel="noreferrer">Join the class</a> : null}
+                    {upcomingLive[0].row.join_url ? (
+                      <a className="mem-join" href={upcomingLive[0].row.join_url} target="_blank" rel="noreferrer">
+                        {upcomingLive[0].state === "live" ? "Join now" : "Join the class"}
+                      </a>
+                    ) : null}
                   </div>
-                  {live.slice(1).map((c) => (
-                    <div className="mem-row" key={c.id}>
-                      <div><h4>{c.title}</h4><span>{fmtWhen(c.starts_at)}</span></div>
-                      {c.join_url ? <a className="rj" href={c.join_url} target="_blank" rel="noreferrer">Join</a> : null}
+                  {upcomingLive.slice(1).map((c) => (
+                    <div className="mem-row" key={c.row.id}>
+                      <div>
+                        <h4>
+                          {c.row.title}
+                          {c.state && c.state !== "upcoming" ? <StatusPill state={c.state} /> : null}
+                        </h4>
+                        <WhenLines instant={c.instant as Date} tz={tz} compact />
+                        {c.row.note ? <span className="mem-row-note">{c.row.note}</span> : null}
+                      </div>
+                      {c.row.join_url ? <a className="rj" href={c.row.join_url} target="_blank" rel="noreferrer">Join</a> : null}
                     </div>
                   ))}
+                  <p className="mem-caption">
+                    Every class is scheduled in {MASTER_LABEL} time and shown above in {zoneLabel(tz)} time.
+                    Change your timezone at the top of the page if you have moved.
+                  </p>
                 </div>
               ) : (
                 <div className="mem-soon">
@@ -210,14 +331,34 @@ export default function MembersArea() {
             )}
 
             {tab === "events" && (
-              events.length ? (
+              eventRows.length ? (
                 <div>
-                  {events.map((ev, i) => (
-                    <div className="mem-event" key={ev.title + i}>
-                      <div className="mem-date"><b>{ev.day}</b><span>{ev.mon}</span></div>
-                      <div><h4>{ev.title}</h4><p>{ev.desc}</p></div>
-                    </div>
-                  ))}
+                  {eventRows.map((e, i) => {
+                    const badge = e.instant ? dayBadge(e.instant, tz) : plainDayBadge(e.row.event_date);
+                    return (
+                      <div className="mem-event" key={e.row.id || e.row.title + i}>
+                        <div className="mem-date"><b>{badge.day}</b><span>{badge.mon}</span></div>
+                        <div>
+                          <h4>
+                            {e.row.title}
+                            {e.state && e.state !== "upcoming" ? <StatusPill state={e.state} /> : null}
+                          </h4>
+                          {e.instant ? (
+                            <WhenLines instant={e.instant} tz={tz} compact />
+                          ) : (
+                            <span className="mem-when is-compact"><span className="mem-when-main">All day</span></span>
+                          )}
+                          {e.row.description ? <p>{e.row.description}</p> : null}
+                          {e.row.join_url ? (
+                            <a className="rj" href={e.row.join_url} target="_blank" rel="noreferrer">Join</a>
+                          ) : null}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <p className="mem-caption">
+                    Events are scheduled in {MASTER_LABEL} time and shown here in {zoneLabel(tz)} time.
+                  </p>
                 </div>
               ) : (
                 <div className="mem-soon">
@@ -246,6 +387,8 @@ export default function MembersArea() {
             )}
           </>
         )}
+
+        <p className="mem-legal"><a href="/terms">Terms &amp; Conditions</a></p>
       </main>
 
       {playing && (

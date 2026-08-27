@@ -29,6 +29,9 @@ export default async function MembersPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  // `timezone` is optional: older profiles predate the column, and the SQL
+  // migration may not have been run yet — so ask for it separately and treat a
+  // failure as "no saved timezone", never as "no membership".
   const { data: profile } = await supabase
     .from("profiles")
     .select("is_member")
@@ -37,5 +40,11 @@ export default async function MembersPage() {
 
   if (!profile?.is_member) return <JoinMembership email={user.email ?? ""} />;
 
-  return <MembersArea />;
+  const { data: prefs } = await supabase
+    .from("profiles")
+    .select("timezone")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  return <MembersArea initialTimezone={(prefs as { timezone?: string | null } | null)?.timezone ?? null} />;
 }
