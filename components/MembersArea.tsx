@@ -3,12 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import Opportunities from "@/components/Opportunities";
 import { Play, Download, Upload, X, Video, Calendar, BookOpen } from "lucide-react";
 
 const TABS = [
   { id: "lessons", label: "Lessons" },
   { id: "live", label: "Live classes" },
   { id: "events", label: "Events" },
+  { id: "opportunities", label: "Opportunities" },
   { id: "workbooks", label: "Workbooks" },
 ];
 
@@ -83,7 +85,7 @@ function HandInCard({ wb }: { wb: any }) {
   );
 }
 
-export default function MembersArea() {
+export default function MembersArea({ isAdmin = false }: { isAdmin?: boolean }) {
   const [tab, setTab] = useState("lessons");
   const [loading, setLoading] = useState(true);
   const [lessons, setLessons] = useState<any[]>([]);
@@ -145,7 +147,7 @@ export default function MembersArea() {
 
       <main className="mem-wrap">
         <h1 className="mem-hello">Welcome back.</h1>
-        <p className="mem-hello-sub">Your lessons, live classes, events, and workbooks — all in one place.</p>
+        <p className="mem-hello-sub">Your lessons, live classes, events, opportunities, and workbooks — all in one place.</p>
 
         <div className="mem-tabs" role="tablist">
           {TABS.map((t) => (
@@ -227,6 +229,8 @@ export default function MembersArea() {
                 </div>
               )
             )}
+
+            {tab === "opportunities" && <Opportunities isAdmin={isAdmin} />}
 
             {tab === "workbooks" && (
               workbooks.length ? (

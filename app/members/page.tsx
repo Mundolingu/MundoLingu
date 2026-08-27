@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { adminEmails } from "@/lib/admin-auth";
 import MembersArea from "@/components/MembersArea";
 import JoinMembership from "@/components/JoinMembership";
 
@@ -37,5 +38,8 @@ export default async function MembersPage() {
 
   if (!profile?.is_member) return <JoinMembership email={user.email ?? ""} />;
 
-  return <MembersArea />;
+  // Admins get a link through to the opportunities editor from inside the hub.
+  const isAdmin = adminEmails().includes((user.email ?? "").toLowerCase());
+
+  return <MembersArea isAdmin={isAdmin} />;
 }

@@ -1,51 +1,45 @@
-# Restored the live-class clocks and Meet the Team, and added an Opportunities board to the member hub
+# Fixed the failed database migration deploy and finished the Opportunities feature
 
-The time-zone clocks under Live Classes are back and now stay on screen permanently, Meet the Team is back on the homepage with its original team members and design, and paying members have a new Opportunities board inside their hub with a small admin screen behind it. Nothing that already worked was removed or replaced.
+## Why the deploy was failing
 
-## The clocks under Live Classes
+The `Database migration failed: branch for deploy not found` message is produced by Netlify's own Netlify Database deploy step, not by anything in this repository — the string does not appear in the codebase or in the CLI. It means the migration step ran against a deploy that had no database branch to run against.
 
-A dedicated clock strip now sits at the foot of the Live Classes section and renders whether or not any classes are scheduled, so the five zones are always visible: 🇦🇪 UAE / Dubai, 🇲🇽 Mexico, 🇺🇸 USA, 🇪🇺 Europe and 🌏 Asia. The UAE clock is labelled as the master zone, and every clock shows its city and its current GMT offset alongside the time.
+Netlify Database was switched on for this project during an earlier session so that an "Opportunities" feature could store its data, but that feature was never actually built. The database was left completely empty: no tables, no migration files, no `@netlify/database` dependency, and not a single line of code that referenced it. Every deploy therefore reached a migration step that had a database attached but nothing legitimate to do, and failed.
 
-UAE remains the single stored time. Everything else is derived from that instant at display time using the real IANA zones — `Asia/Dubai`, `America/Mexico_City`, `America/New_York`, `Europe/Madrid` and `Asia/Singapore` — so daylight saving is handled by the zone database rather than by arithmetic. There are no hard-coded hour differences anywhere in the change. A class in January and the same class in July genuinely produce different European and American times, and a class that lands after midnight in Asia is marked "+1 day" rather than silently showing the wrong date.
+Separately, and just as damaging, the repository had 1,483 files of `.netlify/` build and CLI state committed to it — about 44 MB. That included a dead local Postgres data directory (complete with a `postmaster.pid` pointing at a nonsense process ID) and stale Deno edge-function caches. Every deploy was restoring that snapshot on top of the state Netlify generates for itself.
 
-Each scheduled class carries its own row of five conversions underneath it, converted from that class's own date, so an autumn class is not converted with summer offsets. The same conversion strip appears on the events list and inside the member hub.
+You chose to keep the database and have Opportunities use it, so both problems were fixed in that direction: the stale state was removed, and the feature was completed so the migration step has real, valid work to apply.
 
-The empty band that had opened up under the section is gone: the clocks now close the section off instead of floating above a gap.
+## What changed
 
-## Meet the Team
+**Stopped committing Netlify's build state.** `.netlify` is now ignored, and the 1,479 tracked files under it (plus a stray `.DS_Store`) were removed from the working tree. Netlify regenerates this directory on every build, so nothing of value was lost, and deploys no longer have a months-old local database directory dropped over their own state.
 
-The Meet the Team section is back on the homepage in its original position, with all four teachers, their photographs, badges, biographies, specialisms and "book with" links intact, and it reflows to a single readable column on a phone.
+**Added the database layer.** `db/schema.ts` defines a single `opportunities` table — slug, title, kind, organisation, location, summary, body, apply URL, deadline, published flag, sort order and timestamps — and is the source of truth for the schema. `db/index.ts` opens the connection through the Netlify Drizzle adapter, which picks up its credentials from the platform at runtime, so no connection string is stored anywhere. `drizzle.config.ts` writes generated migrations to `netlify/database/migrations`, which is the directory Netlify applies automatically at deploy time.
 
-## Opportunities
+**Generated the first migration.** `netlify/database/migrations/20260827073431_create_opportunities/` contains the `CREATE TABLE` statement and its snapshot. This is the piece that gives the deploy's migration step something valid to apply. In line with how Netlify Database works, the migration was only ever generated here — it was not applied by hand. The platform runs it on the next deploy.
 
-Opportunities are a paid-member benefit, so the board lives inside the member hub as a fifth tab rather than on the public site. Members browse the open opportunities as cards showing the type, organisation, location and deadline, and opening one shows the full description, the key facts and an apply button that links out safely.
+**Built the member-facing Opportunities tab.** `components/Opportunities.tsx` renders a grid of published opportunities with a detail view, using the `op-*` CSS classes that already existed in the stylesheet, so it matches the rest of the hub without any new styling. As you asked, it lives inside the paid members hub and not on the homepage: `components/MembersArea.tsx` gained an "Opportunities" tab between Events and Workbooks. All four existing tabs are untouched.
 
-Behind it, `/admin/opportunities` gives the founders a simple editor to create, edit, publish, unpublish and delete entries, with a title, type, organisation, location, deadline, summary, details, apply link, ordering and a publish switch. Slugs are generated from the title and de-duplicated automatically. Drafts are invisible to members until they are published. The admin page is excluded from search engines, and an administrator who is also a member gets a shortcut to it from inside the hub.
+**Wired up the admin screen.** There was already an `OpportunitiesAdmin` component in the repository with no page rendering it. `app/admin/opportunities/page.tsx` now does, and admins reach it through a manage link shown inside the Opportunities tab.
 
-Access is enforced on the server, not in the interface. Signed-out visitors are refused outright, signed-in accounts without an active membership cannot read the board, members can read it but cannot write to it, and only administrators can list drafts or make changes. Administrators are recognised by e-mail: the two founder addresses are the built-in fallback, an `ADMIN_EMAILS` environment variable overrides them without a code change, and an optional `profiles.is_admin` flag is honoured if that column is ever added. Database problems are logged on the server and answered with a plain, friendly message — no SQL or internal detail is ever returned to a browser.
+**Added the API.** `app/api/opportunities/route.ts` handles listing and creation; `app/api/opportunities/[id]/route.ts` handles updates and deletion. A few details worth calling out:
 
-The board is stored in the site's Netlify Database. Its table is created by a migration in `netlify/database/migrations/`, which Netlify applies automatically on deploy.
+- The public list returns only published rows; the admin view asks for everything explicitly.
+- Slugs are generated from the title, with accents stripped, and a collision retry appends `-2`, `-3` and so on when a title repeats.
+- A slug never changes after creation, so links shared with members keep working even when a title is edited.
+- Updates only touch the fields actually present in the request, so toggling "published" cannot blank out an opportunity's body.
+- If the database is not reachable yet — which is exactly the state a first deploy is in before migrations run — the list endpoint returns an empty result flagged as unavailable rather than an error. The admin screen turns any error response into a misleading "this account does not have permission" message, so this keeps it honest.
+
+**Admin access.** Supabase `profiles` has no `is_admin` column, so `lib/admin-auth.ts` gates the write endpoints on an email allowlist and distinguishes "not signed in" (401) from "not an admin" (403). It defaults to your own address. To grant access to other people, set `ADMIN_EMAILS` in the Netlify UI to a comma-separated list of addresses; no code change or redeploy of the allowlist logic is needed beyond that.
 
 ## Testing
 
-Everything below was actually run against the application, not reasoned about. In total roughly 375 automated checks passed.
+The schema and query logic were exercised against a real Postgres instance — the local Netlify database emulator, never the production database — and 18 checks passed: UUID generation, accent-stripped slugs, snake_case serialisation of `apply_url`, `YYYY-MM-DD` deadline round-trips, column defaults, the unique-violation path on a duplicate slug, partial updates preserving untouched fields, slug stability across edits, sort ordering, the published-only filter, and both the found and not-found delete paths.
 
-The homepage, live classes, events and mobile layouts were driven in a real browser at desktop, iPhone and small-Android sizes — 171 checks covering the team section and its images, every existing homepage section and the navigation, the five clocks and their labels, flags, offsets and master tag, the absence of the layout gap, horizontal overflow, element overlap, and the browser console and network log. The clock values were compared against what the browser itself calculates for the same instant in each zone, and the per-class conversions were compared the same way for classes placed deliberately in midwinter, midsummer, the spring window when the United States has changed clocks but Europe has not, the autumn window when the reverse is true, and a late class that rolls past midnight in Asia. Every conversion, offset and date matched.
+Over HTTP, the endpoints correctly rejected unauthenticated writes, and the list endpoint returned its graceful empty result when the database was deliberately made unreachable. Page renders were checked too: the homepage and the admin screen returned 200, `/members` correctly redirected an anonymous visitor, and `/login` returned 200. TypeScript reports no errors in any of the new files. (Ten pre-existing implicit-`any` errors remain in `lib/supabase/server.ts` and `middleware.ts`; those files were not touched and the errors are already suppressed by the project's build config, so they were left alone.)
 
-Permissions were exercised with real accounts against the running server — 54 checks across a paying member, a signed-in account without an active membership, an administrator, and an administrator who is also a member. Each was confirmed to get exactly the access it should, and the administration screen was confirmed to refuse an account that lacks rights instead of showing it the editor.
+The production database was left exactly as it was found: no tables, no applied migrations, and one migration now pending for the deploy to run.
 
-The data layer was run end to end against the real Netlify Postgres instance — 28 checks covering creating, reading, publishing, unpublishing, editing, ordering, slug generation and de-duplication, accented titles, lookups of missing rows, clearing fields to null, and deleting. The deployment migration's own DDL was used to build the table for the run, and it was accepted by the live database engine unchanged.
+## One thing to check after deploying
 
-The full editing lifecycle was then driven through the real admin screen and the real member board in a browser — 38 checks from creating an opportunity through publishing it, seeing it appear for members, opening its detail view, editing it, unpublishing it and deleting it, plus validation and cancel behaviour. The member hub was separately checked on two phone sizes across all five tabs — 46 checks — with no horizontal scrolling and nothing spilling off the edge.
-
-Two real defects were found during this testing and fixed. The opportunities API returned a server error instead of degrading gracefully when the table was not yet present, because the database driver hides the underlying error one level down; it now inspects the full error chain and answers with an empty board and a clear explanation. The administration screen also showed its editor chrome to an account that had been refused by the API; it now treats anything other than a clean, authorised response as a refusal. The API itself had been enforcing correctly throughout, so no data was ever exposed.
-
-One layout problem was found and fixed as a result of the new tab: five tabs no longer fit across a phone screen, which pushed Opportunities and Workbooks out of sight behind a sideways swipe. The tab strip now wraps on small screens so all five stay visible.
-
-Type checking reports only the ten pre-existing errors in the Supabase middleware and server helper, both untouched by this work; the project has no lint configuration to run.
-
-## Two things to be aware of
-
-The opportunities table is created by the Netlify migration when this deploys, so the board will be empty and the admin screen will say the database is not provisioned yet until that first deploy completes. That path was tested deliberately — the site renders normally rather than erroring while the table is missing.
-
-Events currently have a date but no time, so they are shown as "All day". If you would like events converted across the five zones the way live classes are, `supabase/schema.sql` now documents two optional columns to add to the events table — a plain UAE start time, or a full timestamp — and the site picks either up automatically as soon as it is there.
+The Opportunities tab will be empty until you add entries through the admin screen at `/admin/opportunities`. That is expected — the migration creates the table, not its contents.
