@@ -294,7 +294,8 @@ which defaults to mundolingu@gmail.com). The hand-in link also uses your Supabas
 After re-running `supabase/schema.sql` once, everything in the members hub is managed by adding rows in Supabase -> Table Editor:
 
 - **Lessons** (`lessons` table): `title`, `level` (e.g. "12 min - A2"), `video_url` (an unlisted YouTube link), `sort`. Members see a video card; clicking plays it in a pop-up player.
-- **Live classes** (`live_classes` table): `title`, `starts_at` (date & time), `join_url` (Zoom/Meet link), `note` (optional). Members see upcoming classes with a Join button.
+- **Live classes** (`live_classes` table): `title`, `starts_at` (date & time), `join_url` (Zoom/Meet link), `note` (optional). Members see upcoming classes with a Join button, and each class shows the time in the student's own zone alongside Mexico City, Bogotá/Lima, Buenos Aires, Madrid and Dubai.
+  When you add a class, **write the time zone offset** with the time — `2026-09-01 18:00+04` for 6pm Dubai, `2026-09-01 18:00-06` for 6pm Mexico City. A bare `18:00` is read as UTC, which would show up as 10pm in Dubai. The conversions are worked out from that one instant, so daylight saving is handled automatically.
 - **Events** (`events` table): `event_date`, `title`, `description`.
 - **Workbooks** (`workbooks` table): `title`, `label` (e.g. "March"), `pdf_url` (link to the PDF, e.g. from Supabase Storage), `sort`. Members can download and hand in their work.
 

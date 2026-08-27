@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Play, Download, Upload, X, Video, Calendar, BookOpen } from "lucide-react";
+import { fullInZone, localZone } from "@/lib/timezones";
+import ZoneRow from "@/components/ZoneRow";
 
 const TABS = [
   { id: "lessons", label: "Lessons" },
@@ -26,8 +28,10 @@ function ytThumb(url: string): string | null {
   return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
 }
 function fmtWhen(iso: string): string {
+  // Always name the zone: "Tue, Sep 1 - 6:00 PM GMT+4" reads the same for a
+  // student in Mexico City as it does for a teacher in Dubai.
   try {
-    return new Date(iso).toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+    return fullInZone(iso, localZone());
   } catch { return ""; }
 }
 
@@ -193,10 +197,17 @@ export default function MembersArea() {
                     </div>
                     {live[0].join_url ? <a className="mem-join" href={live[0].join_url} target="_blank" rel="noreferrer">Join the class</a> : null}
                   </div>
+                  <div className="lc-zones lc-zones--hero">
+                    <span className="lc-zones-label">What time that is where you are</span>
+                    <ZoneRow iso={live[0].starts_at} />
+                  </div>
                   {live.slice(1).map((c) => (
-                    <div className="mem-row" key={c.id}>
-                      <div><h4>{c.title}</h4><span>{fmtWhen(c.starts_at)}</span></div>
-                      {c.join_url ? <a className="rj" href={c.join_url} target="_blank" rel="noreferrer">Join</a> : null}
+                    <div className="mem-class" key={c.id}>
+                      <div className="mem-row">
+                        <div><h4>{c.title}</h4><span>{fmtWhen(c.starts_at)}</span></div>
+                        {c.join_url ? <a className="rj" href={c.join_url} target="_blank" rel="noreferrer">Join</a> : null}
+                      </div>
+                      <ZoneRow iso={c.starts_at} />
                     </div>
                   ))}
                 </div>
@@ -247,6 +258,11 @@ export default function MembersArea() {
           </>
         )}
       </main>
+
+      <footer className="mem-foot">
+        <span>© 2026 MundoLingu</span>
+        <a href="/terms">Terms &amp; Conditions</a>
+      </footer>
 
       {playing && (
         <div className="mem-modal" onClick={() => setPlaying(null)}>

@@ -58,6 +58,8 @@ export default function JoinMembership({ email }: { email: string }) {
         wa: "Ya pagué — confirmar por WhatsApp",
         waMsg: `¡Hola MundoLingu! Ya realicé mi pago de la membresía. Mi correo de registro es ${email}. Aquí está mi comprobante:`,
         logout: "Cerrar sesión",
+        agree: "Al activar tu membresía aceptas nuestros", terms: "Términos y Condiciones",
+        agreeAfter: ", incluida la renovación mensual y la política de cancelación.",
       }
     : {
         title: "You're almost in!",
@@ -71,6 +73,8 @@ export default function JoinMembership({ email }: { email: string }) {
         wa: "I've paid — confirm on WhatsApp",
         waMsg: `Hi MundoLingu! I've paid for the membership. My sign-up email is ${email}. Here's my receipt:`,
         logout: "Log out",
+        agree: "By activating your membership you agree to our", terms: "Terms & Conditions",
+        agreeAfter: ", including monthly renewal and the cancellation policy.",
       };
 
   const waHref = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(t.waMsg)}`;
@@ -115,6 +119,7 @@ export default function JoinMembership({ email }: { email: string }) {
         <a className="join-wa" href={waHref} target="_blank" rel="noreferrer">
           <MessageCircle size={19} /> {t.wa}
         </a>
+        <p className="join-terms">{t.agree} <a href="/terms" target="_blank" rel="noreferrer">{t.terms}</a>{t.agreeAfter}</p>
         <p className="join-logout"><a onClick={logout}>{t.logout}</a></p>
       </div>
     </div>

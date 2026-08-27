@@ -116,6 +116,15 @@ drop policy if exists "Members view lessons" on public.lessons;
 create policy "Members view lessons" on public.lessons for select to authenticated using (true);
 
 -- LIVE CLASSES. Columns: title, starts_at (date & time), join_url (Zoom/Meet link), note (optional)
+--
+-- IMPORTANT: starts_at is timestamptz, and the SQL editor reads a bare time as
+-- UTC. Always write the offset for the time you actually mean, or a 6pm Dubai
+-- class is stored as 10pm Dubai:
+--     insert into public.live_classes (title, starts_at) values
+--       ('Conversation hour', '2026-09-01 18:00+04');   -- 6pm Dubai  (+04, no DST)
+--       ('Conversation hour', '2026-09-01 18:00-06');   -- 6pm Mexico City (-06)
+-- The member hub converts the stored instant into each student's own zone, so
+-- getting the offset right here is all that is needed.
 create table if not exists public.live_classes (
   id uuid primary key default gen_random_uuid(),
   title text not null,

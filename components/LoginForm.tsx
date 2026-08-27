@@ -85,6 +85,12 @@ export default function LoginForm() {
                 {loading ? "Please wait…" : mode === "signin" ? "Log in" : "Create account"}
               </button>
             </form>
+            {mode === "signup" && (
+              <p className="login-terms">
+                By creating an account you agree to our{" "}
+                <a href="/terms" target="_blank" rel="noreferrer">Terms &amp; Conditions</a>.
+              </p>
+            )}
             {msg && <p className="login-note" style={{ color: "#b23b13" }}>{msg}</p>}
             <p className="login-alt">
               {mode === "signin" ? (

@@ -1,2 +1,25 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Binary assets — never diff or line-ending-normalize these.
+# Without this, a PDF with no NUL bytes in its first 8k is misdetected as text
+# and diffed as raw bytes, which breaks any UTF-8 consumer of the patch.
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.avif binary
+*.ico binary
+*.svgz binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.eot binary
+*.mp4 binary
+*.webm binary
+*.mp3 binary
+*.zip binary
+*.gz binary
