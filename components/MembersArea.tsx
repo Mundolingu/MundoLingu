@@ -33,6 +33,71 @@ function fmtWhen(iso: string): string {
   } catch { return ""; }
 }
 
+// --- Class times in every student zone ---
+// Class times are stored in UAE wall-clock time. Dubai is permanently UTC+4 and
+// never uses daylight saving, so a naive value is read as +04:00 and Intl takes
+// care of daylight saving in each of the target zones.
+const CLASS_ZONES: { flag: string; label: string; tz: string }[] = [
+  { flag: "\u{1F1E6}\u{1F1EA}", label: "UAE", tz: "Asia/Dubai" },
+  { flag: "\u{1F1F2}\u{1F1FD}", label: "Mexico City", tz: "America/Mexico_City" },
+  { flag: "\u{1F1EC}\u{1F1E7}", label: "London", tz: "Europe/London" },
+  { flag: "\u{1F1EA}\u{1F1FA}", label: "Europe", tz: "Europe/Paris" },
+  { flag: "\u{1F1F9}\u{1F1F7}", label: "Turkey", tz: "Europe/Istanbul" },
+  { flag: "\u{1F1EE}\u{1F1F3}", label: "India", tz: "Asia/Kolkata" },
+  { flag: "\u{1F1F8}\u{1F1EC}", label: "Singapore", tz: "Asia/Singapore" },
+];
+
+// The absolute moment a stored class time refers to, or null if it is unusable.
+function classMoment(value: any): Date | null {
+  const raw = String(value == null ? "" : value).trim();
+  if (!raw) return null;
+  const stamp = raw.replace(" ", "T");
+  let d: Date;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(stamp)) d = new Date(stamp + "T00:00:00+04:00");
+  else if (/^\d{4}-\d{2}-\d{2}T[\d:.]+$/.test(stamp)) d = new Date(stamp + "+04:00");
+  else d = new Date(stamp);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function zoneDayKey(m: Date, tz: string): string {
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(m);
+  const get = (t: string) => (parts.find((x) => x.type === t) || { value: "" }).value;
+  return get("year") + "-" + get("month") + "-" + get("day");
+}
+
+function ClassZones({ startsAt, dark = false }: { startsAt: any; dark?: boolean }) {
+  const m = classMoment(startsAt);
+  if (!m) return null;
+  let lines: { label: string; flag: string; time: string }[];
+  try {
+    const uaeDay = zoneDayKey(m, "Asia/Dubai");
+    lines = CLASS_ZONES.map((z) => {
+      const time = new Intl.DateTimeFormat("en-US", { timeZone: z.tz, hour: "numeric", minute: "2-digit", hour12: true }).format(m);
+      // Only note the date when the class lands on a different day than in the UAE.
+      const day = zoneDayKey(m, z.tz) === uaeDay
+        ? ""
+        : new Intl.DateTimeFormat("en-GB", { timeZone: z.tz, day: "numeric", month: "short" }).format(m);
+      return { label: z.label, flag: z.flag, time: day ? time + " (" + day + ")" : time };
+    });
+  } catch {
+    return null;
+  }
+
+  return (
+    <div className={"cz" + (dark ? " cz--dark" : "")}>
+      <h5 className="cz-title">Class time in your timezone</h5>
+      <ul className="cz-list">
+        {lines.map((l) => (
+          <li key={l.label}>
+            <span className="cz-zone"><span className="cz-flag" aria-hidden="true">{l.flag}</span>{l.label}:</span>
+            <span className="cz-time">{l.time}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function HandInCard({ wb }: { wb: any }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<"idle" | "uploading" | "done" | "error">("idle");
@@ -194,11 +259,15 @@ export default function MembersArea({ isAdmin = false }: { isAdmin?: boolean }) 
                       <p>{fmtWhen(live[0].starts_at)}{live[0].note ? ` — ${live[0].note}` : ""}</p>
                     </div>
                     {live[0].join_url ? <a className="mem-join" href={live[0].join_url} target="_blank" rel="noreferrer">Join the class</a> : null}
+                    <ClassZones startsAt={live[0].starts_at} dark />
                   </div>
                   {live.slice(1).map((c) => (
-                    <div className="mem-row" key={c.id}>
-                      <div><h4>{c.title}</h4><span>{fmtWhen(c.starts_at)}</span></div>
-                      {c.join_url ? <a className="rj" href={c.join_url} target="_blank" rel="noreferrer">Join</a> : null}
+                    <div className="mem-class" key={c.id}>
+                      <div className="mem-row">
+                        <div><h4>{c.title}</h4><span>{fmtWhen(c.starts_at)}</span></div>
+                        {c.join_url ? <a className="rj" href={c.join_url} target="_blank" rel="noreferrer">Join</a> : null}
+                      </div>
+                      <ClassZones startsAt={c.starts_at} />
                     </div>
                   ))}
                 </div>
