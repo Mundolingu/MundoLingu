@@ -766,3 +766,14 @@ body { background: #F5F6F7; }
   .mem-tabs{flex-wrap:wrap;overflow-x:visible;gap:2px;}
   .mem-tab{padding:10px 12px;font-size:14px;}
 }
+
+/* nav: keep logo, links, login and button on one tidy line */
+.ml-lockup{flex-shrink:0;margin-right:18px;}
+.ml-navlinks{gap:12px;flex-wrap:nowrap;}
+.ml-nav-cta{flex-shrink:0;margin-left:14px;gap:12px;}
+.ml-loginlink,.ml-nav-cta .ml-btn{white-space:nowrap;}
+@media(max-width:1400px){
+  .ml-navlinks{display:none;}
+  .ml-nav-cta .ml-btn{display:none;}
+  .ml-mobile-btn{display:inline-flex;align-items:center;padding:8px;}
+}

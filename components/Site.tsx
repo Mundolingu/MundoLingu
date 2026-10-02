@@ -20,7 +20,7 @@ const NAV: { id: string; en: string; es: string; page?: boolean; route?: string 
   { id: "pricing", en: "Pricing", es: "Precios" },
   { id: "faq", en: "FAQ", es: "Preguntas" },
   { id: "level-test", en: "Level test", es: "Test de nivel", route: "/level-test" },
-  { id: "ielts-band-check", en: "IELTS band check", es: "Test IELTS", route: "/ielts-band-check" },
+  { id: "ielts-band-check", en: "IELTS check", es: "Test IELTS", route: "/ielts-band-check" },
   { id: "blog", en: "Blog", es: "Blog", route: "/blog" },
 ];
 
