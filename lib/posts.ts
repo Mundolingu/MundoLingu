@@ -1,3 +1,5 @@
+import { IELTS_POSTS } from "./posts-ielts";
+
 export type Block = { type: "p" | "h" | "list"; text?: string; items?: string[] };
 export type PostContent = { title: string; excerpt: string; body: Block[] };
 export type Post = {
@@ -5,11 +7,13 @@ export type Post = {
   date: string;
   readMins: number;
   tag: { en: string; es: string };
+  cta?: "ielts";
   en: PostContent;
   es: PostContent;
 };
 
 export const POSTS: Post[] = [
+  ...IELTS_POSTS,
   {
     slug: "english-phrases-job-interview",
     date: "2026-07-16",
