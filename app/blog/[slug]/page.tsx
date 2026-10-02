@@ -9,7 +9,9 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = getPost(slug);
-  return { title: post ? `${post.en.title} — MundoLingu` : "Blog — MundoLingu" };
+  return post
+    ? { title: `${post.en.title} — MundoLingu`, description: post.en.excerpt, alternates: { canonical: `/blog/${post.slug}` } }
+    : { title: "Blog — MundoLingu" };
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {

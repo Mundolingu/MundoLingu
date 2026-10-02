@@ -20,6 +20,13 @@ export default function BlogArticle({ post }: { post: Post }) {
     ? { back: "← Volver al blog", read: "min de lectura", ctaH: "¿Listo para dar el paso?", ctaP: "Reserva una clase de prueba gratis o descubre tu nivel de inglés en dos minutos.", demo: "Reserva una clase gratis", test: "Test de nivel" }
     : { back: "← Back to the blog", read: "min read", ctaH: "Ready to take the step?", ctaP: "Book a free demo lesson, or find out your English level in two minutes.", demo: "Book a free demo", test: "Level test" };
 
+  const ielts = post.cta === "ielts";
+  const cta = ielts
+    ? (lang === "es"
+      ? { h: "¿Qué banda sacarías hoy?", p: "Haz el band check gratis de 5 minutos y recibe tu banda exacta de un profesor por WhatsApp.", a: "Band check gratis", href: "/ielts-band-check", b: "Preparación IELTS en Dubái", bhref: "/ielts-preparation-dubai" }
+      : { h: "What band would you get today?", p: "Take our free 5-minute band check, then get your exact band from a teacher on WhatsApp.", a: "Free IELTS band check", href: "/ielts-band-check", b: "IELTS preparation in Dubai", bhref: "/ielts-preparation-dubai" })
+    : { h: tt.ctaH, p: tt.ctaP, a: tt.demo, href: "/#demo", b: tt.test, bhref: "/level-test" };
+
   return (
     <div className="blog-root">
       <header className="blog-top">
@@ -42,11 +49,11 @@ export default function BlogArticle({ post }: { post: Post }) {
           })}
         </div>
         <div className="blog-cta">
-          <h3>{tt.ctaH}</h3>
-          <p>{tt.ctaP}</p>
+          <h3>{cta.h}</h3>
+          <p>{cta.p}</p>
           <div className="blog-cta-btns">
-            <a className="ml-btn ml-btn--primary" href="/#demo">{tt.demo} <ArrowRight /></a>
-            <a className="ml-btn" href="/level-test" style={{ background: "transparent", color: "#fff", boxShadow: "inset 0 0 0 1.4px rgba(255,255,255,.3)" }}>{tt.test} <ArrowRight /></a>
+            <a className="ml-btn ml-btn--primary" href={cta.href}>{cta.a} <ArrowRight /></a>
+            <a className="ml-btn" href={cta.bhref} style={{ background: "transparent", color: "#fff", boxShadow: "inset 0 0 0 1.4px rgba(255,255,255,.3)" }}>{cta.b} <ArrowRight /></a>
           </div>
         </div>
       </article>
