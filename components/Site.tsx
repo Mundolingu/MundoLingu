@@ -28,6 +28,54 @@ type Learn = "exams" | "english" | "spanish";
 
 const EXAM_CHIPS = ["IELTS", "PTE", "TOEFL"];
 
+const wa = (msg: string) => `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+
+// Exam-prep 1-to-1 packages. No prices on the site: prices are shared after the free demo.
+const PACKAGES = {
+  en: [
+    { name: "Exam Starter", lessons: "10", tag: "Sharpen your skills", best: false,
+      for: "You’re close to your target, or your test date is coming up soon.",
+      perks: ["10 private 1-to-1 lessons", "Level check and a personal study plan", "Laser focus on your weakest skill"] },
+    { name: "Exam Booster", lessons: "20", tag: "Most popular", best: true,
+      for: "You want a real score jump and to walk into the exam calm and confident.",
+      perks: ["20 private 1-to-1 lessons", "Everything in Exam Starter", "All four skills, step by step", "Regular progress checks against your target"] },
+    { name: "Exam Result", lessons: "30", tag: "For big goals", best: false,
+      for: "You need a high score like band 7+, or you’re starting further away.",
+      perks: ["30 private 1-to-1 lessons", "Everything in Exam Booster", "Complete preparation, from foundations to test day", "The most practice and feedback before your exam"] },
+  ],
+  es: [
+    { name: "Exam Starter", lessons: "10", tag: "Afina tus habilidades", best: false,
+      for: "Estás cerca de tu nota objetivo o tu examen se acerca.",
+      perks: ["10 clases privadas 1 a 1", "Prueba de nivel y plan de estudio personal", "Enfoque total en tu habilidad más débil"] },
+    { name: "Exam Booster", lessons: "20", tag: "El más popular", best: true,
+      for: "Quieres subir tu nota de verdad y llegar al examen tranquilo y seguro.",
+      perks: ["20 clases privadas 1 a 1", "Todo lo de Exam Starter", "Las cuatro habilidades, paso a paso", "Revisiones de progreso frente a tu objetivo"] },
+    { name: "Exam Result", lessons: "30", tag: "Para metas grandes", best: false,
+      for: "Necesitas una nota alta, como band 7+, o empiezas desde más lejos.",
+      perks: ["30 clases privadas 1 a 1", "Todo lo de Exam Booster", "Preparación completa, de las bases al día del examen", "La mayor práctica y feedback antes de tu examen"] },
+  ],
+};
+
+// "Us vs a typical course" comparison
+const COMPARE = {
+  en: [
+    ["Class size", "15–20 students in one room", "Just you and your teacher"],
+    ["Lessons", "The same syllabus for everyone", "Built around your weak spots and target score"],
+    ["Help between lessons", "Only during class hours", "24/7 WhatsApp support"],
+    ["Homework", "One worksheet for the whole class", "Extra homework whenever you ask"],
+    ["Speaking practice", "A few minutes per lesson", "Free group classes + a weekly live exam class"],
+    ["Schedule", "Fixed times you work around", "Lessons that fit around your life"],
+  ],
+  es: [
+    ["Tamaño de clase", "15–20 alumnos en un aula", "Solo tú y tu profe"],
+    ["Clases", "El mismo temario para todos", "Diseñadas según tus puntos débiles y tu nota objetivo"],
+    ["Ayuda entre clases", "Solo en horario de clase", "Soporte por WhatsApp 24/7"],
+    ["Tareas", "Una hoja para toda la clase", "Tareas extra siempre que las pidas"],
+    ["Práctica oral", "Unos minutos por clase", "Clases grupales gratis + clase de examen en vivo semanal"],
+    ["Horario", "Horas fijas a las que te adaptas", "Clases que se adaptan a tu vida"],
+  ],
+};
+
 const HERO = {
   en: {
     exams: { eyebrow: "IELTS · PTE · TOEFL preparation", line1: "Pass your exam.", greet: "band 7+",
@@ -178,7 +226,11 @@ const UI = {
   en: {
     login: "Log in", memberLogin: "Member login", bookDemo: "Book a free demo", exploreMembership: "Explore the Conversation Club",
     iWantToLearn: "I want", learnExams: "Exam prep", learnEnglish: "English", learnSpanish: "Spanish", unlock: "Unlock",
-    bookExamDemo: "Book a free exam demo", joinClub: "Join the Conversation Club", examsVisual: "IELTS · PTE · TOEFL", targetScore: "Target score",
+    bookExamDemo: "Book a free exam demo", joinClub: "Join the Conversation Club", askWa: "Or ask us anything on WhatsApp", waHi: "Hi MundoLingu! I'm interested in IELTS / PTE / TOEFL preparation.",
+    trust: ["Licensed IELTS Head of Exams", "Native, experienced teachers", "Free 15-min demo, no commitment"],
+    pkgEyebrow: "1-to-1 exam packages", pkgTitle: "Choose how far you want to go.", pkgNote: "Three packages, one goal: your score. Book a free demo and your teacher will recommend the right one for you.", lessonsWord: "lessons", limited: "Limited 1-to-1 spots each month. Book your free demo to reserve yours.", pickPkg: "Start with a free demo",
+    mtTitle: "Free IELTS mini-test", mtBody: "Not sure where you are? Get our free IELTS mini-test on WhatsApp, send back your answers, and our Head of Exams will tell you your estimated band — free.", mtBtn: "Get the free mini-test", mtMsg: "Hi MundoLingu! I'd like the free IELTS mini-test.",
+    barDemo: "Free exam demo", examsVisual: "IELTS · PTE · TOEFL", targetScore: "Target score",
     heroFoot: "Free 15-minute demo · meet a teacher · zero pressure", liveLesson: "Live lesson", confidence: "Confidence",
     whyEyebrow: "Why MundoLingu", whyTitle: "We don't sell lessons. We open doors.",
     visionEyebrow: "Our vision", visionBody: "Most language schools hand everyone the same syllabus and hope they keep up. We were built on the opposite conviction: that a language is deeply personal — bound up with the job you're chasing, the country you're moving to, the person you're becoming. So we start with you, and shape everything around where you're going.",
@@ -191,13 +243,14 @@ const UI = {
     pricingEyebrow: "Pricing", pricingTitle: "Choose the path that fits your goal.",
     planCommunity: "Speak every week", planCommunityFor: "For anyone who wants regular speaking practice, structure and momentum.", planCommunityPrice: "first month, then $15/mo",
     planCommunityList: ["A weekly live conversation class", "Monthly workbooks & resources", "Feedback from a professional teacher", "All levels welcome", "English or Spanish"],
-    planExamTag: "Exam prep 1-to-1", planExam: "Pass IELTS, PTE or TOEFL", planExamFor: "For students who need a target score for study, work or a visa.", planExamPrice: "Packages", planExamPriceSub: "single lessons, 10 or 20",
-    planExamList: ["Your own experienced native teacher", "A personal study plan for your target score", "Mock tests with detailed feedback", "A weekly live exam class included", "Conversation Club included free"],
+    planExamTag: "Exam prep 1-to-1", planExam: "Pass IELTS, PTE or TOEFL", planExamFor: "For students who need a target score for study, work or a visa.", planExamPrice: "3 packages", planExamPriceSub: "10, 20 or 30 lessons",
+    planExamList: ["Your own experienced native teacher", "A personal study plan for your target score", "Extra homework whenever you ask", "24/7 WhatsApp support", "Free group classes + weekly live exam class"],
     planPrivateTag: "Private 1-to-1", planPrivate: "Learn with your own teacher", planPrivateFor: "For the fastest, most personal progress toward a specific goal.", planPrivatePrice: "Personalised", planPrivatePriceSub: "priced to your plan",
     planPrivateList: ["Your own dedicated teacher", "A plan built for your goal or exam", "Flexible scheduling around your life", "The fastest route to fluency", "English or Spanish"],
     pricingFoot: "Every path starts with a free 15-minute demo lesson.",
     examsEyebrow: "Exam preparation", examsTitle: "IELTS, PTE & TOEFL — prepared properly.", examsLead: "Whether you need a score for university, a visa or your career, you get your own teacher and a plan built around you. Led by our Head of Exams, a licensed IELTS teacher with 14+ years of experience across South Africa and the UAE.",
-    examsIncl: "Included with every exam package", examsInclList: ["1-to-1 lessons with an experienced native teacher", "A personal study plan for your target score", "A weekly live exam class", "Free Conversation / Exam Talk Prep Club"],
+    examsIncl: "Included in every package, at no extra cost", examsInclList: ["1-to-1 lessons with an experienced native teacher", "A personal study plan for your target score", "Free access to our group classes (Conversation / Exam Talk Prep Club)", "A weekly live exam class", "Extra homework whenever you ask for it", "24/7 WhatsApp support"],
+    cmpEyebrow: "Why students choose us", cmpTitle: "You’re not just a number in a classroom.", cmpThem: "A typical exam course", cmpUs: "MundoLingu", cmpClose: "Every week you wait is one less week to prepare. Your free demo takes 15 minutes.",
     bandCheck: "Try our free IELTS band check", ieltsDubai: "IELTS preparation in Dubai",
     faqEyebrow: "Questions", faqTitle: "Everything you might be wondering.",
     igTitle: "Follow the journey.", igLead: "Daily tips, student wins, and behind-the-scenes with our teachers — come say hi on Instagram.", igBtn: "Follow on Instagram",
@@ -209,7 +262,11 @@ const UI = {
   es: {
     login: "Entrar", memberLogin: "Acceso de miembros", bookDemo: "Reserva una clase gratis", exploreMembership: "Explora el Club de conversación",
     iWantToLearn: "Quiero", learnExams: "Exámenes", learnEnglish: "Inglés", learnSpanish: "Español", unlock: "Desbloquea",
-    bookExamDemo: "Reserva una clase de examen gratis", joinClub: "Únete al Club de conversación", examsVisual: "IELTS · PTE · TOEFL", targetScore: "Nota objetivo",
+    bookExamDemo: "Reserva una clase de examen gratis", joinClub: "Únete al Club de conversación", askWa: "O pregúntanos lo que quieras por WhatsApp", waHi: "¡Hola MundoLingu! Me interesa la preparación de IELTS / PTE / TOEFL.",
+    trust: ["Jefe de Exámenes IELTS con licencia", "Profes nativos con experiencia", "Clase gratis de 15 min, sin compromiso"],
+    pkgEyebrow: "Paquetes de examen 1 a 1", pkgTitle: "Elige hasta dónde quieres llegar.", pkgNote: "Tres paquetes, una meta: tu nota. Reserva una clase gratis y tu profe te recomendará el ideal para ti.", lessonsWord: "clases", limited: "Plazas 1 a 1 limitadas cada mes. Reserva tu clase gratis para asegurar la tuya.", pickPkg: "Empieza con una clase gratis",
+    mtTitle: "Mini-test IELTS gratis", mtBody: "¿No sabes en qué nivel estás? Pide nuestro mini-test IELTS gratis por WhatsApp, envía tus respuestas y nuestro Jefe de Exámenes te dirá tu band estimado, gratis.", mtBtn: "Pide el mini-test gratis", mtMsg: "¡Hola MundoLingu! Quiero el mini-test IELTS gratis.",
+    barDemo: "Clase de examen gratis", examsVisual: "IELTS · PTE · TOEFL", targetScore: "Nota objetivo",
     heroFoot: "Clase de prueba de 15 min · conoce a un profe · sin compromiso", liveLesson: "Clase en vivo", confidence: "Confianza",
     whyEyebrow: "Por qué MundoLingu", whyTitle: "No vendemos clases. Abrimos puertas.",
     visionEyebrow: "Nuestra visión", visionBody: "La mayoría de las escuelas dan a todos el mismo temario y esperan que sigan el ritmo. Nosotros nacimos con la convicción contraria: que un idioma es algo profundamente personal, ligado al trabajo que buscas, al país al que te mudas, a la persona en la que te conviertes. Por eso empezamos por ti y lo diseñamos todo en torno a hacia dónde vas.",
@@ -222,13 +279,14 @@ const UI = {
     pricingEyebrow: "Precios", pricingTitle: "Elige el camino que encaja con tu meta.",
     planCommunity: "Habla cada semana", planCommunityFor: "Para quien quiere práctica oral constante, estructura e impulso.", planCommunityPrice: "primer mes, luego $15/mes",
     planCommunityList: ["Una clase de conversación en vivo cada semana", "Cuadernos y recursos mensuales", "Feedback de un profe profesional", "Para todos los niveles", "Inglés o español"],
-    planExamTag: "Exámenes 1 a 1", planExam: "Aprueba IELTS, PTE o TOEFL", planExamFor: "Para quien necesita una nota para estudiar, trabajar o una visa.", planExamPrice: "Paquetes", planExamPriceSub: "clases sueltas, 10 o 20",
-    planExamList: ["Tu propio profe nativo con experiencia", "Un plan de estudio para tu nota objetivo", "Simulacros con feedback detallado", "Una clase de examen en vivo semanal incluida", "Club de conversación incluido gratis"],
+    planExamTag: "Exámenes 1 a 1", planExam: "Aprueba IELTS, PTE o TOEFL", planExamFor: "Para quien necesita una nota para estudiar, trabajar o una visa.", planExamPrice: "3 paquetes", planExamPriceSub: "10, 20 o 30 clases",
+    planExamList: ["Tu propio profe nativo con experiencia", "Un plan de estudio para tu nota objetivo", "Tareas extra siempre que las pidas", "Soporte por WhatsApp 24/7", "Clases grupales gratis + clase de examen semanal"],
     planPrivateTag: "Privado 1 a 1", planPrivate: "Aprende con tu propio profe", planPrivateFor: "Para el progreso más rápido y personal hacia una meta concreta.", planPrivatePrice: "Personalizado", planPrivatePriceSub: "según tu plan",
     planPrivateList: ["Tu propio profe dedicado", "Un plan hecho para tu meta o examen", "Horarios flexibles a tu medida", "El camino más rápido a la fluidez", "Inglés o español"],
     pricingFoot: "Todo empieza con una clase de prueba gratis de 15 minutos.",
     examsEyebrow: "Preparación de exámenes", examsTitle: "IELTS, PTE y TOEFL, bien preparados.", examsLead: "Necesites una nota para la universidad, una visa o tu carrera, tendrás tu propio profe y un plan hecho para ti. Dirigido por nuestro Jefe de Exámenes, profesor de IELTS con licencia y más de 14 años de experiencia en Sudáfrica y los Emiratos.",
-    examsIncl: "Incluido en cada paquete de examen", examsInclList: ["Clases 1 a 1 con un profe nativo con experiencia", "Un plan de estudio personal para tu nota objetivo", "Una clase de examen en vivo cada semana", "Conversation / Exam Talk Prep Club gratis"],
+    examsIncl: "Incluido en cada paquete, sin costo extra", examsInclList: ["Clases 1 a 1 con un profe nativo con experiencia", "Un plan de estudio personal para tu nota objetivo", "Acceso gratis a nuestras clases grupales (Conversation / Exam Talk Prep Club)", "Una clase de examen en vivo cada semana", "Tareas extra siempre que las pidas", "Soporte por WhatsApp 24/7"],
+    cmpEyebrow: "Por qué nos eligen", cmpTitle: "No eres solo un número en un aula.", cmpThem: "Un curso de examen típico", cmpUs: "MundoLingu", cmpClose: "Cada semana que esperas es una semana menos para prepararte. Tu clase gratis dura 15 minutos.",
     bandCheck: "Haz nuestro test IELTS gratis", ieltsDubai: "Preparación IELTS en Dubái",
     faqEyebrow: "Preguntas", faqTitle: "Todo lo que quizás te preguntas.",
     igTitle: "Sigue el camino.", igLead: "Consejos diarios, logros de estudiantes y el detrás de cámaras con nuestros profes. Ven a saludarnos en Instagram.", igBtn: "Síguenos en Instagram",
@@ -247,6 +305,7 @@ export default function Site() {
   const [wi, setWi] = useState(0);
   const [faq, setFaq] = useState(0);
   const [page, setPage] = useState<"home" | "team">("home");
+  const [interest, setInterest] = useState("IELTS");
   const rootRef = useRef(null);
 
   useEffect(() => {
@@ -296,6 +355,7 @@ export default function Site() {
     const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     setTimeout(() => { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }); }, 60);
   };
+  const bookExam = (exam: string) => { setInterest(exam); go("demo"); };
   const goTeam = () => {
     setMobileOpen(false);
     setPage("team");
@@ -413,7 +473,9 @@ export default function Site() {
                     <a className="ml-btn ml-btn--ghost" href="#membership" onClick={(e) => { e.preventDefault(); go("membership"); }}>{t.joinClub} <ArrowRight /></a>
                   </div>
 
-                  <div className="ml-learn" style={{ marginTop: 34 }}>
+                  <a className="ml-wa-link" href={wa(t.waHi)} target="_blank" rel="noreferrer"><MessageCircle /> {t.askWa}</a>
+
+                  <div className="ml-learn" style={{ marginTop: 28 }}>
                     <span className="ml-learn-label">{t.iWantToLearn}</span>
                     <div className="ml-learn-seg" role="group" aria-label="Choose what to learn">
                       <button className={learn === "exams" ? "is-active" : ""} aria-pressed={learn === "exams"} onClick={() => setLearn("exams")}>{t.learnExams}</button>
@@ -422,7 +484,7 @@ export default function Site() {
                     </div>
                   </div>
 
-                  <div className="ml-hero-foot"><span className="ml-dotpulse" /> {t.heroFoot}</div>
+                  <div className="ml-trust">{t.trust.map((x) => (<span key={x}><Check /> {x}</span>))}</div>
                 </div>
 
                 <div className="ml-visual" aria-hidden="true">
@@ -466,8 +528,25 @@ export default function Site() {
                       <div className="ml-exam-head"><h3>{ex.name}</h3><span>{ex.full}</span></div>
                       <p className="ml-exam-for">{ex.for}</p>
                       <ul>{ex.points.map((pt) => (<li key={pt}><Check /> {pt}</li>))}</ul>
-                      <a className="ml-btn ml-btn--primary" href="#demo" onClick={(e) => { e.preventDefault(); go("demo"); }}>{lang === "es" ? "Clase de " + ex.name + " gratis" : "Free " + ex.name + " demo"} <ArrowRight /></a>
+                      <a className="ml-btn ml-btn--primary" href="#demo" onClick={(e) => { e.preventDefault(); bookExam(ex.name); }}>{lang === "es" ? "Clase de " + ex.name + " gratis" : "Free " + ex.name + " demo"} <ArrowRight /></a>
                     </article>
+                  ))}
+                </div>
+                <div className="ml-pkgs-head" data-reveal>
+                  <span className="ml-eyebrow">{t.pkgEyebrow}</span>
+                  <h3>{t.pkgTitle}</h3>
+                  <p>{t.pkgNote}</p>
+                </div>
+                <div className="ml-pkgs">
+                  {PACKAGES[lang].map((pk, i) => (
+                    <div className={"ml-pkg" + (pk.best ? " ml-pkg--best" : "")} data-reveal style={{ transitionDelay: i * 0.06 + "s" }} key={pk.name}>
+                      <span className="ml-pkg-flag">{pk.tag}</span>
+                      <div className="ml-pkg-name">{pk.name}</div>
+                      <div className="ml-pkg-lessons"><b>{pk.lessons}</b> {t.lessonsWord}</div>
+                      <p className="ml-pkg-for">{pk.for}</p>
+                      <ul>{pk.perks.map((x) => (<li key={x}><Check /> {x}</li>))}</ul>
+                      <a className={"ml-btn " + (pk.best ? "ml-btn--primary" : "ml-btn--light")} href="#demo" onClick={(e) => { e.preventDefault(); bookExam(interest); }}>{t.pickPkg} <ArrowRight /></a>
+                    </div>
                   ))}
                 </div>
                 <div className="ml-exam-incl" data-reveal>
@@ -478,6 +557,41 @@ export default function Site() {
                   <div className="ml-exam-links">
                     <a href="/ielts-band-check">{t.bandCheck} <ArrowUpRight /></a>
                     <a href="/ielts-preparation-dubai">{t.ieltsDubai} <ArrowUpRight /></a>
+                  </div>
+                </div>
+
+                <p className="ml-limited" data-reveal><span className="ml-dotpulse" /> {t.limited}</p>
+
+                <div className="ml-minitest" data-reveal>
+                  <div>
+                    <h3>{t.mtTitle}</h3>
+                    <p>{t.mtBody}</p>
+                  </div>
+                  <a className="ml-btn ml-btn--wa" href={wa(t.mtMsg)} target="_blank" rel="noreferrer"><MessageCircle /> {t.mtBtn}</a>
+                </div>
+              </div>
+            </section>
+
+            {/* US vs THEM */}
+            <section className="ml-section" id="why-us">
+              <div className="ml-wrap">
+                <span className="ml-eyebrow" data-reveal>{t.cmpEyebrow}</span>
+                <h2 className="ml-h2" data-reveal>{t.cmpTitle}</h2>
+                <div className="ml-cmp" data-reveal role="table">
+                  <div className="ml-cmp-row ml-cmp-head" role="row"><span role="columnheader" /><span role="columnheader">{t.cmpThem}</span><span role="columnheader">{t.cmpUs}</span></div>
+                  {COMPARE[lang].map(([k, them, us]) => (
+                    <div className="ml-cmp-row" role="row" key={k}>
+                      <span role="rowheader">{k}</span>
+                      <span role="cell" className="ml-cmp-them"><X /> {them}</span>
+                      <span role="cell" className="ml-cmp-us"><Check /> {us}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="ml-cmp-cta" data-reveal>
+                  <p>{t.cmpClose}</p>
+                  <div className="ml-cmp-btns">
+                    <a className="ml-btn ml-btn--primary" href="#demo" onClick={(e) => { e.preventDefault(); bookExam(interest); }}>{t.bookExamDemo} <ArrowRight /></a>
+                    <a className="ml-btn ml-btn--wa" href={wa(t.waHi)} target="_blank" rel="noreferrer"><MessageCircle /> WhatsApp</a>
                   </div>
                 </div>
               </div>
@@ -586,7 +700,7 @@ export default function Site() {
                     <p className="for">{t.planExamFor}</p>
                     <div className="ml-plan-price">{t.planExamPrice} <small>{t.planExamPriceSub}</small></div>
                     <ul>{t.planExamList.map((li) => (<li key={li}><Check /> {li}</li>))}</ul>
-                    <a className="ml-btn ml-btn--primary" href="#demo" onClick={(e) => { e.preventDefault(); go("demo"); }}>{t.bookExamDemo} <ArrowRight /></a>
+                    <a className="ml-btn ml-btn--primary" href="#demo" onClick={(e) => { e.preventDefault(); bookExam("IELTS"); }}>{t.bookExamDemo} <ArrowRight /></a>
                   </div>
                   <div className="ml-plan" data-reveal style={{ transitionDelay: "0.08s" }}>
                     <span className="ml-plan-tag">{t.membTag}</span>
@@ -650,7 +764,7 @@ export default function Site() {
                 <span className="ml-eyebrow" data-reveal style={{ justifyContent: "center", display: "flex" }}>{t.finalEyebrow}</span>
                 <h2 data-reveal>{t.finalTitle}</h2>
                 <p className="ml-lead" data-reveal>{t.finalLead}</p>
-                <DemoForm lang={lang} />
+                <DemoForm lang={lang} interest={interest} />
                 <p className="ml-demo-alt" data-reveal>{t.demoAlt} <a href="#membership" onClick={(e) => { e.preventDefault(); go("membership"); }}>{t.exploreMembership}</a></p>
                 <div className="ml-horizon" style={{ marginTop: 48 }} data-reveal />
               </div>
@@ -685,8 +799,15 @@ export default function Site() {
         </div>
       </footer>
 
+      {page === "home" && (
+        <div className={"ml-mbar" + (scrolled && !mobileOpen ? " show" : "")}>
+          <a className="ml-btn ml-btn--primary" href="#demo" onClick={(e) => { e.preventDefault(); bookExam(interest); }}>{t.barDemo} <ArrowRight /></a>
+          <a className="ml-mbar-wa" href={wa(t.waHi)} target="_blank" rel="noreferrer" aria-label="WhatsApp"><MessageCircle /></a>
+        </div>
+      )}
+
       {WHATSAPP_NUMBER && (
-        <a className="wa-fab" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi MundoLingu! I'd like to know more about lessons.")}`} target="_blank" rel="noreferrer" aria-label="Chat on WhatsApp">
+        <a className="wa-fab" href={wa(t.waHi)} target="_blank" rel="noreferrer" aria-label="Chat on WhatsApp">
           <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" aria-hidden="true">
             <path d="M12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.5 1.3 5L2 22l5.1-1.3c1.4.8 3.1 1.2 4.9 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2zm0 18c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .8.8-2.9-.2-.3C4 15 3.5 13.5 3.5 12 3.5 7.3 7.3 3.5 12 3.5S20.5 7.3 20.5 12 16.7 20 12 20z" />
             <path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.5-.1-.7.1-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1-1.3-.6-2.2-1.2-3.1-2.6-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.1-.3.2-.5v-.5c-.1-.1-.7-1.6-.9-2.2-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.9.9-1 2.1-.5 3.3.7 1.7 1.9 3.1 3.5 4.1 1.6 1 2.9 1.1 3.4 1 .5-.1 1.7-.7 1.9-1.4.2-.6.2-1.2.2-1.3-.1-.1-.3-.2-.6-.3z" />
