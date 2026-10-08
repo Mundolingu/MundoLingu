@@ -913,3 +913,72 @@ body { background: #F5F6F7; }
   .ml-footer{padding-bottom:90px;}
 }
 @media(max-width:560px){.ml-exam-incl-list{grid-template-columns:1fr;}}
+
+/* ===== Footer terms link ===== */
+.ml-foot-terms{color:inherit;opacity:.8;text-decoration:underline;text-underline-offset:3px;}
+.ml-foot-terms:hover{opacity:1;}
+.demo-fine a{color:inherit;text-decoration:underline;text-underline-offset:2px;}
+
+/* ===== Terms & Conditions page ===== */
+.terms-wrap{max-width:760px;margin:0 auto;padding:44px 24px 100px;}
+.terms-wrap .blog-back{display:inline-flex;align-items:center;gap:6px;}
+.terms-updated{font-size:14px;color:var(--faint);margin:-14px 0 26px;}
+.terms-intro{font-size:17.5px;line-height:1.75;color:#26364d;margin:0 0 32px;}
+.terms-toc{background:var(--paper-2);border-radius:18px;padding:24px 28px;box-shadow:inset 0 0 0 1px var(--line-2);margin:0 0 44px;}
+.terms-toc h2{font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:0 0 12px;}
+.terms-toc ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;}
+.terms-toc a{font-size:14.5px;color:var(--teal-text);text-decoration:none;line-height:1.5;}
+.terms-toc a:hover{color:var(--ink);text-decoration:underline;}
+.terms-sec{padding-top:12px;margin-bottom:30px;scroll-margin-top:80px;}
+.terms-sec h2{font-family:var(--serif);font-weight:400;font-size:26px;letter-spacing:-.01em;margin:0 0 12px;color:var(--ink);}
+.terms-sec p,.terms-sec li{font-size:16.5px;line-height:1.75;color:#26364d;}
+.terms-sec p{margin:0 0 12px;}
+.terms-sec ul{margin:0 0 14px;padding-inline-start:22px;}
+.terms-sec li{margin-bottom:8px;}
+.terms-sec li::marker{color:var(--teal);}
+.terms-box{background:var(--paper-2);border-radius:16px;padding:22px 24px;margin:14px 0 16px;box-shadow:inset 0 0 0 1px var(--line-2);border-inline-start:4px solid var(--orange);}
+.terms-box h3{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange-deep);margin:0 0 12px;}
+.terms-box b{color:var(--ink);}
+.terms-thanks{margin-top:40px;padding-top:24px;border-top:1px solid var(--line-2);font-family:var(--serif);font-size:20px;line-height:1.5;color:var(--ink);}
+@media(max-width:640px){.terms-toc ol{grid-template-columns:1fr;}.terms-sec h2{font-size:22px;}}
+
+/* ===== Arabic / right-to-left ===== */
+[dir="rtl"]{--serif:var(--font-ar-serif),"Noto Naskh Arabic","Geeza Pro",serif;--sans:var(--font-ar-sans),"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;}
+[dir="rtl"] .ml-root,[dir="rtl"].ml-root,[dir="rtl"].blog-root{font-family:var(--sans);}
+/* Arabic letters join together, so letter-spacing and italics break them */
+[dir="rtl"] *{letter-spacing:0 !important;}
+[dir="rtl"] .ml-rotator,[dir="rtl"] .ml-greet,[dir="rtl"] .ml-teacher-phil,[dir="rtl"] .ml-founder-q{font-style:normal;}
+[dir="rtl"] .ml-hero h1{line-height:1.25;}
+[dir="rtl"] .ml-h2,[dir="rtl"] .ml-vision-head,[dir="rtl"] .ml-pkgs-head h3,[dir="rtl"] .blog-title{line-height:1.3;}
+[dir="rtl"] .ml-h2{max-width:20ch;}
+[dir="rtl"] .ml-lead,[dir="rtl"] .terms-sec p,[dir="rtl"] .terms-sec li,[dir="rtl"] .terms-intro{line-height:1.9;}
+/* arrows point the other way */
+[dir="rtl"] .lucide-arrow-right,[dir="rtl"] .lucide-arrow-up-right,[dir="rtl"] .terms-backic{transform:scaleX(-1);}
+[dir="rtl"] .ml-btn:hover .lucide-arrow-right{transform:scaleX(-1) translateX(4px);}
+/* method timeline line and teacher badge sit on the right */
+[dir="rtl"] .ml-step::before{left:auto;right:15px;}
+[dir="rtl"] .ml-badge{left:auto;right:14px;}
+/* the scrolling quotes keep their animation */
+[dir="rtl"] .ml-marquee{direction:ltr;}
+[dir="rtl"] .ml-tag{direction:rtl;}
+[dir="rtl"] .ml-tag::before{content:none;}
+/* English brand / exam words inside Arabic text */
+[dir="rtl"] .ml-exam-head h3,[dir="rtl"] .ml-pkg-name,[dir="rtl"] .ml-greet,[dir="rtl"] .ml-exam-chip{font-family:var(--font-serif),Georgia,serif;}
+[dir="rtl"] .ml-exam-chip{font-family:var(--font-sans),system-ui,sans-serif;}
+[dir="rtl"] .ml-langsw > svg{margin-right:0;margin-left:3px;}
+[dir="rtl"] .ml-lockup{margin-right:0;margin-left:18px;}
+[dir="rtl"] .ml-nav-cta{margin-left:0;margin-right:14px;}
+
+/* fixes */
+.ml-wa-link{display:flex;width:fit-content;}
+[dir="rtl"] .ml-greet span,[dir="rtl"] .ml-exam-chips{direction:ltr;unicode-bidi:isolate;}
+[dir="rtl"] .ml-exam-chips{justify-content:flex-end;}
+@media(max-width:1640px){
+  [dir="rtl"] .ml-navlinks{display:none;}
+  [dir="rtl"] .ml-nav-cta .ml-btn{display:none;}
+  [dir="rtl"] .ml-mobile-btn{display:inline-flex;align-items:center;padding:8px;}
+}
+.ml-nowrap{white-space:nowrap;}
+/* demo submit button: beat the generic ".ml-root button" reset so it shows orange */
+.ml-root .demo-submit{background:var(--orange);color:var(--navy);font-family:var(--sans);font-weight:700;}
+.ml-root .demo-submit:hover{background:var(--orange-deep);color:#fff;}

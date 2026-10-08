@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ArrowRight, ArrowUpRight, Check, Instagram, Mail, MessageCircle, Menu, X, Globe } from "lucide-react";
 import DemoForm from "@/components/DemoForm";
+import { AR } from "@/components/site-ar";
 
 // Add your full WhatsApp number (country code, no +, spaces or dashes), e.g. "5215512345678".
 const WHATSAPP_NUMBER = "971504296090";
@@ -10,7 +11,7 @@ const WHATSAPP_NUMBER = "971504296090";
 // Show your latest Instagram posts: get a widget URL (see guide) and set NEXT_PUBLIC_IG_EMBED in Netlify.
 const INSTAGRAM_EMBED_URL = process.env.NEXT_PUBLIC_IG_EMBED || "";
 
-type Lang = "en" | "es";
+type Lang = "en" | "es" | "ar";
 
 const NAV: { id: string; en: string; es: string; page?: boolean; route?: string }[] = [
   { id: "exams", en: "Exam prep", es: "Exámenes" },
@@ -54,6 +55,7 @@ const PACKAGES = {
       for: "Necesitas una nota alta, como band 7+, o empiezas desde más lejos.",
       perks: ["30 clases privadas 1 a 1", "Todo lo de Exam Booster", "Preparación completa, de las bases al día del examen", "La mayor práctica y feedback antes de tu examen"] },
   ],
+  ar: AR.PACKAGES,
 };
 
 // "Us vs a typical course" comparison
@@ -74,6 +76,7 @@ const COMPARE = {
     ["Práctica oral", "Unos minutos por clase", "Clases grupales gratis + clase de examen en vivo semanal"],
     ["Horario", "Horas fijas a las que te adaptas", "Clases que se adaptan a tu vida"],
   ],
+  ar: AR.COMPARE,
 };
 
 const HERO = {
@@ -99,16 +102,19 @@ const HERO = {
       sub: "¿Vives, trabajas o te mudas a un lugar nuevo? Español online personalizado que te ayuda a pertenecer, no solo a traducir.",
       words: ["un nuevo hogar", "conexión real", "una mudanza más fácil", "una segunda cultura", "una vida en el extranjero"] },
   },
+  ar: AR.HERO,
 };
 
 const STATS = {
   en: [ { b: "1,200+", s: "lessons taught" }, { b: "4.9★", s: "average rating" }, { b: "12", s: "countries reached" }, { b: "UAE · Gulf · EU", s: "and worldwide online" } ],
   es: [ { b: "1.200+", s: "clases impartidas" }, { b: "4.9★", s: "valoración media" }, { b: "12", s: "países alcanzados" }, { b: "EAU · Golfo · UE", s: "y en todo el mundo online" } ],
+  ar: AR.STATS,
 };
 
 const TAGS = {
   en: ["Passed my B2 interview", "Moved to Canada", "Now working in Spanish in CDMX", "Promoted to team lead", "Ordered dinner in Madrid — no English", "Closed my first client abroad", "Relocated to Dubai", "Stopped translating in my head", "Nailed my visa interview"],
   es: ["Aprobé mi entrevista B2", "Me mudé a Canadá", "Ahora trabajo en español en CDMX", "Ascendido a líder de equipo", "Pedí la cena en Madrid, sin inglés", "Cerré mi primer cliente en el extranjero", "Me mudé a Dubái", "Dejé de traducir en mi cabeza", "Aprobé mi entrevista de visa"],
+  ar: AR.TAGS,
 };
 
 const WHY = {
@@ -122,6 +128,7 @@ const WHY = {
     { n: "02", h: "La confianza para hablar de verdad", p: "Te enseñamos a que te entiendan, no a ser perfecto. Hablarás desde tu primera clase." },
     { n: "03", h: "Un plan a la medida de tu vida", p: "Tus metas, tu horario, tu ritmo, en inglés o español. Nunca una clase igual para todos." },
   ],
+  ar: AR.WHY,
 };
 
 const STEPS = {
@@ -145,6 +152,7 @@ const STEPS = {
     { h: "Idioma de la vida real", p: "El inglés o español que de verdad usarás en el trabajo, en llamadas y en la calle." },
     { h: "Fluidez a largo plazo", p: "Hábitos y apoyo que te mantienen mejorando mucho después de la primera clase." },
   ],
+  ar: AR.STEPS,
 };
 
 const STORIES = {
@@ -156,11 +164,13 @@ const STORIES = {
     { q: "Después de ocho meses hice la entrevista en inglés y conseguí el trabajo en Guadalajara. Dejé de traducir en mi cabeza: simplemente hablé.", by: "Mariana", ctx: "aprendiendo inglés" },
     { q: "Me mudé a Dubái por trabajo y aprendí español para la parte latinoamericana de mi puesto. A los seis meses, cierro llamadas en español.", by: "James", ctx: "aprendiendo español" },
   ],
+  ar: AR.STORIES,
 };
 
 const BENEFITS = {
   en: ["Exclusive workbooks", "Weekly study plans", "Guided learning roadmaps", "Speaking practice sessions", "Grammar lessons", "Vocabulary packs", "Member-only video lessons", "Weekly challenges", "Accountability check-ins", "A community moving with you", "Live group sessions", "Discounts on private lessons"],
   es: ["Cuadernos exclusivos", "Planes de estudio semanales", "Hojas de ruta guiadas", "Sesiones de práctica oral", "Clases de gramática", "Packs de vocabulario", "Videoclases solo para miembros", "Retos semanales", "Seguimiento y motivación", "Una comunidad que avanza contigo", "Sesiones grupales en vivo", "Descuentos en clases privadas"],
+  ar: AR.BENEFITS,
 };
 
 const FAQ = {
@@ -184,6 +194,7 @@ const FAQ = {
     { q: "¿Cómo elijo o cambio de profe?", a: "Te asignamos al profe indicado después de tu prueba. Si más adelante prefieres otro, puedes cambiar cuando quieras, sin problema." },
     { q: "¿De dónde son tus estudiantes?", a: "Sobre todo de los Emiratos, el Golfo y Europa, con estudiantes en todo el mundo. Todo es online y se adapta a tu zona horaria." },
   ],
+  ar: AR.FAQ,
 };
 
 const EXAMS = {
@@ -203,6 +214,7 @@ const EXAMS = {
     { name: "TOEFL", full: "TOEFL iBT", color: "var(--cyan)", for: "El examen académico para universidades en EE. UU. y en todo el mundo.",
       points: ["Tareas integradas de speaking y writing", "Vocabulario académico y toma de notas", "Exámenes de práctica completos con feedback"] },
   ],
+  ar: AR.EXAMS,
 };
 
 const TEACHERS: { [k in Lang]: { name: string; teaches: string; meta: string; phil: string; spec: string; photo?: string }[] } = {
@@ -220,6 +232,7 @@ const TEACHERS: { [k in Lang]: { name: string; teaches: string; meta: string; ph
     { name: "Samantha", teaches: "Inglés y español", meta: "CEO · tripulante de Emirates", phil: "“Enseño a la gente a crear sus propias oportunidades, porque yo lo he vivido.”", spec: "Tripulante de cabina de Emirates y CEO en MundoLingu. Además de recorrer el mundo, enseña inglés y español online, mostrando a las personas cómo crear oportunidades para mejorar su vida, desde la experiencia real ganada por todo el planeta.", photo: "/team-samantha.jpg" },
     { name: "Paty", teaches: "Inglés y español", meta: "Tripulante de Emirates · Titulada en México", phil: "“Una estructura clara que te hace hablar, rápido.”", spec: "Tripulante de cabina de Emirates, titulada como profesora de inglés en México. Enseña inglés y español online y habla desde la experiencia real de viajar por el mundo, con un método claro y estructurado que hace avanzar rápido.", photo: "/team-paty.jpg" },
   ],
+  ar: AR.TEACHERS,
 };
 
 const UI = {
@@ -258,6 +271,9 @@ const UI = {
     teamEyebrow: "The MundoLingu team", teamTitle: "The people behind your progress.", teamLead: "A small, dedicated team of teachers and mentors — each one here to help you speak with confidence, in English or Spanish.",
     bookWith: "Book a demo with", readyToMeet: "Ready to meet yours?", applyTitle: "Want to teach with us?", applyBody: "We're always looking for passionate English and Spanish teachers who care about real progress. Send your CV and a few words about yourself — if you're a great fit, we'll be in touch.", applyBtn: "Send your CV",
     footTag: "IELTS, PTE & TOEFL preparation, plus English & Spanish made personal. Online lessons that turn a language into an opportunity.", explore: "Explore", contact: "Contact", footBar: "© 2026 MundoLingu · Online — UAE · Gulf · Europe · Worldwide",
+    terms: "Terms & Conditions", freeExamDemo: (x: string) => `Free ${x} demo`,
+    visionHead: ["An education that begins with the ", "person", " — not the language."] as [string, string, string],
+    englishLabel: "English", spanishLabel: "Español",
   },
   es: {
     login: "Entrar", memberLogin: "Acceso de miembros", bookDemo: "Reserva una clase gratis", exploreMembership: "Explora el Club de conversación",
@@ -294,7 +310,11 @@ const UI = {
     teamEyebrow: "El equipo de MundoLingu", teamTitle: "Las personas detrás de tu progreso.", teamLead: "Un equipo pequeño y dedicado de profes y mentores, cada uno aquí para ayudarte a hablar con confianza, en inglés o español.",
     bookWith: "Reserva una clase con", readyToMeet: "¿Quieres conocer al tuyo?", applyTitle: "¿Quieres enseñar con nosotros?", applyBody: "Siempre buscamos profes apasionados de inglés y español a quienes les importe el progreso real. Envía tu CV y unas líneas sobre ti; si encajas, te contactamos.", applyBtn: "Envía tu CV",
     footTag: "Preparación IELTS, PTE y TOEFL, más inglés y español hechos personales. Clases online que convierten un idioma en una oportunidad.", explore: "Explora", contact: "Contacto", footBar: "© 2026 MundoLingu · Online — EAU · Golfo · Europa · Todo el mundo",
+    terms: "Términos y Condiciones", freeExamDemo: (x: string) => `Clase de ${x} gratis`,
+    visionHead: ["Una educación que empieza por la ", "persona", ", no por el idioma."] as [string, string, string],
+    englishLabel: "Inglés", spanishLabel: "Español",
   },
+  ar: AR.UI,
 };
 
 export default function Site() {
@@ -311,10 +331,16 @@ export default function Site() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem("ml-lang");
-      if (saved === "es" || saved === "en") setLang(saved);
-      else if (navigator.language && navigator.language.toLowerCase().startsWith("es")) setLang("es");
+      const nl = (navigator.language || "").toLowerCase();
+      if (saved === "es" || saved === "en" || saved === "ar") setLang(saved);
+      else if (nl.startsWith("es")) setLang("es");
+      else if (nl.startsWith("ar")) setLang("ar");
     } catch {}
   }, []);
+  useEffect(() => {
+    try { document.documentElement.lang = lang; document.documentElement.dir = lang === "ar" ? "rtl" : "ltr"; } catch {}
+  }, [lang]);
+  const navLabel = (n: { id: string; en: string; es: string }) => (lang === "ar" ? AR.NAV[n.id] || n.en : n[lang]);
   function switchLang(l: Lang) { setLang(l); try { localStorage.setItem("ml-lang", l); } catch {} }
 
   useEffect(() => {
@@ -368,11 +394,12 @@ export default function Site() {
       <Globe size={14} />
       <button className={lang === "en" ? "on" : ""} onClick={() => switchLang("en")}>EN</button>
       <button className={lang === "es" ? "on" : ""} onClick={() => switchLang("es")}>ES</button>
+      <button className={lang === "ar" ? "on" : ""} onClick={() => switchLang("ar")} lang="ar">ع</button>
     </div>
   );
 
   return (
-    <div className="ml-root" ref={rootRef}>
+    <div className="ml-root" ref={rootRef} dir={lang === "ar" ? "rtl" : "ltr"} lang={lang}>
       {/* NAV */}
       <nav className={"ml-nav" + (scrolled ? " scrolled" : "")}>
         <div className="ml-nav-in">
@@ -382,7 +409,7 @@ export default function Site() {
           </a>
           <div className="ml-navlinks">
             {NAV.map((n) => (
-              <a key={n.id} className="ml-navlink" href={n.route ? n.route : n.page ? "#team" : "#" + n.id} onClick={(e) => { if (n.route) return; e.preventDefault(); n.page ? goTeam() : go(n.id); }}>{n[lang]}</a>
+              <a key={n.id} className="ml-navlink" href={n.route ? n.route : n.page ? "#team" : "#" + n.id} onClick={(e) => { if (n.route) return; e.preventDefault(); n.page ? goTeam() : go(n.id); }}>{navLabel(n)}</a>
             ))}
           </div>
           <div className="ml-nav-cta">
@@ -401,7 +428,7 @@ export default function Site() {
       {/* MOBILE MENU */}
       <div className={"ml-mobile" + (mobileOpen ? " open" : "")}>
         {NAV.map((n) => (
-          <a key={n.id} href={n.route ? n.route : n.page ? "#team" : "#" + n.id} onClick={(e) => { if (n.route) return; e.preventDefault(); n.page ? goTeam() : go(n.id); }}>{n[lang]}</a>
+          <a key={n.id} href={n.route ? n.route : n.page ? "#team" : "#" + n.id} onClick={(e) => { if (n.route) return; e.preventDefault(); n.page ? goTeam() : go(n.id); }}>{navLabel(n)}</a>
         ))}
         <a href="/login" onClick={() => setMobileOpen(false)}>{t.memberLogin}</a>
         <div style={{ marginTop: 18 }}><LangSwitch /></div>
@@ -458,7 +485,7 @@ export default function Site() {
                   <span className="ml-eyebrow">{hero.eyebrow}</span>
                   <h1>
                     <span className="ml-unlock">{hero.line1}</span><br />
-                    {t.unlock} <span key={lang + learn + wi} className="ml-rotator ml-rotator--anim">{word}</span>.
+                    {t.unlock} <span className="ml-nowrap"><span key={lang + learn + wi} className="ml-rotator ml-rotator--anim">{word}</span>.</span>
                   </h1>
                   <p className="ml-lead">{hero.sub}</p>
 
@@ -490,7 +517,7 @@ export default function Site() {
                 <div className="ml-visual" aria-hidden="true">
                   <div className="ml-visual-top">
                     <span className="ml-live"><b />{t.liveLesson}</span>
-                    <span>{learn === "exams" ? t.examsVisual : (learn === "english" ? (lang === "es" ? "Inglés" : "English") : "Español") + " · A1 → C1"}</span>
+                    <span>{learn === "exams" ? t.examsVisual : (learn === "english" ? t.englishLabel : t.spanishLabel) + " · A1 → C1"}</span>
                   </div>
                   <div className="ml-greet"><span key={learn}>{hero.greet}</span></div>
                   <div className="ml-visual-bottom">
@@ -528,7 +555,7 @@ export default function Site() {
                       <div className="ml-exam-head"><h3>{ex.name}</h3><span>{ex.full}</span></div>
                       <p className="ml-exam-for">{ex.for}</p>
                       <ul>{ex.points.map((pt) => (<li key={pt}><Check /> {pt}</li>))}</ul>
-                      <a className="ml-btn ml-btn--primary" href="#demo" onClick={(e) => { e.preventDefault(); bookExam(ex.name); }}>{lang === "es" ? "Clase de " + ex.name + " gratis" : "Free " + ex.name + " demo"} <ArrowRight /></a>
+                      <a className="ml-btn ml-btn--primary" href="#demo" onClick={(e) => { e.preventDefault(); bookExam(ex.name); }}>{t.freeExamDemo(ex.name)} <ArrowRight /></a>
                     </article>
                   ))}
                 </div>
@@ -616,7 +643,7 @@ export default function Site() {
             <section className="ml-section ml-section--dark" id="vision">
               <div className="ml-wrap">
                 <span className="ml-eyebrow" data-reveal>{t.visionEyebrow}</span>
-                <h2 className="ml-vision-head" data-reveal>{lang === "es" ? (<>Una educación que empieza por la <em>persona</em>, no por el idioma.</>) : (<>An education that begins with the <em>person</em> — not the language.</>)}</h2>
+                <h2 className="ml-vision-head" data-reveal><>{t.visionHead[0]}<em>{t.visionHead[1]}</em>{t.visionHead[2]}</></h2>
                 <p className="ml-vision-body" data-reveal>{t.visionBody}</p>
                 <div className="ml-diff">
                   {t.diff.map((d, i) => (
@@ -786,7 +813,7 @@ export default function Site() {
             </div>
             <div className="ml-foot-col">
               <h5>{t.explore}</h5>
-              {NAV.map((n) => (<a key={n.id} href={n.route ? n.route : n.page ? "#team" : "#" + n.id} onClick={(e) => { if (n.route) return; e.preventDefault(); n.page ? goTeam() : go(n.id); }}>{n[lang]}</a>))}
+              {NAV.map((n) => (<a key={n.id} href={n.route ? n.route : n.page ? "#team" : "#" + n.id} onClick={(e) => { if (n.route) return; e.preventDefault(); n.page ? goTeam() : go(n.id); }}>{navLabel(n)}</a>))}
             </div>
             <div className="ml-foot-col">
               <h5>{t.contact}</h5>
@@ -795,7 +822,7 @@ export default function Site() {
               <a href="mailto:mundolingu@gmail.com"><Mail /> mundolingu@gmail.com</a>
             </div>
           </div>
-          <div className="ml-foot-bar"><span>{t.footBar}</span></div>
+          <div className="ml-foot-bar"><span>{t.footBar}</span><a className="ml-foot-terms" href="/terms">{t.terms}</a></div>
         </div>
       </footer>
 

@@ -10,11 +10,12 @@ const TIMEZONES = [
 ];
 
 const T = {
-  en: { fullName: "Full name", namePh: "Your name", email: "Email", emailPh: "you@email.com", countryLabel: "Where is your number from?", countryPh: "Select your country", phone: "Phone / WhatsApp number", phonePh: "Your number", age: "Age", agePh: "e.g. 28", daysLabel: "Which days work for you?", days: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], timeLabel: "What time of day?", times: ["Morning","Afternoon","Evening"], tzLabel: "Your time zone", tzPh: "Select your time zone", learnLabel: "I'm interested in", learnIelts: "IELTS preparation", learnPte: "PTE preparation", learnToefl: "TOEFL preparation", learnEn: "General English", learnEs: "Spanish", learnClub: "Conversation Club", reasonLabel: "Why do you want to learn?", reasonPh: "A target exam score, a visa, a new job, moving abroad, confidence...", submit: "Request my free demo", sending: "Sending...", fine: "No pressure, no commitment - a real teacher will reach out to schedule.", thanks: "Thank you", thanksMsg: "We've got your request and the times you're free. We'll email you shortly to lock in your free demo lesson.", err: "Something went wrong. Please try again." },
-  es: { fullName: "Nombre completo", namePh: "Tu nombre", email: "Correo", emailPh: "tu@correo.com", countryLabel: "¿De qué país es tu número?", countryPh: "Selecciona tu país", phone: "Teléfono / WhatsApp", phonePh: "Tu número", age: "Edad", agePh: "p. ej. 28", daysLabel: "¿Qué días te vienen bien?", days: ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"], timeLabel: "¿A qué hora del día?", times: ["Mañana","Tarde","Noche"], tzLabel: "Tu zona horaria", tzPh: "Selecciona tu zona horaria", learnLabel: "Me interesa", learnIelts: "Preparación IELTS", learnPte: "Preparación PTE", learnToefl: "Preparación TOEFL", learnEn: "Inglés general", learnEs: "Español", learnClub: "Club de conversación", reasonLabel: "¿Por qué quieres aprender?", reasonPh: "Una nota de examen, una visa, un nuevo trabajo, mudarte al extranjero, confianza...", submit: "Solicita tu clase gratis", sending: "Enviando...", fine: "Sin presión, sin compromiso: un profe real te contactará para agendar.", thanks: "¡Gracias", thanksMsg: "Recibimos tu solicitud y los horarios en los que estás libre. Te escribiremos pronto para agendar tu clase de prueba gratis.", err: "Algo salió mal. Inténtalo de nuevo." },
+  en: { fullName: "Full name", namePh: "Your name", email: "Email", emailPh: "you@email.com", countryLabel: "Where is your number from?", countryPh: "Select your country", phone: "Phone / WhatsApp number", phonePh: "Your number", age: "Age", agePh: "e.g. 28", daysLabel: "Which days work for you?", days: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], timeLabel: "What time of day?", times: ["Morning","Afternoon","Evening"], tzLabel: "Your time zone", tzPh: "Select your time zone", learnLabel: "I'm interested in", learnIelts: "IELTS preparation", learnPte: "PTE preparation", learnToefl: "TOEFL preparation", learnEn: "General English", learnEs: "Spanish", learnClub: "Conversation Club", reasonLabel: "Why do you want to learn?", reasonPh: "A target exam score, a visa, a new job, moving abroad, confidence...", submit: "Request my free demo", sending: "Sending...", fine: "No pressure, no commitment - a real teacher will reach out to schedule.", thanks: "Thank you", thanksMsg: "We've got your request and the times you're free. We'll email you shortly to lock in your free demo lesson.", err: "Something went wrong. Please try again.", agree: "By sending this form you agree to our", terms: "Terms & Conditions" },
+  es: { fullName: "Nombre completo", namePh: "Tu nombre", email: "Correo", emailPh: "tu@correo.com", countryLabel: "¿De qué país es tu número?", countryPh: "Selecciona tu país", phone: "Teléfono / WhatsApp", phonePh: "Tu número", age: "Edad", agePh: "p. ej. 28", daysLabel: "¿Qué días te vienen bien?", days: ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"], timeLabel: "¿A qué hora del día?", times: ["Mañana","Tarde","Noche"], tzLabel: "Tu zona horaria", tzPh: "Selecciona tu zona horaria", learnLabel: "Me interesa", learnIelts: "Preparación IELTS", learnPte: "Preparación PTE", learnToefl: "Preparación TOEFL", learnEn: "Inglés general", learnEs: "Español", learnClub: "Club de conversación", reasonLabel: "¿Por qué quieres aprender?", reasonPh: "Una nota de examen, una visa, un nuevo trabajo, mudarte al extranjero, confianza...", submit: "Solicita tu clase gratis", sending: "Enviando...", fine: "Sin presión, sin compromiso: un profe real te contactará para agendar.", thanks: "¡Gracias", thanksMsg: "Recibimos tu solicitud y los horarios en los que estás libre. Te escribiremos pronto para agendar tu clase de prueba gratis.", err: "Algo salió mal. Inténtalo de nuevo.", agree: "Al enviar este formulario aceptas nuestros", terms: "Términos y Condiciones" },
+  ar: { fullName: "الاسم الكامل", namePh: "اسمك", email: "البريد الإلكتروني", emailPh: "you@email.com", countryLabel: "من أي دولة رقمك؟", countryPh: "اختر دولتك", phone: "رقم الهاتف / واتساب", phonePh: "رقمك", age: "العمر", agePh: "مثال: 28", daysLabel: "ما الأيام المناسبة لك؟", days: ["الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت","الأحد"], timeLabel: "في أي وقت من اليوم؟", times: ["صباحًا","بعد الظهر","مساءً"], tzLabel: "منطقتك الزمنية", tzPh: "اختر منطقتك الزمنية", learnLabel: "أنا مهتم بـ", learnIelts: "التحضير لـ IELTS", learnPte: "التحضير لـ PTE", learnToefl: "التحضير لـ TOEFL", learnEn: "الإنجليزية العامة", learnEs: "الإسبانية", learnClub: "نادي المحادثة", reasonLabel: "لماذا تريد التعلم؟", reasonPh: "درجة في اختبار، تأشيرة، وظيفة جديدة، الانتقال إلى الخارج، الثقة...", submit: "اطلب درسي التجريبي المجاني", sending: "جارٍ الإرسال...", fine: "بلا ضغط ولا التزام: سيتواصل معك معلم حقيقي لتحديد الموعد.", thanks: "شكرًا لك", thanksMsg: "استلمنا طلبك والأوقات التي تناسبك. سنراسلك قريبًا لتأكيد درسك التجريبي المجاني.", err: "حدث خطأ ما. يرجى المحاولة مرة أخرى.", agree: "بإرسال هذا النموذج فإنك توافق على", terms: "الشروط والأحكام" },
 };
 
-export default function DemoForm({ lang = "en", interest = "IELTS" }: { lang?: "en" | "es"; interest?: string }) {
+export default function DemoForm({ lang = "en", interest = "IELTS" }: { lang?: "en" | "es" | "ar"; interest?: string }) {
   const c = T[lang];
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [error, setError] = useState("");
@@ -83,14 +84,14 @@ export default function DemoForm({ lang = "en", interest = "IELTS" }: { lang?: "
         <div className="demo-field demo-span">
           <label>{c.daysLabel}</label>
           <div className="demo-chips">
-            {c.days.map((d) => (<label className="demo-chip" key={d}><input type="checkbox" name="days" value={d} /> {d}</label>))}
+            {c.days.map((d, i) => (<label className="demo-chip" key={d}><input type="checkbox" name="days" value={T.en.days[i]} /> {d}</label>))}
           </div>
         </div>
 
         <div className="demo-field demo-span">
           <label>{c.timeLabel}</label>
           <div className="demo-chips">
-            {c.times.map((tm) => (<label className="demo-chip" key={tm}><input type="checkbox" name="times" value={tm} /> {tm}</label>))}
+            {c.times.map((tm, i) => (<label className="demo-chip" key={tm}><input type="checkbox" name="times" value={T.en.times[i]} /> {tm}</label>))}
           </div>
         </div>
 
@@ -122,6 +123,7 @@ export default function DemoForm({ lang = "en", interest = "IELTS" }: { lang?: "
       {status === "error" && <p className="demo-msg">{error}</p>}
       <button className="demo-submit" type="submit" disabled={status === "loading"}>{status === "loading" ? c.sending : c.submit}</button>
       <p className="demo-fine">{c.fine}</p>
+      <p className="demo-fine">{c.agree} <a href="/terms" target="_blank" rel="noreferrer">{c.terms}</a>.</p>
     </form>
   );
 }
