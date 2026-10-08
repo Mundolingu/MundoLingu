@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     ["Country", country || "\u2014"],
     ["Phone", phone],
     ["Age", String(age ?? "")],
-    ["Wants to learn", language || "—"],
+    ["Interested in", language || "—"],
     ["Available days", list(days)],
     ["Preferred time", list(times)],
     ["Time zone", timezone || "—"],

@@ -13,10 +13,10 @@ const INSTAGRAM_EMBED_URL = process.env.NEXT_PUBLIC_IG_EMBED || "";
 type Lang = "en" | "es";
 
 const NAV: { id: string; en: string; es: string; page?: boolean; route?: string }[] = [
-  { id: "vision", en: "Vision", es: "Visión" },
+  { id: "exams", en: "Exam prep", es: "Exámenes" },
   { id: "method", en: "Method", es: "Método" },
   { id: "team", en: "Our Team", es: "Equipo", page: true },
-  { id: "membership", en: "Membership", es: "Membresía" },
+  { id: "membership", en: "Conversation Club", es: "Club de conversación" },
   { id: "pricing", en: "Pricing", es: "Precios" },
   { id: "faq", en: "FAQ", es: "Preguntas" },
   { id: "level-test", en: "Level test", es: "Test de nivel", route: "/level-test" },
@@ -24,9 +24,16 @@ const NAV: { id: string; en: string; es: string; page?: boolean; route?: string 
   { id: "blog", en: "Blog", es: "Blog", route: "/blog" },
 ];
 
+type Learn = "exams" | "english" | "spanish";
+
+const EXAM_CHIPS = ["IELTS", "PTE", "TOEFL"];
+
 const HERO = {
   en: {
-    english: { eyebrow: "English for Spanish speakers", line1: "Learn English.", greet: "hello.",
+    exams: { eyebrow: "IELTS · PTE · TOEFL preparation", line1: "Pass your exam.", greet: "band 7+",
+      sub: "1-to-1 exam preparation with experienced native teachers — a study plan built around you, a weekly live exam class, and real results. Not just a number in a classroom.",
+      words: ["your visa", "a university place", "a global career", "your dream score", "a new country"] },
+    english: { eyebrow: "English for international learners", line1: "Learn English.", greet: "hello.",
       sub: "The distance between where you are and where you want to be is a language. Personalised online English, built around your goals — not a generic classroom.",
       words: ["a promotion", "a new country", "a bigger salary", "real confidence", "a global career"] },
     spanish: { eyebrow: "Spanish for internationals", line1: "Learn Spanish.", greet: "hola.",
@@ -34,7 +41,10 @@ const HERO = {
       words: ["a new home", "real connection", "an easier move", "a second culture", "a life abroad"] },
   },
   es: {
-    english: { eyebrow: "Inglés para hispanohablantes", line1: "Aprende inglés.", greet: "hello.",
+    exams: { eyebrow: "Preparación IELTS · PTE · TOEFL", line1: "Aprueba tu examen.", greet: "band 7+",
+      sub: "Preparación de exámenes 1 a 1 con profes nativos con experiencia: un plan de estudio hecho para ti, una clase de examen en vivo cada semana y resultados reales. No eres solo un número en un aula.",
+      words: ["tu visa", "una plaza universitaria", "una carrera global", "la nota que sueñas", "un nuevo país"] },
+    english: { eyebrow: "Inglés para estudiantes internacionales", line1: "Aprende inglés.", greet: "hello.",
       sub: "La distancia entre donde estás y donde quieres llegar es un idioma. Inglés online personalizado, diseñado en torno a tus metas, no una clase genérica.",
       words: ["un ascenso", "un nuevo país", "un mejor salario", "confianza real", "una carrera global"] },
     spanish: { eyebrow: "Español para internacionales", line1: "Aprende español.", greet: "hola.",
@@ -44,8 +54,8 @@ const HERO = {
 };
 
 const STATS = {
-  en: [ { b: "1,200+", s: "lessons taught" }, { b: "4.9★", s: "average rating" }, { b: "12", s: "countries reached" }, { b: "MX · EU · UAE", s: "and Latin America" } ],
-  es: [ { b: "1.200+", s: "clases impartidas" }, { b: "4.9★", s: "valoración media" }, { b: "12", s: "países alcanzados" }, { b: "MX · EU · EAU", s: "y Latinoamérica" } ],
+  en: [ { b: "1,200+", s: "lessons taught" }, { b: "4.9★", s: "average rating" }, { b: "12", s: "countries reached" }, { b: "UAE · Gulf · EU", s: "and worldwide online" } ],
+  es: [ { b: "1.200+", s: "clases impartidas" }, { b: "4.9★", s: "valoración media" }, { b: "12", s: "países alcanzados" }, { b: "EAU · Golfo · UE", s: "y en todo el mundo online" } ],
 };
 
 const TAGS = {
@@ -55,12 +65,12 @@ const TAGS = {
 
 const WHY = {
   en: [
-    { n: "01", h: "A door to the opportunity you want", p: "The interview, the promotion, the international role, the move abroad — a language is what gets you into the room." },
+    { n: "01", h: "A door to the opportunity you want", p: "The IELTS band, the visa, the university place, the promotion, the move abroad — a language is what gets you into the room." },
     { n: "02", h: "The confidence to actually speak", p: "We teach you to be understood, not to be perfect. You'll be speaking from your very first lesson." },
     { n: "03", h: "A plan shaped around your life", p: "Your goals, your schedule, your pace — in English or Spanish. Never a one-size-fits-all class." },
   ],
   es: [
-    { n: "01", h: "Una puerta a la oportunidad que quieres", p: "La entrevista, el ascenso, el puesto internacional, la mudanza: un idioma es lo que te abre la puerta." },
+    { n: "01", h: "Una puerta a la oportunidad que quieres", p: "La nota del IELTS, la visa, la plaza universitaria, el ascenso, la mudanza: un idioma es lo que te abre la puerta." },
     { n: "02", h: "La confianza para hablar de verdad", p: "Te enseñamos a que te entiendan, no a ser perfecto. Hablarás desde tu primera clase." },
     { n: "03", h: "Un plan a la medida de tu vida", p: "Tus metas, tu horario, tu ritmo, en inglés o español. Nunca una clase igual para todos." },
   ],
@@ -107,20 +117,43 @@ const BENEFITS = {
 
 const FAQ = {
   en: [
+    { q: "Which exams do you prepare students for?", a: "IELTS (Academic and General Training), PTE Academic and TOEFL iBT. Every student gets 1-to-1 lessons with an experienced native teacher, a personal study plan, and a weekly live exam class. Our Head of Exams is a licensed IELTS teacher with 14+ years of experience." },
+    { q: "Is the Conversation Club included with exam prep?", a: "Yes. Every exam-prep package includes free access to our Conversation / Exam Talk Prep Club, so you practise speaking every week alongside your private lessons." },
     { q: "Do you teach both English and Spanish?", a: "Yes. English for Spanish speakers, and Spanish for English speakers, professionals and expats — including across Europe and Dubai. Same personalised method, either direction." },
     { q: "Can complete beginners join?", a: "Absolutely. We start exactly where you are and build from your very first lesson. Many of our students began from zero." },
     { q: "Do I need to speak well already for the demo?", a: "Not at all. The demo is a relaxed 15-minute chat to find your level and your goals. There's zero pressure and nothing to prepare." },
     { q: "How does the membership work?", a: "Monthly access to resources, live group speaking sessions, weekly plans and community. It's $10 for the first month, then $15 after — cancel anytime." },
     { q: "How do I choose or change my teacher?", a: "We match you with the right teacher after your demo. If you'd like a different fit later, you can switch anytime — no awkwardness." },
-    { q: "Where are your students based?", a: "Across Mexico and Latin America, and increasingly Europe and Dubai. Everything is online and scheduled around your life." },
+    { q: "Where are your students based?", a: "Mostly across the UAE and the Gulf and Europe, with students worldwide. Everything is online and scheduled around your time zone." },
   ],
   es: [
+    { q: "¿Para qué exámenes preparan?", a: "IELTS (Academic y General Training), PTE Academic y TOEFL iBT. Cada estudiante recibe clases 1 a 1 con un profe nativo con experiencia, un plan de estudio personal y una clase de examen en vivo cada semana. Nuestro Jefe de Exámenes es profesor de IELTS con licencia y más de 14 años de experiencia." },
+    { q: "¿El Club de conversación está incluido con la preparación de exámenes?", a: "Sí. Cada paquete de preparación de exámenes incluye acceso gratis a nuestro Conversation / Exam Talk Prep Club, para que practiques la conversación cada semana además de tus clases privadas." },
     { q: "¿Enseñan inglés y español?", a: "Sí. Inglés para hispanohablantes, y español para angloparlantes, profesionales y expatriados, incluso en Europa y Dubái. El mismo método personalizado, en cualquier dirección." },
     { q: "¿Pueden unirse principiantes totales?", a: "Por supuesto. Empezamos justo donde estás y construimos desde tu primera clase. Muchos de nuestros estudiantes empezaron desde cero." },
     { q: "¿Necesito hablar bien para la clase de prueba?", a: "Para nada. La prueba es una charla relajada de 15 minutos para conocer tu nivel y tus metas. Sin presión y sin nada que preparar." },
     { q: "¿Cómo funciona la membresía?", a: "Acceso mensual a recursos, sesiones grupales de conversación en vivo, planes semanales y comunidad. Son $10 el primer mes, luego $15, y cancelas cuando quieras." },
     { q: "¿Cómo elijo o cambio de profe?", a: "Te asignamos al profe indicado después de tu prueba. Si más adelante prefieres otro, puedes cambiar cuando quieras, sin problema." },
-    { q: "¿De dónde son tus estudiantes?", a: "De México y Latinoamérica, y cada vez más de Europa y Dubái. Todo es online y se adapta a tu horario." },
+    { q: "¿De dónde son tus estudiantes?", a: "Sobre todo de los Emiratos, el Golfo y Europa, con estudiantes en todo el mundo. Todo es online y se adapta a tu zona horaria." },
+  ],
+};
+
+const EXAMS = {
+  en: [
+    { name: "IELTS", full: "Academic & General Training", color: "var(--teal)", for: "For university, work and visas in the UK, Australia, Canada and beyond.",
+      points: ["All four skills: listening, reading, writing, speaking", "Writing Task 1 & 2 marked with clear feedback", "Speaking mock tests in real exam format"] },
+    { name: "PTE", full: "PTE Academic", color: "var(--orange)", for: "The fast, computer-based test — popular for Australia and New Zealand.",
+      points: ["Strategies for every computer-scored task", "Pronunciation and oral fluency training", "Timed practice under real exam conditions"] },
+    { name: "TOEFL", full: "TOEFL iBT", color: "var(--cyan)", for: "The academic test for universities in the US and worldwide.",
+      points: ["Integrated speaking and writing tasks", "Academic vocabulary and note-taking", "Full practice tests with score feedback"] },
+  ],
+  es: [
+    { name: "IELTS", full: "Academic y General Training", color: "var(--teal)", for: "Para universidad, trabajo y visas en Reino Unido, Australia, Canadá y más.",
+      points: ["Las cuatro habilidades: listening, reading, writing, speaking", "Writing Task 1 y 2 corregidos con feedback claro", "Simulacros de speaking en formato real"] },
+    { name: "PTE", full: "PTE Academic", color: "var(--orange)", for: "El examen rápido por computadora, muy usado para Australia y Nueva Zelanda.",
+      points: ["Estrategias para cada tarea calificada por computadora", "Entrenamiento de pronunciación y fluidez", "Práctica cronometrada en condiciones reales"] },
+    { name: "TOEFL", full: "TOEFL iBT", color: "var(--cyan)", for: "El examen académico para universidades en EE. UU. y en todo el mundo.",
+      points: ["Tareas integradas de speaking y writing", "Vocabulario académico y toma de notas", "Exámenes de práctica completos con feedback"] },
   ],
 };
 
@@ -143,8 +176,9 @@ const TEACHERS: { [k in Lang]: { name: string; teaches: string; meta: string; ph
 
 const UI = {
   en: {
-    login: "Log in", memberLogin: "Member login", bookDemo: "Book a free demo", exploreMembership: "Explore the membership",
-    iWantToLearn: "I want to learn", learnEnglish: "English", learnSpanish: "Spanish",
+    login: "Log in", memberLogin: "Member login", bookDemo: "Book a free demo", exploreMembership: "Explore the Conversation Club",
+    iWantToLearn: "I want", learnExams: "Exam prep", learnEnglish: "English", learnSpanish: "Spanish", unlock: "Unlock",
+    bookExamDemo: "Book a free exam demo", joinClub: "Join the Conversation Club", examsVisual: "IELTS · PTE · TOEFL", targetScore: "Target score",
     heroFoot: "Free 15-minute demo · meet a teacher · zero pressure", liveLesson: "Live lesson", confidence: "Confidence",
     whyEyebrow: "Why MundoLingu", whyTitle: "We don't sell lessons. We open doors.",
     visionEyebrow: "Our vision", visionBody: "Most language schools hand everyone the same syllabus and hope they keep up. We were built on the opposite conviction: that a language is deeply personal — bound up with the job you're chasing, the country you're moving to, the person you're becoming. So we start with you, and shape everything around where you're going.",
@@ -152,24 +186,30 @@ const UI = {
     founderQuote: "“Whether your next step is a promotion, a move abroad, or simply the courage to speak — we'll build the path with you.”", founderBy: "Jurgen · Founder, MundoLingu",
     methodEyebrow: "How it works", methodTitle: "A journey, not a course.",
     storiesEyebrow: "Student stories", storiesTitle: "Real people. Real change.",
-    membEyebrow: "The membership", membTitle: "Your language journey starts here.", membLead: "Everything you need to keep going — in English or Spanish — with a community moving right alongside you.",
-    membTag: "Membership", firstMonth: "first month", membSub: "then $15 / month · cancel anytime · English or Spanish", joinMembership: "Join the membership", tryFirst: "Prefer to try first? Start with a free demo lesson.",
+    membEyebrow: "The Conversation Club", membTitle: "Speak every week. Build real confidence.", membLead: "Our English and Spanish Conversation Clubs: a weekly live class, monthly workbooks and feedback from a professional teacher. All levels welcome — and free with every exam-prep package.",
+    membTag: "Conversation Club", firstMonth: "first month", membSub: "then $15 / month · cancel anytime · English or Spanish", joinMembership: "Join the Conversation Club", clubFree: "Free with every IELTS, PTE & TOEFL package", tryFirst: "Prefer to try first? Start with a free demo lesson.",
     pricingEyebrow: "Pricing", pricingTitle: "Choose the path that fits your goal.",
-    planCommunity: "Learn with a community", planCommunityFor: "For motivated self-starters who want structure and momentum.", planCommunityPrice: "first month, then $15/mo",
-    planCommunityList: ["Live group speaking sessions", "Weekly plans, workbooks & resources", "Community & accountability", "Member discounts on 1-to-1 lessons", "English or Spanish"],
+    planCommunity: "Speak every week", planCommunityFor: "For anyone who wants regular speaking practice, structure and momentum.", planCommunityPrice: "first month, then $15/mo",
+    planCommunityList: ["A weekly live conversation class", "Monthly workbooks & resources", "Feedback from a professional teacher", "All levels welcome", "English or Spanish"],
+    planExamTag: "Exam prep 1-to-1", planExam: "Pass IELTS, PTE or TOEFL", planExamFor: "For students who need a target score for study, work or a visa.", planExamPrice: "Packages", planExamPriceSub: "single lessons, 10 or 20",
+    planExamList: ["Your own experienced native teacher", "A personal study plan for your target score", "Mock tests with detailed feedback", "A weekly live exam class included", "Conversation Club included free"],
     planPrivateTag: "Private 1-to-1", planPrivate: "Learn with your own teacher", planPrivateFor: "For the fastest, most personal progress toward a specific goal.", planPrivatePrice: "Personalised", planPrivatePriceSub: "priced to your plan",
     planPrivateList: ["Your own dedicated teacher", "A plan built for your goal or exam", "Flexible scheduling around your life", "The fastest route to fluency", "English or Spanish"],
     pricingFoot: "Every path starts with a free 15-minute demo lesson.",
+    examsEyebrow: "Exam preparation", examsTitle: "IELTS, PTE & TOEFL — prepared properly.", examsLead: "Whether you need a score for university, a visa or your career, you get your own teacher and a plan built around you. Led by our Head of Exams, a licensed IELTS teacher with 14+ years of experience across South Africa and the UAE.",
+    examsIncl: "Included with every exam package", examsInclList: ["1-to-1 lessons with an experienced native teacher", "A personal study plan for your target score", "A weekly live exam class", "Free Conversation / Exam Talk Prep Club"],
+    bandCheck: "Try our free IELTS band check", ieltsDubai: "IELTS preparation in Dubai",
     faqEyebrow: "Questions", faqTitle: "Everything you might be wondering.",
     igTitle: "Follow the journey.", igLead: "Daily tips, student wins, and behind-the-scenes with our teachers — come say hi on Instagram.", igBtn: "Follow on Instagram",
-    finalEyebrow: "Book a free demo", finalTitle: "Your bigger life is one conversation away.", finalLead: "A free 15-minute demo. Meet a teacher, find your level, and leave with a plan — in English or Spanish. No pressure, no commitment.", demoAlt: "Prefer to start on your own?",
+    finalEyebrow: "Book a free demo", finalTitle: "Your bigger life is one conversation away.", finalLead: "A free 15-minute demo. Meet a teacher, find your level, and leave with a plan — for IELTS, PTE, TOEFL, English or Spanish. No pressure, no commitment.", demoAlt: "Prefer to start on your own?",
     teamEyebrow: "The MundoLingu team", teamTitle: "The people behind your progress.", teamLead: "A small, dedicated team of teachers and mentors — each one here to help you speak with confidence, in English or Spanish.",
     bookWith: "Book a demo with", readyToMeet: "Ready to meet yours?", applyTitle: "Want to teach with us?", applyBody: "We're always looking for passionate English and Spanish teachers who care about real progress. Send your CV and a few words about yourself — if you're a great fit, we'll be in touch.", applyBtn: "Send your CV",
-    footTag: "English & Spanish, made personal. Online lessons that turn a language into an opportunity.", explore: "Explore", contact: "Contact", footBar: "© 2026 MundoLingu · Online — Mexico · Latin America · Europe · Dubai",
+    footTag: "IELTS, PTE & TOEFL preparation, plus English & Spanish made personal. Online lessons that turn a language into an opportunity.", explore: "Explore", contact: "Contact", footBar: "© 2026 MundoLingu · Online — UAE · Gulf · Europe · Worldwide",
   },
   es: {
-    login: "Entrar", memberLogin: "Acceso de miembros", bookDemo: "Reserva una clase gratis", exploreMembership: "Explora la membresía",
-    iWantToLearn: "Quiero aprender", learnEnglish: "Inglés", learnSpanish: "Español",
+    login: "Entrar", memberLogin: "Acceso de miembros", bookDemo: "Reserva una clase gratis", exploreMembership: "Explora el Club de conversación",
+    iWantToLearn: "Quiero", learnExams: "Exámenes", learnEnglish: "Inglés", learnSpanish: "Español", unlock: "Desbloquea",
+    bookExamDemo: "Reserva una clase de examen gratis", joinClub: "Únete al Club de conversación", examsVisual: "IELTS · PTE · TOEFL", targetScore: "Nota objetivo",
     heroFoot: "Clase de prueba de 15 min · conoce a un profe · sin compromiso", liveLesson: "Clase en vivo", confidence: "Confianza",
     whyEyebrow: "Por qué MundoLingu", whyTitle: "No vendemos clases. Abrimos puertas.",
     visionEyebrow: "Nuestra visión", visionBody: "La mayoría de las escuelas dan a todos el mismo temario y esperan que sigan el ritmo. Nosotros nacimos con la convicción contraria: que un idioma es algo profundamente personal, ligado al trabajo que buscas, al país al que te mudas, a la persona en la que te conviertes. Por eso empezamos por ti y lo diseñamos todo en torno a hacia dónde vas.",
@@ -177,20 +217,25 @@ const UI = {
     founderQuote: "“Ya sea un ascenso, una mudanza al extranjero o simplemente el valor de hablar, construiremos el camino contigo.”", founderBy: "Jurgen · Fundador, MundoLingu",
     methodEyebrow: "Cómo funciona", methodTitle: "Un camino, no un curso.",
     storiesEyebrow: "Historias de estudiantes", storiesTitle: "Personas reales. Cambios reales.",
-    membEyebrow: "La membresía", membTitle: "Tu viaje con el idioma empieza aquí.", membLead: "Todo lo que necesitas para seguir avanzando, en inglés o español, con una comunidad que avanza a tu lado.",
-    membTag: "Membresía", firstMonth: "el primer mes", membSub: "luego $15/mes · cancela cuando quieras · inglés o español", joinMembership: "Únete a la membresía", tryFirst: "¿Prefieres probar primero? Empieza con una clase gratis.",
+    membEyebrow: "El Club de conversación", membTitle: "Habla cada semana. Gana confianza real.", membLead: "Nuestros Clubs de conversación en inglés y en español: una clase en vivo cada semana, cuadernos mensuales y feedback de un profe profesional. Para todos los niveles, y gratis con cada paquete de preparación de exámenes.",
+    membTag: "Club de conversación", firstMonth: "el primer mes", membSub: "luego $15/mes · cancela cuando quieras · inglés o español", joinMembership: "Únete al Club de conversación", clubFree: "Gratis con cada paquete de IELTS, PTE y TOEFL", tryFirst: "¿Prefieres probar primero? Empieza con una clase gratis.",
     pricingEyebrow: "Precios", pricingTitle: "Elige el camino que encaja con tu meta.",
-    planCommunity: "Aprende en comunidad", planCommunityFor: "Para personas motivadas que quieren estructura e impulso.", planCommunityPrice: "primer mes, luego $15/mes",
-    planCommunityList: ["Sesiones grupales de conversación en vivo", "Planes semanales, cuadernos y recursos", "Comunidad y motivación", "Descuentos de miembro en clases 1 a 1", "Inglés o español"],
+    planCommunity: "Habla cada semana", planCommunityFor: "Para quien quiere práctica oral constante, estructura e impulso.", planCommunityPrice: "primer mes, luego $15/mes",
+    planCommunityList: ["Una clase de conversación en vivo cada semana", "Cuadernos y recursos mensuales", "Feedback de un profe profesional", "Para todos los niveles", "Inglés o español"],
+    planExamTag: "Exámenes 1 a 1", planExam: "Aprueba IELTS, PTE o TOEFL", planExamFor: "Para quien necesita una nota para estudiar, trabajar o una visa.", planExamPrice: "Paquetes", planExamPriceSub: "clases sueltas, 10 o 20",
+    planExamList: ["Tu propio profe nativo con experiencia", "Un plan de estudio para tu nota objetivo", "Simulacros con feedback detallado", "Una clase de examen en vivo semanal incluida", "Club de conversación incluido gratis"],
     planPrivateTag: "Privado 1 a 1", planPrivate: "Aprende con tu propio profe", planPrivateFor: "Para el progreso más rápido y personal hacia una meta concreta.", planPrivatePrice: "Personalizado", planPrivatePriceSub: "según tu plan",
     planPrivateList: ["Tu propio profe dedicado", "Un plan hecho para tu meta o examen", "Horarios flexibles a tu medida", "El camino más rápido a la fluidez", "Inglés o español"],
     pricingFoot: "Todo empieza con una clase de prueba gratis de 15 minutos.",
+    examsEyebrow: "Preparación de exámenes", examsTitle: "IELTS, PTE y TOEFL, bien preparados.", examsLead: "Necesites una nota para la universidad, una visa o tu carrera, tendrás tu propio profe y un plan hecho para ti. Dirigido por nuestro Jefe de Exámenes, profesor de IELTS con licencia y más de 14 años de experiencia en Sudáfrica y los Emiratos.",
+    examsIncl: "Incluido en cada paquete de examen", examsInclList: ["Clases 1 a 1 con un profe nativo con experiencia", "Un plan de estudio personal para tu nota objetivo", "Una clase de examen en vivo cada semana", "Conversation / Exam Talk Prep Club gratis"],
+    bandCheck: "Haz nuestro test IELTS gratis", ieltsDubai: "Preparación IELTS en Dubái",
     faqEyebrow: "Preguntas", faqTitle: "Todo lo que quizás te preguntas.",
     igTitle: "Sigue el camino.", igLead: "Consejos diarios, logros de estudiantes y el detrás de cámaras con nuestros profes. Ven a saludarnos en Instagram.", igBtn: "Síguenos en Instagram",
-    finalEyebrow: "Reserva una clase gratis", finalTitle: "Tu vida más grande está a una conversación de distancia.", finalLead: "Una clase de prueba gratis de 15 minutos. Conoce a un profe, descubre tu nivel y sal con un plan, en inglés o español. Sin presión, sin compromiso.", demoAlt: "¿Prefieres empezar por tu cuenta?",
+    finalEyebrow: "Reserva una clase gratis", finalTitle: "Tu vida más grande está a una conversación de distancia.", finalLead: "Una clase de prueba gratis de 15 minutos. Conoce a un profe, descubre tu nivel y sal con un plan: IELTS, PTE, TOEFL, inglés o español. Sin presión, sin compromiso.", demoAlt: "¿Prefieres empezar por tu cuenta?",
     teamEyebrow: "El equipo de MundoLingu", teamTitle: "Las personas detrás de tu progreso.", teamLead: "Un equipo pequeño y dedicado de profes y mentores, cada uno aquí para ayudarte a hablar con confianza, en inglés o español.",
     bookWith: "Reserva una clase con", readyToMeet: "¿Quieres conocer al tuyo?", applyTitle: "¿Quieres enseñar con nosotros?", applyBody: "Siempre buscamos profes apasionados de inglés y español a quienes les importe el progreso real. Envía tu CV y unas líneas sobre ti; si encajas, te contactamos.", applyBtn: "Envía tu CV",
-    footTag: "Inglés y español, hechos personales. Clases online que convierten un idioma en una oportunidad.", explore: "Explora", contact: "Contacto", footBar: "© 2026 MundoLingu · Online — México · Latinoamérica · Europa · Dubái",
+    footTag: "Preparación IELTS, PTE y TOEFL, más inglés y español hechos personales. Clases online que convierten un idioma en una oportunidad.", explore: "Explora", contact: "Contacto", footBar: "© 2026 MundoLingu · Online — EAU · Golfo · Europa · Todo el mundo",
   },
 };
 
@@ -198,7 +243,7 @@ export default function Site() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [lang, setLang] = useState<Lang>("en");
-  const [learn, setLearn] = useState<"english" | "spanish">("english");
+  const [learn, setLearn] = useState<Learn>("exams");
   const [wi, setWi] = useState(0);
   const [faq, setFaq] = useState(0);
   const [page, setPage] = useState<"home" | "team">("home");
@@ -353,18 +398,25 @@ export default function Site() {
                   <span className="ml-eyebrow">{hero.eyebrow}</span>
                   <h1>
                     <span className="ml-unlock">{hero.line1}</span><br />
-                    {lang === "es" ? "Desbloquea" : "Unlock"} <span key={lang + learn + wi} className="ml-rotator ml-rotator--anim">{word}</span>.
+                    {t.unlock} <span key={lang + learn + wi} className="ml-rotator ml-rotator--anim">{word}</span>.
                   </h1>
                   <p className="ml-lead">{hero.sub}</p>
 
+                  <div className="ml-exam-chips" aria-label="Exams we prepare for">
+                    {EXAM_CHIPS.map((x) => (
+                      <a key={x} className="ml-exam-chip" href="#exams" onClick={(e) => { e.preventDefault(); go("exams"); }}>{x}</a>
+                    ))}
+                  </div>
+
                   <div className="ml-hero-ctas">
-                    <a className="ml-btn ml-btn--primary" href="#demo" onClick={(e) => { e.preventDefault(); go("demo"); }}>{t.bookDemo} <ArrowRight /></a>
-                    <a className="ml-btn ml-btn--ghost" href="#membership" onClick={(e) => { e.preventDefault(); go("membership"); }}>{t.exploreMembership} <ArrowRight /></a>
+                    <a className="ml-btn ml-btn--primary" href="#demo" onClick={(e) => { e.preventDefault(); go("demo"); }}>{learn === "exams" ? t.bookExamDemo : t.bookDemo} <ArrowRight /></a>
+                    <a className="ml-btn ml-btn--ghost" href="#membership" onClick={(e) => { e.preventDefault(); go("membership"); }}>{t.joinClub} <ArrowRight /></a>
                   </div>
 
                   <div className="ml-learn" style={{ marginTop: 34 }}>
                     <span className="ml-learn-label">{t.iWantToLearn}</span>
-                    <div className="ml-learn-seg" role="group" aria-label="Choose a language to learn">
+                    <div className="ml-learn-seg" role="group" aria-label="Choose what to learn">
+                      <button className={learn === "exams" ? "is-active" : ""} aria-pressed={learn === "exams"} onClick={() => setLearn("exams")}>{t.learnExams}</button>
                       <button className={learn === "english" ? "is-active" : ""} aria-pressed={learn === "english"} onClick={() => setLearn("english")}>{t.learnEnglish}</button>
                       <button className={learn === "spanish" ? "is-active" : ""} aria-pressed={learn === "spanish"} onClick={() => setLearn("spanish")}>{t.learnSpanish}</button>
                     </div>
@@ -376,12 +428,12 @@ export default function Site() {
                 <div className="ml-visual" aria-hidden="true">
                   <div className="ml-visual-top">
                     <span className="ml-live"><b />{t.liveLesson}</span>
-                    <span>{learn === "english" ? (lang === "es" ? "Inglés" : "English") : "Español"} · A1 → C1</span>
+                    <span>{learn === "exams" ? t.examsVisual : (learn === "english" ? (lang === "es" ? "Inglés" : "English") : "Español") + " · A1 → C1"}</span>
                   </div>
                   <div className="ml-greet"><span key={learn}>{hero.greet}</span></div>
                   <div className="ml-visual-bottom">
                     <div className="ml-horizon ml-horizon--draw" />
-                    <div className="ml-progress-label"><span>{t.confidence}</span><span>80%</span></div>
+                    <div className="ml-progress-label"><span>{learn === "exams" ? t.targetScore : t.confidence}</span><span>{learn === "exams" ? "7.5" : "80%"}</span></div>
                     <div className="ml-progress"><i /></div>
                   </div>
                 </div>
@@ -398,6 +450,35 @@ export default function Site() {
               <div className="ml-marquee">
                 <div className="ml-mtrack">
                   {[...TAGS[lang], ...TAGS[lang]].map((tag, i) => (<span className="ml-tag" key={i}>{tag}”</span>))}
+                </div>
+              </div>
+            </section>
+
+            {/* EXAM PREP */}
+            <section className="ml-section ml-section--dark" id="exams">
+              <div className="ml-wrap">
+                <span className="ml-eyebrow" data-reveal>{t.examsEyebrow}</span>
+                <h2 className="ml-h2" data-reveal>{t.examsTitle}</h2>
+                <p className="ml-lead" data-reveal>{t.examsLead}</p>
+                <div className="ml-exams">
+                  {EXAMS[lang].map((ex, i) => (
+                    <article className="ml-exam" data-reveal style={{ transitionDelay: i * 0.08 + "s", ["--exam" as string]: ex.color }} key={ex.name}>
+                      <div className="ml-exam-head"><h3>{ex.name}</h3><span>{ex.full}</span></div>
+                      <p className="ml-exam-for">{ex.for}</p>
+                      <ul>{ex.points.map((pt) => (<li key={pt}><Check /> {pt}</li>))}</ul>
+                      <a className="ml-btn ml-btn--primary" href="#demo" onClick={(e) => { e.preventDefault(); go("demo"); }}>{lang === "es" ? "Clase de " + ex.name + " gratis" : "Free " + ex.name + " demo"} <ArrowRight /></a>
+                    </article>
+                  ))}
+                </div>
+                <div className="ml-exam-incl" data-reveal>
+                  <h4>{t.examsIncl}</h4>
+                  <div className="ml-exam-incl-list">
+                    {t.examsInclList.map((li) => (<span key={li}><Check /> {li}</span>))}
+                  </div>
+                  <div className="ml-exam-links">
+                    <a href="/ielts-band-check">{t.bandCheck} <ArrowUpRight /></a>
+                    <a href="/ielts-preparation-dubai">{t.ieltsDubai} <ArrowUpRight /></a>
+                  </div>
                 </div>
               </div>
             </section>
@@ -484,6 +565,7 @@ export default function Site() {
                       <div className="ml-plan-tag" style={{ color: "var(--cyan)" }}>{t.membTag}</div>
                       <div className="ml-price-tag" style={{ marginTop: 14 }}>$10 <small>{t.firstMonth}</small></div>
                       <div className="ml-price-sub">{t.membSub}</div>
+                      <div className="ml-club-free"><Check /> {t.clubFree}</div>
                       <a className="ml-btn ml-btn--primary" href="#demo" onClick={(e) => { e.preventDefault(); go("demo"); }}>{t.joinMembership} <ArrowRight /></a>
                       <div className="ml-price-note">{t.tryFirst}</div>
                     </div>
@@ -497,8 +579,16 @@ export default function Site() {
               <div className="ml-wrap">
                 <span className="ml-eyebrow" data-reveal>{t.pricingEyebrow}</span>
                 <h2 className="ml-h2" data-reveal>{t.pricingTitle}</h2>
-                <div className="ml-plans">
-                  <div className="ml-plan" data-reveal>
+                <div className="ml-plans ml-plans--3">
+                  <div className="ml-plan ml-plan--feature" data-reveal>
+                    <span className="ml-plan-tag">{t.planExamTag}</span>
+                    <h3>{t.planExam}</h3>
+                    <p className="for">{t.planExamFor}</p>
+                    <div className="ml-plan-price">{t.planExamPrice} <small>{t.planExamPriceSub}</small></div>
+                    <ul>{t.planExamList.map((li) => (<li key={li}><Check /> {li}</li>))}</ul>
+                    <a className="ml-btn ml-btn--primary" href="#demo" onClick={(e) => { e.preventDefault(); go("demo"); }}>{t.bookExamDemo} <ArrowRight /></a>
+                  </div>
+                  <div className="ml-plan" data-reveal style={{ transitionDelay: "0.08s" }}>
                     <span className="ml-plan-tag">{t.membTag}</span>
                     <h3>{t.planCommunity}</h3>
                     <p className="for">{t.planCommunityFor}</p>
@@ -506,7 +596,7 @@ export default function Site() {
                     <ul>{t.planCommunityList.map((li) => (<li key={li}><Check /> {li}</li>))}</ul>
                     <a className="ml-btn ml-btn--ghost" href="#membership" onClick={(e) => { e.preventDefault(); go("membership"); }}>{t.joinMembership} <ArrowRight /></a>
                   </div>
-                  <div className="ml-plan ml-plan--feature" data-reveal style={{ transitionDelay: "0.08s" }}>
+                  <div className="ml-plan" data-reveal style={{ transitionDelay: "0.16s" }}>
                     <span className="ml-plan-tag">{t.planPrivateTag}</span>
                     <h3>{t.planPrivate}</h3>
                     <p className="for">{t.planPrivateFor}</p>

@@ -807,3 +807,37 @@ body { background: #F5F6F7; }
 .dx-faq p{margin:10px 0 0;font-size:16px;line-height:1.65;color:var(--muted);}
 @media(max-width:640px){.dx-grid{grid-template-columns:1fr;}.dx-wrap{padding:40px 20px 70px;}}
 .blog-root .ml-btn{text-decoration:none;}
+
+/* ===== Exam prep (IELTS · PTE · TOEFL) + Conversation Club ===== */
+.ml-exam-chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px;}
+.ml-exam-chip{font-size:13.5px;font-weight:700;letter-spacing:.08em;color:var(--navy);background:var(--paper-2);padding:9px 18px;border-radius:100px;box-shadow:inset 0 0 0 1.5px var(--navy);text-decoration:none;transition:background .25s,color .25s,transform .25s;}
+.ml-exam-chip:hover{background:var(--navy);color:#fff;transform:translateY(-2px);}
+.ml-exams{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:52px;}
+.ml-exam{position:relative;background:rgba(255,255,255,.04);border-radius:20px;padding:34px 30px 30px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);display:flex;flex-direction:column;overflow:hidden;transition:transform .4s cubic-bezier(.2,.8,.2,1),box-shadow .4s;}
+.ml-exam::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--exam);}
+.ml-exam:hover{transform:translateY(-4px);box-shadow:0 30px 60px -30px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.18);}
+.ml-exam-head h3{font-family:var(--serif);font-weight:400;font-size:44px;line-height:1;letter-spacing:-.01em;color:#fff;}
+.ml-exam-head span{display:block;margin-top:8px;font-size:12.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--exam);}
+.ml-exam-for{margin:18px 0 20px;font-size:15.5px;line-height:1.55;color:var(--d-muted);}
+.ml-exam ul{list-style:none;padding:0;margin:0 0 28px;display:flex;flex-direction:column;gap:11px;}
+.ml-exam li{display:flex;gap:10px;font-size:14.5px;line-height:1.45;color:var(--d-text);align-items:flex-start;}
+.ml-exam li svg{width:17px;height:17px;color:var(--exam);flex:none;margin-top:2px;}
+.ml-exam .ml-btn{margin-top:auto;justify-content:center;}
+.ml-exam-incl{margin-top:28px;border-radius:20px;padding:30px;background:linear-gradient(120deg,rgba(18,163,160,.18),rgba(55,199,212,.08) 50%,rgba(242,107,42,.14));box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);}
+.ml-exam-incl h4{font-size:12.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan);margin:0 0 16px;}
+.ml-exam-incl-list{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 20px;}
+.ml-exam-incl-list span{display:flex;gap:10px;font-size:15px;color:#fff;align-items:flex-start;line-height:1.4;}
+.ml-exam-incl-list svg{width:17px;height:17px;color:var(--orange);flex:none;margin-top:2px;}
+.ml-exam-links{display:flex;flex-wrap:wrap;gap:22px;margin-top:22px;padding-top:18px;border-top:1px solid rgba(255,255,255,.1);}
+.ml-exam-links a{display:inline-flex;align-items:center;gap:6px;font-size:14.5px;font-weight:600;color:var(--cyan);text-decoration:none;}
+.ml-exam-links a:hover{color:#fff;}
+.ml-exam-links svg{width:16px;height:16px;}
+.ml-club-free{display:flex;gap:8px;align-items:center;font-size:13.5px;font-weight:600;color:var(--cyan);margin:-6px 0 22px;}
+.ml-club-free svg{width:16px;height:16px;flex:none;}
+.ml-plans--3{grid-template-columns:repeat(3,1fr);}
+@media(max-width:1100px){.ml-exam-incl-list{grid-template-columns:1fr 1fr;}}
+@media(max-width:900px){
+  .ml-exams,.ml-plans--3{grid-template-columns:1fr;}
+  .ml-exam-head h3{font-size:38px;}
+}
+@media(max-width:560px){.ml-exam-incl-list{grid-template-columns:1fr;}.ml-exam-incl{padding:24px 20px;}}
