@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Newsreader, Hanken_Grotesk } from "next/font/google";
+import { Newsreader, Hanken_Grotesk, IBM_Plex_Sans_Arabic, Noto_Naskh_Arabic } from "next/font/google";
 import "./globals.css";
 
 const serif = Newsreader({
@@ -14,6 +14,22 @@ const sans = Hanken_Grotesk({
   weight: ["400", "500", "600", "700"],
   variable: "--font-sans",
   display: "swap",
+});
+
+// Arabic fonts: only downloaded when the Arabic version is shown.
+const arSans = IBM_Plex_Sans_Arabic({
+  subsets: ["arabic"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-ar-sans",
+  display: "swap",
+  preload: false,
+});
+const arSerif = Noto_Naskh_Arabic({
+  subsets: ["arabic"],
+  weight: ["400", "500", "600"],
+  variable: "--font-ar-serif",
+  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -65,7 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <style>{`[data-reveal]{opacity:1 !important;transform:none !important;}`}</style>
         </noscript>
       </head>
-      <body className={`${serif.variable} ${sans.variable}`}>
+      <body className={`${serif.variable} ${sans.variable} ${arSans.variable} ${arSerif.variable}`}>
         {children}
         {process.env.NEXT_PUBLIC_CF_ANALYTICS_TOKEN ? (
           <script
