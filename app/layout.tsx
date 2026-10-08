@@ -19,25 +19,30 @@ const sans = Hanken_Grotesk({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://mundolingu.com"),
   title: {
-    default: "MundoLingu — English & Spanish, made personal",
+    default: "MundoLingu — IELTS, PTE & TOEFL prep, English & Spanish online",
     template: "%s — MundoLingu",
   },
   description:
-    "Personalised online English and Spanish lessons — for a bigger career, a new country, or the confidence to speak. Book a free demo lesson.",
+    "1-to-1 online IELTS, PTE and TOEFL preparation with experienced native teachers, plus English and Spanish lessons and a weekly Conversation Club. For students in the UAE, the Gulf and Europe. Book a free demo lesson.",
   keywords: [
+    "IELTS preparation Dubai",
+    "IELTS preparation online",
+    "PTE preparation UAE",
+    "TOEFL preparation online",
+    "IELTS tutor UAE",
+    "English conversation club",
     "learn English online",
     "learn Spanish online",
     "English for Spanish speakers",
     "Spanish for expats",
     "online language lessons",
     "private English tutor",
-    "English classes Mexico",
     "Spanish lessons Dubai",
   ],
   openGraph: {
-    title: "MundoLingu — English & Spanish, made personal",
+    title: "MundoLingu — IELTS, PTE & TOEFL prep, English & Spanish online",
     description:
-      "Personalised online English and Spanish lessons. Book a free demo lesson.",
+      "1-to-1 IELTS, PTE and TOEFL preparation, plus English and Spanish lessons and a weekly Conversation Club. Book a free demo lesson.",
     url: "/",
     siteName: "MundoLingu",
     type: "website",
@@ -45,8 +50,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "MundoLingu — English & Spanish, made personal",
-    description: "Personalised online English and Spanish lessons.",
+    title: "MundoLingu — IELTS, PTE & TOEFL prep, English & Spanish online",
+    description: "1-to-1 IELTS, PTE and TOEFL preparation, plus English and Spanish lessons online.",
   },
   alternates: { canonical: "/" },
 };
