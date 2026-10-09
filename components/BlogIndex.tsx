@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ArrowRight, Globe } from "lucide-react";
+import Script from "next/script";
 import { POSTS } from "@/lib/posts";
 
 export default function BlogIndex() {
@@ -46,6 +47,12 @@ export default function BlogIndex() {
             );
           })}
         </div>
+        {/* Soro auto-published articles */}
+        <div id="soro-blog" style={{ marginTop: 48 }}></div>
+        <Script
+          src="https://app.trysoro.com/api/embed/5b64cdd8-8a33-41e9-a0fd-9f6fd3151de0"
+          strategy="afterInteractive"
+        />
       </div>
     </div>
   );
