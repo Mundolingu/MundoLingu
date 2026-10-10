@@ -199,19 +199,19 @@ const FAQ = {
 
 const EXAMS = {
   en: [
-    { name: "IELTS", full: "Academic & General Training", color: "var(--teal)", for: "For university, work and visas in the UK, Australia, Canada and beyond.",
+    { name: "IELTS", full: "Academic & General Training", badge: "Most accepted", color: "var(--teal)", for: "For university, work and visas in the UK, Australia, Canada and beyond.",
       points: ["All four skills: listening, reading, writing, speaking", "Writing Task 1 & 2 marked with clear feedback", "Speaking mock tests in real exam format"] },
-    { name: "PTE", full: "PTE Academic", color: "var(--orange)", for: "The fast, computer-based test — popular for Australia and New Zealand.",
+    { name: "PTE", full: "PTE Academic", badge: "Fastest results", color: "var(--orange)", for: "The fast, computer-based test — accepted for UK, Australian and New Zealand visas, and by ÖSYM in Turkey.",
       points: ["Strategies for every computer-scored task", "Pronunciation and oral fluency training", "Timed practice under real exam conditions"] },
-    { name: "TOEFL", full: "TOEFL iBT", color: "var(--cyan)", for: "The academic test for universities in the US and worldwide.",
+    { name: "TOEFL", full: "TOEFL iBT", badge: "For US universities", color: "var(--cyan)", for: "The academic test for universities in the US and worldwide.",
       points: ["Integrated speaking and writing tasks", "Academic vocabulary and note-taking", "Full practice tests with score feedback"] },
   ],
   es: [
-    { name: "IELTS", full: "Academic y General Training", color: "var(--teal)", for: "Para universidad, trabajo y visas en Reino Unido, Australia, Canadá y más.",
+    { name: "IELTS", full: "Academic y General Training", badge: "El más aceptado", color: "var(--teal)", for: "Para universidad, trabajo y visas en Reino Unido, Australia, Canadá y más.",
       points: ["Las cuatro habilidades: listening, reading, writing, speaking", "Writing Task 1 y 2 corregidos con feedback claro", "Simulacros de speaking en formato real"] },
-    { name: "PTE", full: "PTE Academic", color: "var(--orange)", for: "El examen rápido por computadora, muy usado para Australia y Nueva Zelanda.",
+    { name: "PTE", full: "PTE Academic", badge: "Resultados más rápidos", color: "var(--orange)", for: "El examen rápido por computadora: aceptado para visas de Reino Unido, Australia y Nueva Zelanda, y por ÖSYM en Turquía.",
       points: ["Estrategias para cada tarea calificada por computadora", "Entrenamiento de pronunciación y fluidez", "Práctica cronometrada en condiciones reales"] },
-    { name: "TOEFL", full: "TOEFL iBT", color: "var(--cyan)", for: "El examen académico para universidades en EE. UU. y en todo el mundo.",
+    { name: "TOEFL", full: "TOEFL iBT", badge: "Para universidades de EE. UU.", color: "var(--cyan)", for: "El examen académico para universidades en EE. UU. y en todo el mundo.",
       points: ["Tareas integradas de speaking y writing", "Vocabulario académico y toma de notas", "Exámenes de práctica completos con feedback"] },
   ],
   ar: AR.EXAMS,
@@ -552,6 +552,7 @@ export default function Site() {
                 <div className="ml-exams">
                   {EXAMS[lang].map((ex, i) => (
                     <article className="ml-exam" data-reveal style={{ transitionDelay: i * 0.08 + "s", ["--exam" as string]: ex.color }} key={ex.name}>
+                      <span className="ml-exam-badge">{ex.badge}</span>
                       <div className="ml-exam-head"><h3>{ex.name}</h3><span>{ex.full}</span></div>
                       <p className="ml-exam-for">{ex.for}</p>
                       <ul>{ex.points.map((pt) => (<li key={pt}><Check /> {pt}</li>))}</ul>
