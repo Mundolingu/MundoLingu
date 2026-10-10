@@ -252,15 +252,16 @@ const UI = {
     methodEyebrow: "How it works", methodTitle: "A journey, not a course.",
     storiesEyebrow: "Student stories", storiesTitle: "Real people. Real change.",
     membEyebrow: "The Conversation Club", membTitle: "Speak every week. Build real confidence.", membLead: "Our English and Spanish Conversation Clubs: a weekly live class, monthly workbooks and feedback from a professional teacher. All levels welcome — and free with every exam-prep package.",
-    membTag: "Conversation Club", firstMonth: "first month", membSub: "then $15 / month · cancel anytime · English or Spanish", joinMembership: "Join the Conversation Club", clubFree: "Free with every IELTS, PTE & TOEFL package", tryFirst: "Prefer to try first? Start with a free demo lesson.",
+    membTag: "Conversation Club", firstMonth: "first month", membSub: "then $15 / month · cancel anytime · English or Spanish", joinMembership: "Join the Conversation Club", clubFree: "Free with every package — exam prep and 1-to-1 lessons", tryFirst: "Prefer to try first? Start with a free demo lesson.",
     pricingEyebrow: "Pricing", pricingTitle: "Choose the path that fits your goal.",
     planCommunity: "Speak every week", planCommunityFor: "For anyone who wants regular speaking practice, structure and momentum.", planCommunityPrice: "first month, then $15/mo",
     planCommunityList: ["A weekly live conversation class", "Monthly workbooks & resources", "Feedback from a professional teacher", "All levels welcome", "English or Spanish"],
     planExamTag: "Exam prep 1-to-1", planExam: "Pass IELTS, PTE or TOEFL", planExamFor: "For students who need a target score for study, work or a visa.", planExamPrice: "3 packages", planExamPriceSub: "10, 20 or 30 lessons",
     planExamList: ["Your own experienced native teacher", "A personal study plan for your target score", "Extra homework whenever you ask", "24/7 WhatsApp support", "Free group classes + weekly live exam class"],
     planPrivateTag: "Private 1-to-1", planPrivate: "Learn with your own teacher", planPrivateFor: "For the fastest, most personal progress toward a specific goal.", planPrivatePrice: "Personalised", planPrivatePriceSub: "priced to your plan",
-    planPrivateList: ["Your own dedicated teacher", "A plan built for your goal or exam", "Flexible scheduling around your life", "The fastest route to fluency", "English or Spanish"],
+    planPrivateList: ["Your own dedicated teacher", "A plan built for your goal or exam", "Flexible scheduling around your life", "Free Conversation Club included", "English, Spanish, Dutch — or ask for any language"],
     pricingFoot: "Every path starts with a free 15-minute demo lesson.",
+    lrEyebrow: "Language request", lrTitle: "Want to learn another language?", lrLead: "Tell us which language you want to learn and we will look for the right teacher for you. Every 1-to-1 package includes free access to our Conversation Club.", lrChips: ["Dutch", "French", "German", "Italian", "Arabic", "Portuguese", "Turkish", "Mandarin"], lrLabel: "Which language do you want to learn?", lrPh: "e.g. French", lrBtn: "Request it on WhatsApp", lrFine: "We usually reply within 24 hours. No commitment.", lrMsg: (l: string) => `Hi MundoLingu! I would like to learn ${l}. Can you help me find a teacher?`,
     examsEyebrow: "Exam preparation", examsTitle: "IELTS, PTE & TOEFL — prepared properly.", examsLead: "Whether you need a score for university, a visa or your career, you get your own teacher and a plan built around you. Led by our Head of Exams, a licensed IELTS teacher with 14+ years of experience across South Africa and the UAE.",
     examsIncl: "Included in every package, at no extra cost", examsInclList: ["1-to-1 lessons with an experienced native teacher", "A personal study plan for your target score", "Free access to our group classes (Conversation / Exam Talk Prep Club)", "A weekly live exam class", "Extra homework whenever you ask for it", "24/7 WhatsApp support"],
     cmpEyebrow: "Why students choose us", cmpTitle: "You’re not just a number in a classroom.", cmpThem: "A typical exam course", cmpUs: "MundoLingu", cmpClose: "Every week you wait is one less week to prepare. Your free demo takes 15 minutes.",
@@ -291,7 +292,7 @@ const UI = {
     methodEyebrow: "Cómo funciona", methodTitle: "Un camino, no un curso.",
     storiesEyebrow: "Historias de estudiantes", storiesTitle: "Personas reales. Cambios reales.",
     membEyebrow: "El Club de conversación", membTitle: "Habla cada semana. Gana confianza real.", membLead: "Nuestros Clubs de conversación en inglés y en español: una clase en vivo cada semana, cuadernos mensuales y feedback de un profe profesional. Para todos los niveles, y gratis con cada paquete de preparación de exámenes.",
-    membTag: "Club de conversación", firstMonth: "el primer mes", membSub: "luego $15/mes · cancela cuando quieras · inglés o español", joinMembership: "Únete al Club de conversación", clubFree: "Gratis con cada paquete de IELTS, PTE y TOEFL", tryFirst: "¿Prefieres probar primero? Empieza con una clase gratis.",
+    membTag: "Club de conversación", firstMonth: "el primer mes", membSub: "luego $15/mes · cancela cuando quieras · inglés o español", joinMembership: "Únete al Club de conversación", clubFree: "Gratis con cada paquete: exámenes y clases 1 a 1", tryFirst: "¿Prefieres probar primero? Empieza con una clase gratis.",
     pricingEyebrow: "Precios", pricingTitle: "Elige el camino que encaja con tu meta.",
     planCommunity: "Habla cada semana", planCommunityFor: "Para quien quiere práctica oral constante, estructura e impulso.", planCommunityPrice: "primer mes, luego $15/mes",
     planCommunityList: ["Una clase de conversación en vivo cada semana", "Cuadernos y recursos mensuales", "Feedback de un profe profesional", "Para todos los niveles", "Inglés o español"],
@@ -300,6 +301,7 @@ const UI = {
     planPrivateTag: "Privado 1 a 1", planPrivate: "Aprende con tu propio profe", planPrivateFor: "Para el progreso más rápido y personal hacia una meta concreta.", planPrivatePrice: "Personalizado", planPrivatePriceSub: "según tu plan",
     planPrivateList: ["Tu propio profe dedicado", "Un plan hecho para tu meta o examen", "Horarios flexibles a tu medida", "El camino más rápido a la fluidez", "Inglés o español"],
     pricingFoot: "Todo empieza con una clase de prueba gratis de 15 minutos.",
+    lrEyebrow: "Pide un idioma", lrTitle: "¿Quieres aprender otro idioma?", lrLead: "Dinos qué idioma quieres aprender y buscaremos el profe ideal para ti. Cada paquete 1 a 1 incluye acceso gratis a nuestro Club de conversación.", lrChips: ["Neerlandés", "Francés", "Alemán", "Italiano", "Árabe", "Portugués", "Turco", "Chino mandarín"], lrLabel: "¿Qué idioma quieres aprender?", lrPh: "p. ej. francés", lrBtn: "Pídelo por WhatsApp", lrFine: "Normalmente respondemos en 24 horas. Sin compromiso.", lrMsg: (l: string) => `Hi MundoLingu! I would like to learn ${l}. Can you help me find a teacher?`,
     examsEyebrow: "Preparación de exámenes", examsTitle: "IELTS, PTE y TOEFL, bien preparados.", examsLead: "Necesites una nota para la universidad, una visa o tu carrera, tendrás tu propio profe y un plan hecho para ti. Dirigido por nuestro Jefe de Exámenes, profesor de IELTS con licencia y más de 14 años de experiencia en Sudáfrica y los Emiratos.",
     examsIncl: "Incluido en cada paquete, sin costo extra", examsInclList: ["Clases 1 a 1 con un profe nativo con experiencia", "Un plan de estudio personal para tu nota objetivo", "Acceso gratis a nuestras clases grupales (Conversation / Exam Talk Prep Club)", "Una clase de examen en vivo cada semana", "Tareas extra siempre que las pidas", "Soporte por WhatsApp 24/7"],
     cmpEyebrow: "Por qué nos eligen", cmpTitle: "No eres solo un número en un aula.", cmpThem: "Un curso de examen típico", cmpUs: "MundoLingu", cmpClose: "Cada semana que esperas es una semana menos para prepararte. Tu clase gratis dura 15 minutos.",
@@ -326,6 +328,7 @@ export default function Site() {
   const [faq, setFaq] = useState(0);
   const [page, setPage] = useState<"home" | "team">("home");
   const [interest, setInterest] = useState("IELTS");
+  const [langReq, setLangReq] = useState("");
   const rootRef = useRef(null);
 
   useEffect(() => {
@@ -748,6 +751,28 @@ export default function Site() {
                   </div>
                 </div>
                 <p className="ml-plans-foot">{t.pricingFoot}</p>
+              </div>
+            </section>
+
+            {/* LANGUAGE REQUEST */}
+            <section className="ml-section ml-section--tight" id="language-request">
+              <div className="ml-wrap">
+                <div className="ml-langreq" data-reveal>
+                  <div className="ml-langreq-copy">
+                    <span className="ml-eyebrow">{t.lrEyebrow}</span>
+                    <h2 className="ml-h2">{t.lrTitle}</h2>
+                    <p className="ml-lead">{t.lrLead}</p>
+                    <div className="ml-langreq-chips">
+                      {t.lrChips.map((c) => (<button type="button" className={"ml-langreq-chip" + (langReq === c ? " is-on" : "")} key={c} onClick={() => setLangReq(c)}>{c}</button>))}
+                    </div>
+                  </div>
+                  <form className="ml-langreq-form" onSubmit={(e) => { e.preventDefault(); const v = langReq.trim(); if (!v) return; window.open(wa(t.lrMsg(v)), "_blank", "noopener"); }}>
+                    <label htmlFor="lr-lang">{t.lrLabel}</label>
+                    <input id="lr-lang" type="text" value={langReq} onChange={(e) => setLangReq(e.target.value)} placeholder={t.lrPh} required maxLength={60} />
+                    <button className="ml-btn ml-btn--wa" type="submit"><MessageCircle /> {t.lrBtn}</button>
+                    <p className="ml-langreq-fine">{t.lrFine}</p>
+                  </form>
+                </div>
               </div>
             </section>
 
