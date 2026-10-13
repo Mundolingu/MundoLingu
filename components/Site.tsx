@@ -31,6 +31,10 @@ const EXAM_CHIPS = ["IELTS", "PTE", "TOEFL"];
 
 const wa = (msg: string) => `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
 
+// Small, face-centred copies of the team photos live in /public/team (made from /public/team-<name>.jpg).
+// "/team-jurgen.jpg" -> "/team/jurgen-160.webp" (round avatars) or "/team/jurgen-480.webp" (cards).
+const teamImg = (photo: string, size: 160 | 480) => photo.replace(/^\/team-(.+)\.jpg$/, `/team/$1-${size}.webp`);
+
 // Exam-prep 1-to-1 packages. No prices on the site: prices are shared after the free demo.
 const PACKAGES = {
   en: [
@@ -275,6 +279,9 @@ const UI = {
     terms: "Terms & Conditions", freeExamDemo: (x: string) => `Free ${x} demo`,
     visionHead: ["An education that begins with the ", "person", " — not the language."] as [string, string, string],
     englishLabel: "English", spanishLabel: "Español",
+    heroTeam: "Taught by real, experienced teachers", heroTeamLink: "Meet the team",
+    meetEyebrow: "Your teachers", meetTitle: "Meet the people who’ll teach you.", meetLead: "Real teachers with years of classroom and online experience — not an app, not a call centre. Your free 15-minute demo is with one of our teachers.", meetMore: "Read their full stories",
+    demoPeople: "A real teacher reads your request and contacts you personally to set up your demo.",
   },
   es: {
     login: "Entrar", memberLogin: "Acceso de miembros", bookDemo: "Reserva una clase gratis", exploreMembership: "Explora el Club de conversación",
@@ -315,6 +322,9 @@ const UI = {
     terms: "Términos y Condiciones", freeExamDemo: (x: string) => `Clase de ${x} gratis`,
     visionHead: ["Una educación que empieza por la ", "persona", ", no por el idioma."] as [string, string, string],
     englishLabel: "Inglés", spanishLabel: "Español",
+    heroTeam: "Clases con profes reales y con experiencia", heroTeamLink: "Conoce al equipo",
+    meetEyebrow: "Tus profes", meetTitle: "Conoce a las personas que te van a enseñar.", meetLead: "Profes reales con años de experiencia en el aula y online: ni una app ni un call center. Tu clase de prueba gratis de 15 minutos es con uno de nuestros profes.", meetMore: "Lee sus historias completas",
+    demoPeople: "Un profe real lee tu solicitud y te contacta personalmente para agendar tu clase de prueba.",
   },
   ar: AR.UI,
 };
@@ -503,6 +513,15 @@ export default function Site() {
                     <a className="ml-btn ml-btn--ghost" href="#membership" onClick={(e) => { e.preventDefault(); go("membership"); }}>{t.joinClub} <ArrowRight /></a>
                   </div>
 
+                  <div className="ml-hero-team">
+                    <div className="ml-avatars">
+                      {TEACHERS[lang].filter((tc) => tc.photo).map((tc) => (
+                        <img key={tc.name} src={teamImg(tc.photo as string, 160)} alt={tc.name} width={40} height={40} decoding="async" />
+                      ))}
+                    </div>
+                    <span>{t.heroTeam} · <a href="#team" onClick={(e) => { e.preventDefault(); goTeam(); }}>{t.heroTeamLink}</a></span>
+                  </div>
+
                   <a className="ml-wa-link" href={wa(t.waHi)} target="_blank" rel="noreferrer"><MessageCircle /> {t.askWa}</a>
 
                   <div className="ml-learn" style={{ marginTop: 28 }}>
@@ -628,6 +647,31 @@ export default function Site() {
               </div>
             </section>
 
+            {/* MEET YOUR TEACHERS */}
+            <section className="ml-section ml-section--tight" id="teachers" style={{ background: "var(--paper-2)" }}>
+              <div className="ml-wrap">
+                <span className="ml-eyebrow" data-reveal>{t.meetEyebrow}</span>
+                <h2 className="ml-h2" data-reveal>{t.meetTitle}</h2>
+                <p className="ml-lead" data-reveal>{t.meetLead}</p>
+                <div className="ml-meet">
+                  {TEACHERS[lang].map((tc, i) => (
+                    <article className="ml-meet-card" data-reveal style={{ transitionDelay: i * 0.06 + "s" }} key={tc.name}>
+                      <div className="ml-meet-photo">
+                        {tc.photo ? <img src={teamImg(tc.photo, 480)} alt={tc.name} width={480} height={480} loading="lazy" decoding="async" /> : <span className="ml-mono">{tc.name[0]}</span>}
+                      </div>
+                      <h3>{tc.name}</h3>
+                      <span className="ml-meet-role">{tc.teaches}</span>
+                      <p className="ml-meet-meta">{tc.meta}</p>
+                    </article>
+                  ))}
+                </div>
+                <div className="ml-meet-ctas" data-reveal>
+                  <a className="ml-btn ml-btn--primary" href="#demo" onClick={(e) => { e.preventDefault(); go("demo"); }}>{t.bookDemo} <ArrowRight /></a>
+                  <a className="ml-meet-more" href="#team" onClick={(e) => { e.preventDefault(); goTeam(); }}>{t.meetMore} <ArrowUpRight /></a>
+                </div>
+              </div>
+            </section>
+
             {/* WHY */}
             <section className="ml-section" id="why">
               <div className="ml-wrap">
@@ -658,7 +702,7 @@ export default function Site() {
                 </div>
                 <div className="ml-founder" data-reveal>
                   <p className="ml-founder-q">{t.founderQuote}</p>
-                  <div className="ml-founder-by"><span className="line" /> {t.founderBy}</div>
+                  <div className="ml-founder-by"><img className="ml-founder-img" src="/team/jurgen-160.webp" alt="Jurgen Knechten" width={56} height={56} loading="lazy" decoding="async" /> {t.founderBy}</div>
                 </div>
               </div>
             </section>
@@ -817,6 +861,14 @@ export default function Site() {
                 <span className="ml-eyebrow" data-reveal style={{ justifyContent: "center", display: "flex" }}>{t.finalEyebrow}</span>
                 <h2 data-reveal>{t.finalTitle}</h2>
                 <p className="ml-lead" data-reveal>{t.finalLead}</p>
+                <div className="ml-demo-people" data-reveal>
+                  <div className="ml-avatars ml-avatars--dark">
+                    {TEACHERS[lang].filter((tc) => tc.photo).map((tc) => (
+                      <img key={tc.name} src={teamImg(tc.photo as string, 160)} alt={tc.name} width={40} height={40} loading="lazy" decoding="async" />
+                    ))}
+                  </div>
+                  <p>{t.demoPeople}</p>
+                </div>
                 <DemoForm lang={lang} interest={interest} />
                 <p className="ml-demo-alt" data-reveal>{t.demoAlt} <a href="#membership" onClick={(e) => { e.preventDefault(); go("membership"); }}>{t.exploreMembership}</a></p>
                 <div className="ml-horizon" style={{ marginTop: 48 }} data-reveal />
