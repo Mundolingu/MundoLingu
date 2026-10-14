@@ -6,6 +6,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: `${base}/`, changeFrequency: "monthly", priority: 1 },
     { url: `${base}/ielts-preparation-dubai`, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${base}/ielts-speaking-mock-test`, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${base}/ielts-for-nurses`, changeFrequency: "monthly", priority: 0.9 },
     { url: `${base}/ielts-band-check`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/level-test`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/blog`, changeFrequency: "weekly", priority: 0.7 },
