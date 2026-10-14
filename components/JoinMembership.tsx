@@ -26,7 +26,7 @@ const PAY_INTL = {
 };
 // ▲▲▲ EDIT YOUR PAYMENT DETAILS HERE ▲▲▲
 
-export default function JoinMembership({ email }: { email: string }) {
+export default function JoinMembership({ email, referredBy = null }: { email: string; referredBy?: string | null }) {
   const [lang, setLang] = useState<"en" | "es">("en");
   const router = useRouter();
 
@@ -56,7 +56,7 @@ export default function JoinMembership({ email }: { email: string }) {
         s2: "2. Envíanos tu comprobante", s2p: "Toca el botón y envía tu comprobante de pago por WhatsApp.",
         s3: "3. Activamos tu cuenta", s3p: "Tendrás acceso completo en unas horas. ¡Listo!",
         wa: "Ya pagué — confirmar por WhatsApp",
-        waMsg: `¡Hola MundoLingu! Ya realicé mi pago de la membresía. Mi correo de registro es ${email}. Aquí está mi comprobante:`,
+        waMsg: `¡Hola MundoLingu! Ya realicé mi pago de la membresía. Mi correo de registro es ${email}.${referredBy ? ` Me invitó un amigo (código ${referredBy}).` : ""} Aquí está mi comprobante:`,
         logout: "Cerrar sesión",
       }
     : {
@@ -69,7 +69,7 @@ export default function JoinMembership({ email }: { email: string }) {
         s2: "2. Send us your receipt", s2p: "Tap the button and send your payment receipt on WhatsApp.",
         s3: "3. We activate your account", s3p: "You'll get full access within a few hours. That's it!",
         wa: "I've paid — confirm on WhatsApp",
-        waMsg: `Hi MundoLingu! I've paid for the membership. My sign-up email is ${email}. Here's my receipt:`,
+        waMsg: `Hi MundoLingu! I've paid for the membership. My sign-up email is ${email}.${referredBy ? ` I was invited by a friend (code ${referredBy}).` : ""} Here's my receipt:`,
         logout: "Log out",
       };
 

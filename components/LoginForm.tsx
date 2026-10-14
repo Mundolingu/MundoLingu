@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -13,6 +13,18 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [refCode, setRefCode] = useState("");
+
+  // Invite links look like /login?ref=ML-7K2QD — open straight on "Create account".
+  useEffect(() => {
+    try {
+      const r = new URLSearchParams(window.location.search).get("ref");
+      if (r) {
+        setRefCode(r.trim().toUpperCase());
+        setMode("signup");
+      }
+    } catch {}
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -24,7 +36,10 @@ export default function LoginForm() {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: refCode.trim() ? { ref: refCode.trim().toUpperCase() } : {},
+        },
       });
       if (error) {
         setLoading(false);
@@ -81,6 +96,13 @@ export default function LoginForm() {
                 <input id="password" type="password" required value={password}
                   onChange={(e) => setPassword(e.target.value)} placeholder="Your password" autoComplete="current-password" />
               </div>
+              {mode === "signup" && (
+                <div className="login-field">
+                  <label htmlFor="ref">Friend&apos;s referral code <span style={{ fontWeight: 400, color: "var(--faint)" }}>(optional)</span></label>
+                  <input id="ref" type="text" value={refCode}
+                    onChange={(e) => setRefCode(e.target.value.toUpperCase())} placeholder="e.g. ML-7K2QD" autoComplete="off" />
+                </div>
+              )}
               <button className="login-btn" type="submit" disabled={loading}>
                 {loading ? "Please wait…" : mode === "signin" ? "Log in" : "Create account"}
               </button>

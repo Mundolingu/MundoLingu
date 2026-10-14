@@ -143,3 +143,105 @@ create policy "Members view workbooks" on public.workbooks for select to authent
 
 -- Optional cover image for workbooks
 alter table public.workbooks add column if not exists cover_url text;
+
+
+-- =========================================================
+-- Refer-a-friend (Conversation Club)
+-- Every member gets a personal code (e.g. ML-7K2QD). When a friend signs up
+-- with it, the member who invited them earns 50% off their next month once
+-- the friend has paid. The friend pays the normal sign-up price.
+-- (Re-run this whole file safely; it only adds what's missing.)
+-- =========================================================
+
+-- SECURITY FIX: members could previously edit their own profile row from the
+-- browser, which included is_member. Nothing on the site needs that (all
+-- profile changes happen on the server), so the policy is removed.
+drop policy if exists "Users can update their own profile" on public.profiles;
+
+alter table public.profiles add column if not exists referral_code text;
+alter table public.profiles add column if not exists referred_by text;
+-- Tick this (on the FRIEND's row) once you've given the inviter their 50% off.
+alter table public.profiles add column if not exists referral_reward_given boolean not null default false;
+create unique index if not exists profiles_referral_code_key on public.profiles (referral_code);
+
+-- Makes a short, easy-to-read code like ML-7K2QD (no 0/O or 1/I mix-ups).
+create or replace function public.make_referral_code()
+returns text
+language plpgsql
+set search_path = public
+as $$
+declare
+  alphabet text := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  c text;
+  i int;
+begin
+  loop
+    c := 'ML-';
+    for i in 1..5 loop
+      c := c || substr(alphabet, 1 + floor(random() * length(alphabet))::int, 1);
+    end loop;
+    exit when not exists (select 1 from public.profiles where referral_code = c);
+  end loop;
+  return c;
+end;
+$$;
+
+-- New sign-ups: give them their own code, and remember whose code they used.
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  ref text := upper(trim(coalesce(new.raw_user_meta_data->>'ref', '')));
+begin
+  if ref = '' or not exists (select 1 from public.profiles where referral_code = ref) then
+    ref := null;
+  end if;
+  insert into public.profiles (id, email, referral_code, referred_by)
+  values (new.id, new.email, public.make_referral_code(), ref)
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;
+
+-- Existing members get a code too.
+do $$
+declare r record;
+begin
+  for r in select id from public.profiles where referral_code is null loop
+    update public.profiles set referral_code = public.make_referral_code() where id = r.id;
+  end loop;
+end;
+$$;
+
+-- Lets a member see how many friends used their code (numbers only, no emails).
+create or replace function public.my_referral_stats()
+returns table (invited int, joined int)
+language sql
+stable
+security definer set search_path = public
+as $$
+  select count(f.id)::int, (count(f.id) filter (where f.is_member))::int
+  from public.profiles me
+  join public.profiles f on f.referred_by = me.referral_code
+  where me.id = auth.uid();
+$$;
+revoke all on function public.my_referral_stats() from public, anon;
+grant execute on function public.my_referral_stats() to authenticated;
+
+-- YOUR LIST: open "referral_rewards" in Table Editor to see who invited whom.
+-- friend_paid = true and reward_given = false  ->  that member is owed 50% off.
+create or replace view public.referral_rewards
+with (security_invoker = true) as
+  select
+    me.email                 as member_email,
+    me.referral_code         as member_code,
+    f.email                  as friend_email,
+    f.created_at             as friend_signed_up,
+    f.is_member              as friend_paid,
+    f.referral_reward_given  as reward_given
+  from public.profiles f
+  join public.profiles me on f.referred_by = me.referral_code
+  order by f.created_at desc;
+revoke all on public.referral_rewards from anon, authenticated;
