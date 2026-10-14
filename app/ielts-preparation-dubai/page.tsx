@@ -78,6 +78,10 @@ export default function IeltsDubaiPage() {
             <a className="ml-btn ml-btn--primary" href="/ielts-band-check">Take the free band check <ArrowRight /></a>
             <a className="ml-btn dx-btn-wa" href={WA} target="_blank" rel="noreferrer">Message us on WhatsApp <ArrowRight /></a>
           </div>
+          <p className="dx-p" style={{ marginTop: 18 }}>
+            Nervous about Speaking? <a href="/ielts-speaking-mock-test">Book a free 15-minute Speaking mock test</a>.
+            Nurse or healthcare worker? <a href="/ielts-for-nurses">IELTS for nurses</a>.
+          </p>
           <ul className="dx-facts">
             <li>1-to-1, online</li>
             <li>Academic &amp; General Training</li>

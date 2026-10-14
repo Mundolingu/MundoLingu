@@ -1030,3 +1030,26 @@ body { background: #F5F6F7; }
 /* "Best for" line on the team page cards */
 .ml-teacher-best{font-size:14px;line-height:1.45;color:var(--ink);background:rgba(18,163,160,.09);border-radius:10px;padding:10px 12px;margin:0 0 14px;}
 .ml-teacher-best b{color:var(--teal-text);font-weight:700;margin-inline-end:4px;}
+
+/* ---------- Free Speaking mock test (mock test + nurses pages) ---------- */
+.mt-hero{display:grid;grid-template-columns:1.1fr 1fr;gap:36px;align-items:start;}
+.mt-hero .blog-lead{margin-bottom:0;}
+.mt-card{background:var(--paper-2);border-radius:18px;padding:26px 24px;box-shadow:inset 0 0 0 1px var(--line-2),0 30px 60px -45px rgba(12,28,60,.5);}
+.mt-card h3{font-family:var(--serif);font-weight:400;font-size:24px;line-height:1.2;margin:0 0 6px;color:var(--ink);}
+.mt-form{display:flex;flex-direction:column;gap:8px;scroll-margin-top:80px;}
+.mt-sub{font-size:14.5px;color:var(--muted);margin:0 0 8px;line-height:1.5;}
+.mt-form label{font-size:13.5px;font-weight:600;color:var(--muted);margin-top:6px;}
+.mt-form input,.mt-form select{width:100%;padding:12px 13px;border-radius:11px;border:none;box-shadow:inset 0 0 0 1.4px var(--line);font-size:15px;font-family:var(--sans);background:#fff;color:var(--ink);box-sizing:border-box;}
+.mt-form input:focus,.mt-form select:focus{outline:none;box-shadow:inset 0 0 0 2px var(--teal-t);}
+.mt-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.mt-row>div{display:flex;flex-direction:column;gap:8px;}
+.mt-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;}
+.mt-submit{justify-content:center;margin-top:12px;border:none;cursor:pointer;width:100%;}
+.mt-submit:disabled{opacity:.7;cursor:wait;}
+.mt-error{color:#b42318;font-size:14px;margin:6px 0 0;}
+.mt-fine{font-size:12.5px;color:var(--faint);margin:6px 0 0;text-align:center;}
+.mt-done{text-align:center;}
+.mt-done p{font-size:15.5px;color:var(--muted);line-height:1.55;margin:0 0 14px;}
+.mt-done .ml-btn{text-decoration:none;}
+@media (max-width:820px){.mt-hero{grid-template-columns:1fr;gap:28px;}}
+@media (max-width:420px){.mt-row{grid-template-columns:1fr;}.mt-card{padding:22px 18px;}}
