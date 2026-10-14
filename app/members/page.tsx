@@ -32,14 +32,14 @@ export default async function MembersPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("is_member")
+    .select("*") // "*" so the page still works before the referral columns exist
     .eq("id", user.id)
     .single();
 
-  if (!profile?.is_member) return <JoinMembership email={user.email ?? ""} />;
+  if (!profile?.is_member) return <JoinMembership email={user.email ?? ""} referredBy={profile?.referred_by ?? null} />;
 
   // Admins get a link through to the opportunities editor from inside the hub.
   const isAdmin = adminEmails().includes((user.email ?? "").toLowerCase());
 
-  return <MembersArea isAdmin={isAdmin} />;
+  return <MembersArea isAdmin={isAdmin} referralCode={profile?.referral_code ?? null} />;
 }

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Opportunities from "@/components/Opportunities";
-import { Play, Download, Upload, X, Video, Calendar, BookOpen } from "lucide-react";
+import { Play, Download, Upload, X, Video, Calendar, BookOpen, Gift, Copy, Check, MessageCircle } from "lucide-react";
 
 const TABS = [
   { id: "lessons", label: "Lessons" },
@@ -85,7 +85,59 @@ function HandInCard({ wb }: { wb: any }) {
   );
 }
 
-export default function MembersArea({ isAdmin = false }: { isAdmin?: boolean }) {
+// --- Refer a friend: each member shares their own code ---
+function InviteCard({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false);
+  const [stats, setStats] = useState<{ invited: number; joined: number } | null>(null);
+  const [link, setLink] = useState(`https://www.mundolingu.com/login?ref=${code}`);
+
+  useEffect(() => {
+    setLink(`${window.location.origin}/login?ref=${code}`);
+    (async () => {
+      try {
+        const { data } = await createClient().rpc("my_referral_stats");
+        const row = Array.isArray(data) ? data[0] : data;
+        if (row) setStats({ invited: row.invited || 0, joined: row.joined || 0 });
+      } catch {}
+    })();
+  }, [code]);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {}
+  }
+
+  const msg = `Join me in the MundoLingu Conversation Club! Sign up with my code ${code}: ${link}`;
+
+  return (
+    <section className="mem-ref">
+      <div className="mem-ref-txt">
+        <small><Gift size={14} /> Invite a friend</small>
+        <h3>Get 50% off your next month</h3>
+        <p>Share your code. When a friend joins the Conversation Club with it, your next month is half price.</p>
+        {stats && stats.invited > 0 && (
+          <p className="mem-ref-stats">{stats.invited} signed up with your code · {stats.joined} joined</p>
+        )}
+      </div>
+      <div className="mem-ref-act">
+        <div className="mem-ref-code">{code}</div>
+        <div className="mem-ref-btns">
+          <button className="mem-ref-copy" onClick={copy}>
+            {copied ? (<><Check size={15} /> Copied</>) : (<><Copy size={15} /> Copy link</>)}
+          </button>
+          <a className="mem-ref-wa" href={`https://wa.me/?text=${encodeURIComponent(msg)}`} target="_blank" rel="noreferrer">
+            <MessageCircle size={15} /> Share
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function MembersArea({ isAdmin = false, referralCode = null }: { isAdmin?: boolean; referralCode?: string | null }) {
   const [tab, setTab] = useState("lessons");
   const [loading, setLoading] = useState(true);
   const [lessons, setLessons] = useState<any[]>([]);
@@ -148,6 +200,8 @@ export default function MembersArea({ isAdmin = false }: { isAdmin?: boolean }) 
       <main className="mem-wrap">
         <h1 className="mem-hello">Welcome back.</h1>
         <p className="mem-hello-sub">Your lessons, live classes, events, opportunities, and workbooks — all in one place.</p>
+
+        {referralCode && <InviteCard code={referralCode} />}
 
         <div className="mem-tabs" role="tablist">
           {TABS.map((t) => (
