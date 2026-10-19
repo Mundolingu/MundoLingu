@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Check, CreditCard, Tag } from "lucide-react";
+import { CLUBS, CLUB_IDS, PROMO_CODE, PROMO_PERCENT, money, firstMonth, stripeHref, isClubId, type ClubId } from "@/lib/clubs";
 
 // Your WhatsApp number (country code, no +, spaces or dashes):
 const WHATSAPP = "971504296090";
@@ -25,9 +26,19 @@ const PAY_INTL = {
   corr: "CHASGB2L",
 };
 // ▲▲▲ EDIT YOUR PAYMENT DETAILS HERE ▲▲▲
+// Prices, club names and what's included live in lib/clubs.ts
 
-export default function JoinMembership({ email, referredBy = null }: { email: string; referredBy?: string | null }) {
+type Props = {
+  email: string;
+  referredBy?: string | null;
+  owned?: ClubId[];
+  preselect?: ClubId | null;
+};
+
+export default function JoinMembership({ email, referredBy = null, owned = [], preselect = null }: Props) {
   const [lang, setLang] = useState<"en" | "es">("en");
+  const available = CLUB_IDS.filter((id) => !owned.includes(id));
+  const [club, setClub] = useState<ClubId>(preselect && available.includes(preselect) ? preselect : available[0] || "conversation");
   const router = useRouter();
 
   useEffect(() => {
@@ -35,7 +46,11 @@ export default function JoinMembership({ email, referredBy = null }: { email: st
       const s = localStorage.getItem("ml-lang");
       if (s === "es" || s === "en") setLang(s);
       else if (navigator.language && navigator.language.toLowerCase().startsWith("es")) setLang("es");
+      // A club picked on the homepage before logging in.
+      const picked = localStorage.getItem("ml-club-choice");
+      if (!preselect && isClubId(picked) && available.includes(picked)) setClub(picked);
     } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function logout() {
@@ -45,31 +60,54 @@ export default function JoinMembership({ email, referredBy = null }: { email: st
     router.refresh();
   }
 
+  const c = CLUBS[club];
+  const name = c.name[lang];
+  const price = `$${money(c.usd)} · ${money(c.aed)} AED`;
+  const first = `$${firstMonth(c.usd)} · ${firstMonth(c.aed)} AED`;
+  const card = stripeHref(c, email);
+  const isNew = owned.length === 0;
+
   const t = lang === "es"
     ? {
-        title: "¡Ya casi estás dentro!",
-        sub: `Sesión iniciada como ${email}. Para desbloquear todo, activa tu membresía en 3 pasos:`,
-        s1: "1. Paga con la opción de tu país",
-        mxTitle: "Desde México", mxPrice: "$175 MXN el primer mes, luego $260 MXN/mes",
-        intlTitle: "Desde otro país", intlPrice: "$10 USD el primer mes, luego $15 USD/mes",
+        title: isNew ? "¡Ya casi estás dentro!" : "Únete a otro club",
+        sub: `Sesión iniciada como ${email}. Elige tu club, paga y te damos acceso en unas horas.`,
+        s1: "1. Elige tu club",
+        perMonth: "al mes",
+        youreIn: "Ya estás dentro",
+        promo: `${PROMO_PERCENT}% de descuento el primer mes con el código`,
+        firstL: "Tu primer mes",
+        thenL: "Después",
+        card: "Pagar con tarjeta",
+        orBank: "o paga por transferencia bancaria",
+        s2: "2. Paga por transferencia",
+        mxTitle: "Desde México", mxPrice: "Paga el equivalente en pesos mexicanos",
+        intlTitle: "Desde otro país", intlPrice: "Transferencia en dólares (USD)",
         bankL: "Banco", nameL: "Nombre", accountL: "Cuenta", beneficiaryL: "Beneficiario", corrL: "BIC corresponsal",
-        s2: "2. Envíanos tu comprobante", s2p: "Toca el botón y envía tu comprobante de pago por WhatsApp.",
-        s3: "3. Activamos tu cuenta", s3p: "Tendrás acceso completo en unas horas. ¡Listo!",
+        s3: "3. Envíanos tu comprobante", s3p: "Toca el botón y envía tu comprobante por WhatsApp. Activamos tu club en unas horas.",
         wa: "Ya pagué — confirmar por WhatsApp",
-        waMsg: `¡Hola MundoLingu! Ya realicé mi pago de la membresía. Mi correo de registro es ${email}.${referredBy ? ` Me invitó un amigo (código ${referredBy}).` : ""} Aquí está mi comprobante:`,
+        waMsg: `¡Hola MundoLingu! Ya pagué el ${name} (primer mes con el código ${PROMO_CODE}). Mi correo de registro es ${email}.${referredBy ? ` Me invitó un amigo (código ${referredBy}).` : ""} Aquí está mi comprobante:`,
+        back: "Volver a mi club",
         logout: "Cerrar sesión",
       }
     : {
-        title: "You're almost in!",
-        sub: `Signed in as ${email}. To unlock everything, activate your membership in 3 steps:`,
-        s1: "1. Pay with the option for your country",
-        mxTitle: "From Mexico", mxPrice: "$175 MXN first month, then $260 MXN/month",
-        intlTitle: "From another country", intlPrice: "$10 USD first month, then $15 USD/month",
+        title: isNew ? "You're almost in!" : "Join another club",
+        sub: `Signed in as ${email}. Choose your club, pay, and we'll unlock it for you within a few hours.`,
+        s1: "1. Choose your club",
+        perMonth: "a month",
+        youreIn: "You're in",
+        promo: `${PROMO_PERCENT}% off your first month with code`,
+        firstL: "Your first month",
+        thenL: "Then",
+        card: "Pay by card",
+        orBank: "or pay by bank transfer",
+        s2: "2. Pay by bank transfer",
+        mxTitle: "From Mexico", mxPrice: "Pay the same amount in Mexican pesos",
+        intlTitle: "From another country", intlPrice: "Transfer in US dollars (USD)",
         bankL: "Bank", nameL: "Name", accountL: "Account", beneficiaryL: "Beneficiary", corrL: "Correspondent BIC",
-        s2: "2. Send us your receipt", s2p: "Tap the button and send your payment receipt on WhatsApp.",
-        s3: "3. We activate your account", s3p: "You'll get full access within a few hours. That's it!",
+        s3: "3. Send us your receipt", s3p: "Tap the button and send your payment receipt on WhatsApp. We'll unlock your club within a few hours.",
         wa: "I've paid — confirm on WhatsApp",
-        waMsg: `Hi MundoLingu! I've paid for the membership. My sign-up email is ${email}.${referredBy ? ` I was invited by a friend (code ${referredBy}).` : ""} Here's my receipt:`,
+        waMsg: `Hi MundoLingu! I've paid for the ${name} (first month with code ${PROMO_CODE}). My sign-up email is ${email}.${referredBy ? ` I was invited by a friend (code ${referredBy}).` : ""} Here's my receipt:`,
+        back: "Back to my club",
         logout: "Log out",
       };
 
@@ -77,23 +115,58 @@ export default function JoinMembership({ email, referredBy = null }: { email: st
 
   return (
     <div className="join-root">
-      <div className="join-card">
+      <div className="join-card join-card--wide">
         <div className="join-logo"><img src="/logo-emblem.png" alt="MundoLingu" /></div>
         <h1>{t.title}</h1>
         <p className="join-sub">{t.sub}</p>
 
         <p className="join-s1">{t.s1}</p>
-        <div className="join-pay">
-          <div className="join-method">
-            <div className="join-method-head"><span className="join-flag">🇲🇽</span><h3>{t.mxTitle}</h3></div>
-            <div className="join-method-price">{t.mxPrice}</div>
-            <div className="join-bank">
-              <div><span>{t.bankL}</span><b>{PAY_MX.bank}</b></div>
-              <div><span>{t.nameL}</span><b>{PAY_MX.name}</b></div>
-              <div><span>{t.accountL}</span><b>{PAY_MX.account}</b></div>
-              <div><span>CLABE</span><b>{PAY_MX.clabe}</b></div>
-            </div>
+        <div className="join-clubs" role="radiogroup">
+          {CLUB_IDS.map((id) => {
+            const k = CLUBS[id];
+            const mine = owned.includes(id);
+            return (
+              <button
+                key={id}
+                type="button"
+                role="radio"
+                aria-checked={club === id}
+                disabled={mine}
+                className={"join-club" + (club === id ? " on" : "") + (mine ? " mine" : "")}
+                style={{ ["--club" as any]: k.color }}
+                onClick={() => setClub(id)}
+              >
+                <span className="join-club-name">{k.name[lang]}</span>
+                <span className="join-club-price">${money(k.usd)} <small>/ {money(k.aed)} AED</small></span>
+                <span className="join-club-per">{mine ? (<><Check size={13} /> {t.youreIn}</>) : t.perMonth}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="join-detail">
+          <p className="join-detail-for">{c.for[lang]}</p>
+          <ul>
+            {c.includes[lang].map((li) => (<li key={li}><Check size={15} /> {li}</li>))}
+          </ul>
+          <div className="join-promo">
+            <Tag size={15} /> {t.promo} <b>{PROMO_CODE}</b>
           </div>
+          <div className="join-sum">
+            <div><span>{t.firstL}</span><b>{first}</b></div>
+            <div><span>{t.thenL}</span><b>{price} <small>{t.perMonth}</small></b></div>
+          </div>
+        </div>
+
+        {card && (
+          <>
+            <a className="join-card-btn" href={card}><CreditCard size={18} /> {t.card}</a>
+            <p className="join-or">{t.orBank}</p>
+          </>
+        )}
+
+        <p className="join-s1">{t.s2}</p>
+        <div className="join-pay">
           <div className="join-method">
             <div className="join-method-head"><span className="join-flag">🌎</span><h3>{t.intlTitle}</h3></div>
             <div className="join-method-price">{t.intlPrice}</div>
@@ -105,17 +178,29 @@ export default function JoinMembership({ email, referredBy = null }: { email: st
               <div><span>{t.corrL}</span><b>{PAY_INTL.corr}</b></div>
             </div>
           </div>
+          <div className="join-method">
+            <div className="join-method-head"><span className="join-flag">🇲🇽</span><h3>{t.mxTitle}</h3></div>
+            <div className="join-method-price">{t.mxPrice}</div>
+            <div className="join-bank">
+              <div><span>{t.bankL}</span><b>{PAY_MX.bank}</b></div>
+              <div><span>{t.nameL}</span><b>{PAY_MX.name}</b></div>
+              <div><span>{t.accountL}</span><b>{PAY_MX.account}</b></div>
+              <div><span>CLABE</span><b>{PAY_MX.clabe}</b></div>
+            </div>
+          </div>
         </div>
 
         <div className="join-steps">
-          <div className="join-step"><h3>{t.s2}</h3><p>{t.s2p}</p></div>
           <div className="join-step"><h3>{t.s3}</h3><p>{t.s3p}</p></div>
         </div>
 
         <a className="join-wa" href={waHref} target="_blank" rel="noreferrer">
           <MessageCircle size={19} /> {t.wa}
         </a>
-        <p className="join-logout"><a onClick={logout}>{t.logout}</a></p>
+        <p className="join-logout">
+          {!isNew && (<><a href="/members">{t.back}</a>{" · "}</>)}
+          <a onClick={logout}>{t.logout}</a>
+        </p>
       </div>
     </div>
   );

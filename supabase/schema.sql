@@ -245,3 +245,104 @@ with (security_invoker = true) as
   join public.profiles me on f.referred_by = me.referral_code
   order by f.created_at desc;
 revoke all on public.referral_rewards from anon, authenticated;
+
+
+-- =========================================================
+-- THREE PAID CLUBS: Conversation Club, Spanish Club, Exam Club
+-- Each member can be in one, two or all three clubs.
+-- To activate someone: open "profiles" in Table Editor and tick
+--   club_conversation / club_spanish / club_exam
+-- ("is_member" now updates itself: it's true when any club is ticked.)
+-- To put content in one club: set the "club" column on lessons,
+-- live_classes, events or workbooks. Leave it empty (NULL) to show
+-- that row in every club.
+-- (Re-run this whole file safely; it only adds what's missing.)
+-- =========================================================
+
+do $$
+begin
+  create type public.club as enum ('conversation', 'spanish', 'exam');
+exception when duplicate_object then null;
+end;
+$$;
+
+alter table public.profiles add column if not exists club_conversation boolean not null default false;
+alter table public.profiles add column if not exists club_spanish boolean not null default false;
+alter table public.profiles add column if not exists club_exam boolean not null default false;
+
+-- Everyone who was already a member joined the Conversation Club, so they keep it.
+update public.profiles
+   set club_conversation = true
+ where is_member
+   and not (club_conversation or club_spanish or club_exam);
+
+-- Keep is_member in step with the clubs. If someone ticks is_member the old
+-- way (or an old payment hook does), they get the Conversation Club.
+create or replace function public.sync_is_member()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if tg_op = 'UPDATE'
+     and new.is_member and not coalesce(old.is_member, false)
+     and not (new.club_conversation or new.club_spanish or new.club_exam) then
+    new.club_conversation := true;
+  end if;
+  new.is_member := new.club_conversation or new.club_spanish or new.club_exam;
+  return new;
+end;
+$$;
+
+drop trigger if exists profiles_sync_is_member on public.profiles;
+create trigger profiles_sync_is_member
+  before insert or update on public.profiles
+  for each row execute function public.sync_is_member();
+
+-- Which club each piece of content belongs to (empty = all clubs).
+alter table public.lessons      add column if not exists club public.club;
+alter table public.live_classes add column if not exists club public.club;
+alter table public.events       add column if not exists club public.club;
+alter table public.workbooks    add column if not exists club public.club;
+
+-- True when the logged-in member may see content for club c.
+create or replace function public.can_see_club(c public.club)
+returns boolean
+language sql
+stable
+security definer set search_path = public
+as $$
+  select coalesce((
+    select case
+      when c is null           then p.club_conversation or p.club_spanish or p.club_exam
+      when c = 'conversation'  then p.club_conversation
+      when c = 'spanish'       then p.club_spanish
+      else p.club_exam
+    end
+    from public.profiles p
+    where p.id = auth.uid()
+  ), false);
+$$;
+revoke all on function public.can_see_club(public.club) from public, anon;
+grant execute on function public.can_see_club(public.club) to authenticated;
+
+-- Only paying members of the right club can read each table.
+drop policy if exists "Members view lessons" on public.lessons;
+drop policy if exists "Club members view lessons" on public.lessons;
+create policy "Club members view lessons" on public.lessons
+  for select to authenticated using (public.can_see_club(club));
+
+drop policy if exists "Members view live classes" on public.live_classes;
+drop policy if exists "Club members view live classes" on public.live_classes;
+create policy "Club members view live classes" on public.live_classes
+  for select to authenticated using (public.can_see_club(club));
+
+drop policy if exists "Members can view events" on public.events;
+drop policy if exists "Club members view events" on public.events;
+create policy "Club members view events" on public.events
+  for select to authenticated using (public.can_see_club(club));
+
+drop policy if exists "Members view workbooks" on public.workbooks;
+drop policy if exists "Club members view workbooks" on public.workbooks;
+create policy "Club members view workbooks" on public.workbooks
+  for select to authenticated using (public.can_see_club(club));

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isClubId, type ClubId } from "@/lib/clubs";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,29 +19,34 @@ export async function POST(req: Request) {
   }
 
   const admin = createAdminClient();
-  const setMember = async (customerId: string, active: boolean, status: string) => {
+  // Which club a payment is for: set metadata "club" = conversation / spanish / exam
+  // on the Stripe Payment Link or subscription. Without it, Conversation Club.
+  const clubOf = (meta: Stripe.Metadata | null | undefined): ClubId =>
+    isClubId(meta?.club) ? (meta!.club as ClubId) : "conversation";
+
+  const setClub = async (customerId: string, club: ClubId, active: boolean, status: string) => {
     await admin
       .from("profiles")
-      .update({ is_member: active, subscription_status: status })
+      .update({ [`club_${club}`]: active, subscription_status: status })
       .eq("stripe_customer_id", customerId);
   };
 
   switch (event.type) {
     case "checkout.session.completed": {
       const s = event.data.object as Stripe.Checkout.Session;
-      if (s.customer) await setMember(s.customer as string, true, "active");
+      if (s.customer) await setClub(s.customer as string, clubOf(s.metadata), true, "active");
       break;
     }
     case "customer.subscription.created":
     case "customer.subscription.updated": {
       const sub = event.data.object as Stripe.Subscription;
       const active = ["active", "trialing", "past_due"].includes(sub.status);
-      await setMember(sub.customer as string, active, sub.status);
+      await setClub(sub.customer as string, clubOf(sub.metadata), active, sub.status);
       break;
     }
     case "customer.subscription.deleted": {
       const sub = event.data.object as Stripe.Subscription;
-      await setMember(sub.customer as string, false, "canceled");
+      await setClub(sub.customer as string, clubOf(sub.metadata), false, "canceled");
       break;
     }
   }
