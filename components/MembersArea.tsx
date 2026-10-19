@@ -4,7 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Opportunities from "@/components/Opportunities";
-import { Play, Download, Upload, X, Video, Calendar, BookOpen, Gift, Copy, Check, MessageCircle } from "lucide-react";
+import { Play, Download, Upload, X, Video, Calendar, BookOpen, Gift, Copy, Check, MessageCircle, Plus } from "lucide-react";
+import { CLUBS, CLUB_IDS, type ClubId } from "@/lib/clubs";
+
+// Short intro shown at the top of each club's hub.
+const CLUB_INTRO: Record<ClubId, string> = {
+  conversation: "Your weekly English conversation class, all student books from A1 to B2, this month's themed book and personal feedback.",
+  spanish: "Your weekly Spanish class, all Spanish student books from A1 to B2, this month's themed book and personal feedback.",
+  exam: "Your weekly live exam class, the books for IELTS, TOEFL and PTE, and personal feedback on your work.",
+};
 
 const TABS = [
   { id: "lessons", label: "Lessons" },
@@ -86,7 +94,7 @@ function HandInCard({ wb }: { wb: any }) {
 }
 
 // --- Refer a friend: each member shares their own code ---
-function InviteCard({ code }: { code: string }) {
+function InviteCard({ code, clubName }: { code: string; clubName: string }) {
   const [copied, setCopied] = useState(false);
   const [stats, setStats] = useState<{ invited: number; joined: number } | null>(null);
   const [link, setLink] = useState(`https://www.mundolingu.com/login?ref=${code}`);
@@ -110,14 +118,14 @@ function InviteCard({ code }: { code: string }) {
     } catch {}
   }
 
-  const msg = `Join me in the MundoLingu Conversation Club! Sign up with my code ${code}: ${link}`;
+  const msg = `Join me in the MundoLingu ${clubName}! Sign up with my code ${code}: ${link}`;
 
   return (
     <section className="mem-ref">
       <div className="mem-ref-txt">
         <small><Gift size={14} /> Invite a friend</small>
         <h3>Get 50% off your next month</h3>
-        <p>Share your code. When a friend joins the Conversation Club with it, your next month is half price.</p>
+        <p>Share your code. When a friend joins a MundoLingu club with it, your next month is half price.</p>
         {stats && stats.invited > 0 && (
           <p className="mem-ref-stats">{stats.invited} signed up with your code · {stats.joined} joined</p>
         )}
@@ -137,8 +145,11 @@ function InviteCard({ code }: { code: string }) {
   );
 }
 
-export default function MembersArea({ isAdmin = false, referralCode = null }: { isAdmin?: boolean; referralCode?: string | null }) {
+type Props = { isAdmin?: boolean; referralCode?: string | null; clubs?: ClubId[]; initialClub?: ClubId | null };
+
+export default function MembersArea({ isAdmin = false, referralCode = null, clubs = ["conversation"], initialClub = null }: Props) {
   const [tab, setTab] = useState("lessons");
+  const [club, setClub] = useState<ClubId>(initialClub && clubs.includes(initialClub) ? initialClub : clubs[0]);
   const [loading, setLoading] = useState(true);
   const [lessons, setLessons] = useState<any[]>([]);
   const [live, setLive] = useState<any[]>([]);
@@ -164,7 +175,7 @@ export default function MembersArea({ isAdmin = false, referralCode = null }: { 
         setLive((lv.data || []).filter((c: any) => new Date(c.starts_at).getTime() > now - 2 * 3600 * 1000));
         setEvents((ev.data || []).map((row: any) => {
           const d = new Date(String(row.event_date) + "T00:00:00");
-          return { day: String(d.getDate()).padStart(2, "0"), mon: d.toLocaleString("en-US", { month: "short" }), title: row.title, desc: row.description || "" };
+          return { day: String(d.getDate()).padStart(2, "0"), mon: d.toLocaleString("en-US", { month: "short" }), title: row.title, desc: row.description || "", club: row.club || null };
         }));
         setWorkbooks(wb.data || []);
       } catch {}
@@ -172,6 +183,28 @@ export default function MembersArea({ isAdmin = false, referralCode = null }: { 
     })();
     return () => { active = false; };
   }, []);
+
+  // Remember which club the member last opened.
+  useEffect(() => {
+    if (initialClub) return;
+    try {
+      const saved = localStorage.getItem("ml-hub-club") as ClubId | null;
+      if (saved && clubs.includes(saved)) setClub(saved);
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  function pickClub(id: ClubId) {
+    setClub(id);
+    try { localStorage.setItem("ml-hub-club", id); } catch {}
+  }
+  // Rows with an empty "club" show in every club.
+  const mine = (row: any) => !row.club || row.club === club;
+  const vLessons = lessons.filter(mine);
+  const vLive = live.filter(mine);
+  const vEvents = events.filter(mine);
+  const vWorkbooks = workbooks.filter(mine);
+  const clubName = CLUBS[club].name.en;
+  const others = CLUB_IDS.filter((id) => !clubs.includes(id));
 
   function openLesson(l: any) {
     const emb = ytEmbed(l.video_url);
@@ -198,10 +231,27 @@ export default function MembersArea({ isAdmin = false, referralCode = null }: { 
       </header>
 
       <main className="mem-wrap">
+        {clubs.length > 1 && (
+          <div className="mem-clubs" role="tablist" aria-label="Your clubs">
+            {clubs.map((id) => (
+              <button
+                key={id}
+                role="tab"
+                aria-selected={club === id}
+                className={"mem-club" + (club === id ? " on" : "")}
+                style={{ ["--club" as any]: CLUBS[id].color }}
+                onClick={() => pickClub(id)}
+              >
+                {CLUBS[id].name.en}
+              </button>
+            ))}
+          </div>
+        )}
+        <span className="mem-club-tag" style={{ ["--club" as any]: CLUBS[club].color }}>{clubName}</span>
         <h1 className="mem-hello">Welcome back.</h1>
-        <p className="mem-hello-sub">Your lessons, live classes, events, opportunities, and workbooks — all in one place.</p>
+        <p className="mem-hello-sub">{CLUB_INTRO[club]}</p>
 
-        {referralCode && <InviteCard code={referralCode} />}
+        {referralCode && <InviteCard code={referralCode} clubName={clubName} />}
 
         <div className="mem-tabs" role="tablist">
           {TABS.map((t) => (
@@ -216,9 +266,9 @@ export default function MembersArea({ isAdmin = false, referralCode = null }: { 
         ) : (
           <>
             {tab === "lessons" && (
-              lessons.length ? (
+              vLessons.length ? (
                 <div className="mem-grid">
-                  {lessons.map((l) => (
+                  {vLessons.map((l) => (
                     <div className="mem-card" key={l.id} onClick={() => openLesson(l)} role="button">
                       <div className="mem-thumb">
                         {ytThumb(l.video_url) ? <img src={ytThumb(l.video_url) as string} alt="" /> : null}
@@ -239,17 +289,17 @@ export default function MembersArea({ isAdmin = false, referralCode = null }: { 
             )}
 
             {tab === "live" && (
-              live.length ? (
+              vLive.length ? (
                 <div>
                   <div className="mem-live-hero">
                     <div>
                       <small>Next live class</small>
-                      <h3>{live[0].title}</h3>
-                      <p>{fmtWhen(live[0].starts_at)}{live[0].note ? ` — ${live[0].note}` : ""}</p>
+                      <h3>{vLive[0].title}</h3>
+                      <p>{fmtWhen(vLive[0].starts_at)}{vLive[0].note ? ` — ${vLive[0].note}` : ""}</p>
                     </div>
-                    {live[0].join_url ? <a className="mem-join" href={live[0].join_url} target="_blank" rel="noreferrer">Join the class</a> : null}
+                    {vLive[0].join_url ? <a className="mem-join" href={vLive[0].join_url} target="_blank" rel="noreferrer">Join the class</a> : null}
                   </div>
-                  {live.slice(1).map((c) => (
+                  {vLive.slice(1).map((c) => (
                     <div className="mem-row" key={c.id}>
                       <div><h4>{c.title}</h4><span>{fmtWhen(c.starts_at)}</span></div>
                       {c.join_url ? <a className="rj" href={c.join_url} target="_blank" rel="noreferrer">Join</a> : null}
@@ -266,9 +316,9 @@ export default function MembersArea({ isAdmin = false, referralCode = null }: { 
             )}
 
             {tab === "events" && (
-              events.length ? (
+              vEvents.length ? (
                 <div>
-                  {events.map((ev, i) => (
+                  {vEvents.map((ev, i) => (
                     <div className="mem-event" key={ev.title + i}>
                       <div className="mem-date"><b>{ev.day}</b><span>{ev.mon}</span></div>
                       <div><h4>{ev.title}</h4><p>{ev.desc}</p></div>
@@ -287,10 +337,10 @@ export default function MembersArea({ isAdmin = false, referralCode = null }: { 
             {tab === "opportunities" && <Opportunities isAdmin={isAdmin} />}
 
             {tab === "workbooks" && (
-              workbooks.length ? (
+              vWorkbooks.length ? (
                 <div>
                   <div className="mem-grid">
-                    {workbooks.map((wb) => (<HandInCard wb={wb} key={wb.id} />))}
+                    {vWorkbooks.map((wb) => (<HandInCard wb={wb} key={wb.id} />))}
                   </div>
                   <p className="mem-caption">Download each workbook, then hand in your completed work right here.</p>
                 </div>
@@ -303,6 +353,12 @@ export default function MembersArea({ isAdmin = false, referralCode = null }: { 
               )
             )}
           </>
+        )}
+        {others.length > 0 && (
+          <div className="mem-more">
+            <span>Want more? Join the {others.map((id) => CLUBS[id].name.en).join(" or the ")}.</span>
+            <a href="/members?join=1"><Plus size={15} /> Join another club</a>
+          </div>
         )}
       </main>
 

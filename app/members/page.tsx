@@ -3,11 +3,19 @@ import { createClient } from "@/lib/supabase/server";
 import { adminEmails } from "@/lib/admin-auth";
 import MembersArea from "@/components/MembersArea";
 import JoinMembership from "@/components/JoinMembership";
+import { clubsOf, isClubId } from "@/lib/clubs";
 
 export const metadata = { title: "Members" };
 export const dynamic = "force-dynamic";
 
-export default async function MembersPage() {
+export default async function MembersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const sp = await searchParams;
+  const wanted = typeof sp.club === "string" && isClubId(sp.club) ? sp.club : null;
+
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
     return (
       <div className="login-root">
@@ -36,10 +44,23 @@ export default async function MembersPage() {
     .eq("id", user.id)
     .single();
 
-  if (!profile?.is_member) return <JoinMembership email={user.email ?? ""} referredBy={profile?.referred_by ?? null} />;
+  const clubs = clubsOf(profile);
+  const join = (
+    <JoinMembership
+      email={user.email ?? ""}
+      referredBy={profile?.referred_by ?? null}
+      owned={clubs}
+      preselect={wanted}
+    />
+  );
+
+  // Not in any club yet -> choose a club and pay.
+  if (!clubs.length) return join;
+  // Already a member but asked to join another club (?join=1 or ?club=spanish for a club they don't have).
+  if (sp.join === "1" || (wanted && !clubs.includes(wanted))) return join;
 
   // Admins get a link through to the opportunities editor from inside the hub.
   const isAdmin = adminEmails().includes((user.email ?? "").toLowerCase());
 
-  return <MembersArea isAdmin={isAdmin} referralCode={profile?.referral_code ?? null} />;
+  return <MembersArea isAdmin={isAdmin} referralCode={profile?.referral_code ?? null} clubs={clubs} initialClub={wanted} />;
 }

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { ArrowRight, ArrowUpRight, Check, Instagram, Mail, MessageCircle, Menu, X, Globe } from "lucide-react";
 import DemoForm from "@/components/DemoForm";
 import { AR } from "@/components/site-ar";
+import { CLUBS, CLUB_IDS, PROMO_CODE, PROMO_PERCENT, money } from "@/lib/clubs";
 
 // Add your full WhatsApp number (country code, no +, spaces or dashes), e.g. "5215512345678".
 const WHATSAPP_NUMBER = "971504296090";
@@ -17,7 +18,7 @@ const NAV: { id: string; en: string; es: string; page?: boolean; route?: string 
   { id: "exams", en: "Exam prep", es: "Exámenes" },
   { id: "method", en: "Method", es: "Método" },
   { id: "team", en: "Our Team", es: "Equipo", page: true },
-  { id: "membership", en: "Conversation Club", es: "Club de conversación" },
+  { id: "membership", en: "Clubs", es: "Clubs" },
   { id: "pricing", en: "Pricing", es: "Precios" },
   { id: "faq", en: "FAQ", es: "Preguntas" },
   { id: "level-test", en: "Level test", es: "Test de nivel", route: "/level-test" },
@@ -184,7 +185,7 @@ const FAQ = {
     { q: "Do you teach both English and Spanish?", a: "Yes. English for Spanish speakers, and Spanish for English speakers, professionals and expats — including across Europe and Dubai. Same personalised method, either direction." },
     { q: "Can complete beginners join?", a: "Absolutely. We start exactly where you are and build from your very first lesson. Many of our students began from zero." },
     { q: "Do I need to speak well already for the demo?", a: "Not at all. The demo is a relaxed 15-minute chat to find your level and your goals. There's zero pressure and nothing to prepare." },
-    { q: "How does the membership work?", a: "Monthly access to resources, live group speaking sessions, weekly plans and community. It's $10 for the first month, then $15 after — cancel anytime." },
+    { q: "How do the clubs work?", a: "Choose the Conversation Club ($15 / 60 AED a month), the Spanish Club ($15 / 60 AED) or the Exam Club ($20 / 75 AED). Each club has a live class once a week, all the books you need and personal feedback from a professional teacher. Get 25% off your first month with code FIRST25 — cancel anytime." },
     { q: "How do I choose or change my teacher?", a: "We match you with the right teacher after your demo. If you'd like a different fit later, you can switch anytime — no awkwardness." },
     { q: "Where are your students based?", a: "Mostly across the UAE and the Gulf and Europe, with students worldwide. Everything is online and scheduled around your time zone." },
   ],
@@ -194,7 +195,7 @@ const FAQ = {
     { q: "¿Enseñan inglés y español?", a: "Sí. Inglés para hispanohablantes, y español para angloparlantes, profesionales y expatriados, incluso en Europa y Dubái. El mismo método personalizado, en cualquier dirección." },
     { q: "¿Pueden unirse principiantes totales?", a: "Por supuesto. Empezamos justo donde estás y construimos desde tu primera clase. Muchos de nuestros estudiantes empezaron desde cero." },
     { q: "¿Necesito hablar bien para la clase de prueba?", a: "Para nada. La prueba es una charla relajada de 15 minutos para conocer tu nivel y tus metas. Sin presión y sin nada que preparar." },
-    { q: "¿Cómo funciona la membresía?", a: "Acceso mensual a recursos, sesiones grupales de conversación en vivo, planes semanales y comunidad. Son $10 el primer mes, luego $15, y cancelas cuando quieras." },
+    { q: "¿Cómo funcionan los clubs?", a: "Elige el Club de conversación ($15 / 60 AED al mes), el Club de español ($15 / 60 AED) o el Club de exámenes ($20 / 75 AED). Cada club tiene una clase en vivo a la semana, todos los libros que necesitas y feedback personal de un profe profesional. Obtén 25% de descuento el primer mes con el código FIRST25, y cancelas cuando quieras." },
     { q: "¿Cómo elijo o cambio de profe?", a: "Te asignamos al profe indicado después de tu prueba. Si más adelante prefieres otro, puedes cambiar cuando quieras, sin problema." },
     { q: "¿De dónde son tus estudiantes?", a: "Sobre todo de los Emiratos, el Golfo y Europa, con estudiantes en todo el mundo. Todo es online y se adapta a tu zona horaria." },
   ],
@@ -241,9 +242,9 @@ const TEACHERS: { [k in Lang]: { name: string; teaches: string; meta: string; be
 
 const UI = {
   en: {
-    login: "Log in", memberLogin: "Member login", bookDemo: "Book a free demo", exploreMembership: "Explore the Conversation Club",
+    login: "Log in", memberLogin: "Member login", bookDemo: "Book a free demo", exploreMembership: "Explore our clubs",
     iWantToLearn: "I want", learnExams: "Exam prep", learnEnglish: "English", learnSpanish: "Spanish", unlock: "Unlock",
-    bookExamDemo: "Book a free exam demo", joinClub: "Join the Conversation Club", askWa: "Or ask us anything on WhatsApp", waHi: "Hi MundoLingu! I'm interested in IELTS / PTE / TOEFL preparation.",
+    bookExamDemo: "Book a free exam demo", joinClub: "Join a club", askWa: "Or ask us anything on WhatsApp", waHi: "Hi MundoLingu! I'm interested in IELTS / PTE / TOEFL preparation.",
     trust: ["Licensed IELTS Head of Exams", "Native, experienced teachers", "Free 15-min demo, no commitment"],
     pkgEyebrow: "1-to-1 exam packages", pkgTitle: "Choose how far you want to go.", pkgNote: "Three packages, one goal: your score. Book a free demo and your teacher will recommend the right one for you.", lessonsWord: "lessons", limited: "Limited 1-to-1 spots each month. Book your free demo to reserve yours.", pickPkg: "Start with a free demo",
     mtTitle: "Free IELTS mini-test", mtBody: "Not sure where you are? Get our free IELTS mini-test on WhatsApp, send back your answers, and our Head of Exams will tell you your estimated band — free.", mtBtn: "Get the free mini-test", mtMsg: "Hi MundoLingu! I'd like the free IELTS mini-test.",
@@ -255,11 +256,11 @@ const UI = {
     founderQuote: "“Whether your next step is a promotion, a move abroad, or simply the courage to speak — we'll build the path with you.”", founderBy: "Jurgen · Founder, MundoLingu",
     methodEyebrow: "How it works", methodTitle: "A journey, not a course.",
     storiesEyebrow: "Student stories", storiesTitle: "Real people. Real change.",
-    membEyebrow: "The Conversation Club", membTitle: "Speak every week. Build real confidence.", membLead: "Our English and Spanish Conversation Clubs: a weekly live class, monthly workbooks and feedback from a professional teacher. All levels welcome — and free with every exam-prep package.",
-    membTag: "Conversation Club", firstMonth: "first month", membSub: "then $15 / month · cancel anytime · English or Spanish", joinMembership: "Join the Conversation Club", clubFree: "Free with every package — exam prep and 1-to-1 lessons", tryFirst: "Prefer to try first? Start with a free demo lesson.",
+    membEyebrow: "Our clubs", membTitle: "Join a club. Learn every week.", membLead: "Three monthly clubs. Each one gives you a live class every week, all the books you need and personal feedback from a professional teacher. Pay in dollars or dirhams, and cancel anytime.",
+    membTag: "Monthly clubs", firstMonth: "first month", membSub: "cancel anytime", joinMembership: "See the clubs", perMonth: "/ month", clubPromo: `${PROMO_PERCENT}% off your first month with code`, clubJoin: (n: string) => `Join the ${n}`, clubFree: "A club is included free with every exam-prep and 1-to-1 package", tryFirst: "Prefer to try first? Start with a free demo lesson.",
     pricingEyebrow: "Pricing", pricingTitle: "Choose the path that fits your goal.",
-    planCommunity: "Speak every week", planCommunityFor: "For anyone who wants regular speaking practice, structure and momentum.", planCommunityPrice: "first month, then $15/mo",
-    planCommunityList: ["A weekly live conversation class", "Monthly workbooks & resources", "Feedback from a professional teacher", "All levels welcome", "English or Spanish"],
+    planCommunity: "Learn every week", planCommunityFor: "Conversation, Spanish or Exam Club — a live class every week, books and feedback.", planCommunityPrice: "/ month · 60 AED",
+    planCommunityList: ["A weekly live class", "All student books A1–B2 + a themed book every month", "Personal feedback from a professional teacher", "Exam Club: $20 / 75 AED a month", "25% off your first month with code FIRST25"],
     planExamTag: "Exam prep 1-to-1", planExam: "Pass IELTS, PTE or TOEFL", planExamFor: "For students who need a target score for study, work or a visa.", planExamPrice: "3 packages", planExamPriceSub: "10, 20 or 30 lessons",
     planExamList: ["Your own experienced native teacher", "A personal study plan for your target score", "Extra homework whenever you ask", "24/7 WhatsApp support", "Free group classes + weekly live exam class"],
     planPrivateTag: "Private 1-to-1", planPrivate: "Learn with your own teacher", planPrivateFor: "For the fastest, most personal progress toward a specific goal.", planPrivatePrice: "Personalised", planPrivatePriceSub: "priced to your plan",
@@ -284,9 +285,9 @@ const UI = {
     demoPeople: "A real teacher reads your request and contacts you personally to set up your demo.",
   },
   es: {
-    login: "Entrar", memberLogin: "Acceso de miembros", bookDemo: "Reserva una clase gratis", exploreMembership: "Explora el Club de conversación",
+    login: "Entrar", memberLogin: "Acceso de miembros", bookDemo: "Reserva una clase gratis", exploreMembership: "Explora nuestros clubs",
     iWantToLearn: "Quiero", learnExams: "Exámenes", learnEnglish: "Inglés", learnSpanish: "Español", unlock: "Desbloquea",
-    bookExamDemo: "Reserva una clase de examen gratis", joinClub: "Únete al Club de conversación", askWa: "O pregúntanos lo que quieras por WhatsApp", waHi: "¡Hola MundoLingu! Me interesa la preparación de IELTS / PTE / TOEFL.",
+    bookExamDemo: "Reserva una clase de examen gratis", joinClub: "Únete a un club", askWa: "O pregúntanos lo que quieras por WhatsApp", waHi: "¡Hola MundoLingu! Me interesa la preparación de IELTS / PTE / TOEFL.",
     trust: ["Jefe de Exámenes IELTS con licencia", "Profes nativos con experiencia", "Clase gratis de 15 min, sin compromiso"],
     pkgEyebrow: "Paquetes de examen 1 a 1", pkgTitle: "Elige hasta dónde quieres llegar.", pkgNote: "Tres paquetes, una meta: tu nota. Reserva una clase gratis y tu profe te recomendará el ideal para ti.", lessonsWord: "clases", limited: "Plazas 1 a 1 limitadas cada mes. Reserva tu clase gratis para asegurar la tuya.", pickPkg: "Empieza con una clase gratis",
     mtTitle: "Mini-test IELTS gratis", mtBody: "¿No sabes en qué nivel estás? Pide nuestro mini-test IELTS gratis por WhatsApp, envía tus respuestas y nuestro Jefe de Exámenes te dirá tu band estimado, gratis.", mtBtn: "Pide el mini-test gratis", mtMsg: "¡Hola MundoLingu! Quiero el mini-test IELTS gratis.",
@@ -298,11 +299,11 @@ const UI = {
     founderQuote: "“Ya sea un ascenso, una mudanza al extranjero o simplemente el valor de hablar, construiremos el camino contigo.”", founderBy: "Jurgen · Fundador, MundoLingu",
     methodEyebrow: "Cómo funciona", methodTitle: "Un camino, no un curso.",
     storiesEyebrow: "Historias de estudiantes", storiesTitle: "Personas reales. Cambios reales.",
-    membEyebrow: "El Club de conversación", membTitle: "Habla cada semana. Gana confianza real.", membLead: "Nuestros Clubs de conversación en inglés y en español: una clase en vivo cada semana, cuadernos mensuales y feedback de un profe profesional. Para todos los niveles, y gratis con cada paquete de preparación de exámenes.",
-    membTag: "Club de conversación", firstMonth: "el primer mes", membSub: "luego $15/mes · cancela cuando quieras · inglés o español", joinMembership: "Únete al Club de conversación", clubFree: "Gratis con cada paquete: exámenes y clases 1 a 1", tryFirst: "¿Prefieres probar primero? Empieza con una clase gratis.",
+    membEyebrow: "Nuestros clubs", membTitle: "Únete a un club. Aprende cada semana.", membLead: "Tres clubs mensuales. Cada uno te da una clase en vivo cada semana, todos los libros que necesitas y feedback personal de un profe profesional. Paga en dólares o dírhams, y cancela cuando quieras.",
+    membTag: "Clubs mensuales", firstMonth: "el primer mes", membSub: "cancela cuando quieras", joinMembership: "Ver los clubs", perMonth: "/ mes", clubPromo: `${PROMO_PERCENT}% de descuento el primer mes con el código`, clubJoin: (n: string) => `Únete al ${n}`, clubFree: "Un club gratis con cada paquete de exámenes y de clases 1 a 1", tryFirst: "¿Prefieres probar primero? Empieza con una clase gratis.",
     pricingEyebrow: "Precios", pricingTitle: "Elige el camino que encaja con tu meta.",
-    planCommunity: "Habla cada semana", planCommunityFor: "Para quien quiere práctica oral constante, estructura e impulso.", planCommunityPrice: "primer mes, luego $15/mes",
-    planCommunityList: ["Una clase de conversación en vivo cada semana", "Cuadernos y recursos mensuales", "Feedback de un profe profesional", "Para todos los niveles", "Inglés o español"],
+    planCommunity: "Aprende cada semana", planCommunityFor: "Club de conversación, de español o de exámenes: una clase en vivo cada semana, libros y feedback.", planCommunityPrice: "/ mes · 60 AED",
+    planCommunityList: ["Una clase en vivo cada semana", "Todos los libros de A1 a B2 + un libro temático cada mes", "Feedback personal de un profe profesional", "Club de exámenes: $20 / 75 AED al mes", "25% de descuento el primer mes con el código FIRST25"],
     planExamTag: "Exámenes 1 a 1", planExam: "Aprueba IELTS, PTE o TOEFL", planExamFor: "Para quien necesita una nota para estudiar, trabajar o una visa.", planExamPrice: "3 paquetes", planExamPriceSub: "10, 20 o 30 clases",
     planExamList: ["Tu propio profe nativo con experiencia", "Un plan de estudio para tu nota objetivo", "Tareas extra siempre que las pidas", "Soporte por WhatsApp 24/7", "Clases grupales gratis + clase de examen semanal"],
     planPrivateTag: "Privado 1 a 1", planPrivate: "Aprende con tu propio profe", planPrivateFor: "Para el progreso más rápido y personal hacia una meta concreta.", planPrivatePrice: "Personalizado", planPrivatePriceSub: "según tu plan",
@@ -746,21 +747,28 @@ export default function Site() {
                 <span className="ml-eyebrow" data-reveal>{t.membEyebrow}</span>
                 <h2 className="ml-h2" data-reveal>{t.membTitle}</h2>
                 <p className="ml-lead" data-reveal>{t.membLead}</p>
-                <div className="ml-memb-grid">
-                  <div className="ml-benefits" data-reveal>
-                    {BENEFITS[lang].map((b) => (<div className="ml-benefit" key={b}><Check /> {b}</div>))}
-                  </div>
-                  <div className="ml-price-card" data-reveal>
-                    <div className="rel">
-                      <div className="ml-plan-tag" style={{ color: "var(--cyan)" }}>{t.membTag}</div>
-                      <div className="ml-price-tag" style={{ marginTop: 14 }}>$10 <small>{t.firstMonth}</small></div>
-                      <div className="ml-price-sub">{t.membSub}</div>
-                      <div className="ml-club-free"><Check /> {t.clubFree}</div>
-                      <a className="ml-btn ml-btn--primary" href="#demo" onClick={(e) => { e.preventDefault(); go("demo"); }}>{t.joinMembership} <ArrowRight /></a>
-                      <div className="ml-price-note">{t.tryFirst}</div>
-                    </div>
-                  </div>
+                <div className="ml-plans ml-plans--3 ml-clubs">
+                  {CLUB_IDS.map((id, i) => {
+                    const c = CLUBS[id];
+                    return (
+                      <div className="ml-plan ml-club-card" key={id} data-reveal style={{ ["--club" as any]: c.color, transitionDelay: `${i * 0.08}s` }}>
+                        <span className="ml-plan-tag">{c.name[lang]}</span>
+                        <p className="for" style={{ marginTop: 10 }}>{c.for[lang]}</p>
+                        <div className="ml-plan-price">${money(c.usd)} <small>{t.perMonth}</small><span className="ml-club-aed">{money(c.aed)} AED {t.perMonth}</span></div>
+                        <ul>{c.includes[lang].map((li) => (<li key={li}><Check /> {li}</li>))}</ul>
+                        <a
+                          className={"ml-btn " + (id === "exam" ? "ml-btn--primary" : "ml-btn--ghost")}
+                          href={`/members?club=${id}`}
+                          onClick={() => { try { localStorage.setItem("ml-club-choice", id); } catch {} }}
+                        >
+                          {t.clubJoin(c.name[lang])} <ArrowRight />
+                        </a>
+                      </div>
+                    );
+                  })}
                 </div>
+                <p className="ml-clubs-promo" data-reveal>{t.clubPromo} <b>{PROMO_CODE}</b></p>
+                <p className="ml-clubs-free" data-reveal><Check /> {t.clubFree}</p>
               </div>
             </section>
 
@@ -782,7 +790,7 @@ export default function Site() {
                     <span className="ml-plan-tag">{t.membTag}</span>
                     <h3>{t.planCommunity}</h3>
                     <p className="for">{t.planCommunityFor}</p>
-                    <div className="ml-plan-price">$10 <small>{t.planCommunityPrice}</small></div>
+                    <div className="ml-plan-price">$15 <small>{t.planCommunityPrice}</small></div>
                     <ul>{t.planCommunityList.map((li) => (<li key={li}><Check /> {li}</li>))}</ul>
                     <a className="ml-btn ml-btn--ghost" href="#membership" onClick={(e) => { e.preventDefault(); go("membership"); }}>{t.joinMembership} <ArrowRight /></a>
                   </div>

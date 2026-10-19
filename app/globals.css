@@ -1069,3 +1069,58 @@ body { background: #F5F6F7; }
 .mem-ref-wa{background:#25D366;color:#0b3d1f;}
 .mem-ref-copy:hover,.mem-ref-wa:hover{filter:brightness(1.06);transform:translateY(-1px);}
 @media (max-width:560px){.mem-ref{padding:22px 18px;}.mem-ref-act{flex:1 1 100%;}}
+
+
+/* =========================================================
+   THREE CLUBS — join page picker, hub switcher, homepage cards
+   Club colours come from lib/clubs.ts (--club).
+   ========================================================= */
+.join-card--wide{max-width:620px;}
+.join-clubs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.join-club{--club:var(--teal);display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;background:var(--paper);border:none;border-radius:14px;padding:14px 14px 13px;cursor:pointer;box-shadow:inset 0 0 0 1.3px var(--line);transition:box-shadow .2s,transform .2s;font-family:var(--sans);color:var(--ink);min-width:0;}
+.join-club:hover:not(:disabled){transform:translateY(-1px);box-shadow:inset 0 0 0 1.6px var(--club);}
+.join-club.on{box-shadow:inset 0 0 0 2.2px var(--club);background:#fff;}
+.join-club.mine{opacity:.55;cursor:default;}
+.join-club-name{font-size:14px;font-weight:700;line-height:1.25;}
+.join-club-price{font-family:var(--serif);font-size:24px;letter-spacing:-.01em;line-height:1.1;}
+.join-club-price small{font-family:var(--sans);font-size:12.5px;color:var(--muted);font-weight:600;}
+.join-club-per{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--faint);}
+.join-detail{text-align:left;background:var(--paper);border-radius:14px;padding:18px 20px;box-shadow:inset 0 0 0 1px var(--line-2);margin-bottom:22px;}
+.join-detail-for{margin:0 0 12px;font-size:15px;font-weight:600;color:var(--ink);}
+.join-detail ul{list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:8px;}
+.join-detail li{display:flex;gap:9px;align-items:flex-start;font-size:14.5px;color:var(--muted);line-height:1.45;}
+.join-detail li svg{color:var(--teal);flex:none;margin-top:2px;}
+.join-promo{display:flex;align-items:center;gap:7px;flex-wrap:wrap;background:rgba(242,107,42,.1);color:var(--orange-deep);font-size:14px;font-weight:600;padding:9px 13px;border-radius:10px;margin-bottom:12px;}
+.join-promo b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.06em;background:#fff;padding:2px 8px;border-radius:6px;box-shadow:inset 0 0 0 1px rgba(242,107,42,.35);}
+.join-sum{display:flex;flex-direction:column;gap:6px;}
+.join-sum > div{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:14px;color:var(--muted);}
+.join-sum b{color:var(--navy);font-size:15px;}
+.join-sum small{color:var(--faint);font-weight:500;}
+.join-card-btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;width:100%;box-sizing:border-box;background:var(--orange);color:var(--navy);font-weight:700;font-size:16px;padding:15px 26px;border-radius:12px;text-decoration:none;transition:background .25s,transform .25s;}
+.join-card-btn:hover{background:var(--orange-deep);color:#fff;transform:translateY(-2px);}
+.join-or{font-size:13px;color:var(--faint);margin:12px 0 18px;}
+@media(max-width:560px){
+  .join-card{padding:32px 20px 26px;}
+  .join-clubs{grid-template-columns:1fr;}
+  .join-club{flex-direction:row;align-items:baseline;flex-wrap:wrap;column-gap:10px;}
+  .join-club-name{flex:1 1 100%;}
+}
+
+.mem-clubs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;}
+.mem-club{--club:var(--teal);font-family:var(--sans);font-size:14.5px;font-weight:600;color:var(--muted);background:var(--paper-2);border:none;cursor:pointer;padding:10px 16px;border-radius:100px;box-shadow:inset 0 0 0 1.3px var(--line);transition:box-shadow .2s,color .2s;}
+.mem-club:hover{color:var(--ink);}
+.mem-club.on{color:var(--ink);box-shadow:inset 0 0 0 2px var(--club);}
+.mem-club-tag{--club:var(--teal);display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);margin-bottom:8px;}
+.mem-club-tag::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--club);}
+.mem-more{margin-top:48px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:18px 22px;border-radius:16px;background:var(--paper-2);box-shadow:inset 0 0 0 1px var(--line-2);font-size:15px;color:var(--muted);}
+.mem-more a{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--teal-text);text-decoration:none;white-space:nowrap;}
+
+.ml-clubs{margin-top:52px;}
+.ml-club-card{--club:var(--teal);position:relative;overflow:hidden;}
+.ml-club-card::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--club);}
+.ml-club-card .ml-plan-tag{color:var(--club);}
+.ml-club-aed{display:block;font-family:var(--sans);font-size:14px;color:var(--muted);margin-top:4px;}
+.ml-clubs-promo{display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;margin:28px auto 0;font-size:15px;color:var(--ink);}
+.ml-clubs-promo b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.06em;color:var(--orange-deep);background:rgba(242,107,42,.1);padding:4px 10px;border-radius:7px;}
+.ml-clubs-free{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;font-size:14.5px;color:var(--muted);}
+.ml-clubs-free svg{width:16px;height:16px;color:var(--teal);}
