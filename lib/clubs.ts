@@ -17,8 +17,9 @@ export type Club = {
   id: ClubId;
   usd: number; // monthly price in US dollars
   aed: number; // monthly price in UAE dirhams
-  // Stripe: once your Stripe account is active, paste this club's Payment Link
-  // (https://buy.stripe.com/...) between the quotes. Empty = no "Pay by card" button.
+  // Stripe Payment Link (https://buy.stripe.com/...). Set it in Netlify as an
+  // environment variable (NEXT_PUBLIC_STRIPE_LINK_CONVERSATION / _SPANISH / _EXAM),
+  // or paste it between the quotes below. Empty = bank-transfer fallback is shown.
   stripeLink: string;
   color: string;
   name: Txt;
@@ -31,7 +32,7 @@ export const CLUBS: Record<ClubId, Club> = {
     id: "conversation",
     usd: 15,
     aed: 60,
-    stripeLink: "",
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_LINK_CONVERSATION || "",
     color: "var(--teal)",
     name: { en: "Conversation Club", es: "Club de conversación", ar: "نادي المحادثة" },
     for: {
@@ -49,7 +50,7 @@ export const CLUBS: Record<ClubId, Club> = {
     id: "spanish",
     usd: 15,
     aed: 60,
-    stripeLink: "",
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_LINK_SPANISH || "",
     color: "var(--orange)",
     name: { en: "Spanish Club", es: "Club de español", ar: "نادي الإسبانية" },
     for: {
@@ -67,7 +68,7 @@ export const CLUBS: Record<ClubId, Club> = {
     id: "exam",
     usd: 20,
     aed: 75,
-    stripeLink: "",
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_LINK_EXAM || "",
     color: "var(--navy)",
     name: { en: "Exam Club", es: "Club de exámenes", ar: "نادي الاختبارات" },
     for: {
@@ -93,11 +94,14 @@ export function firstMonth(n: number): string {
   return money(Math.round(n * (100 - PROMO_PERCENT)) / 100);
 }
 
-// Stripe link with the discount code already filled in.
-export function stripeHref(club: Club, email?: string): string {
+// Stripe link with the discount code and email already filled in.
+// client_reference_id tells our webhook WHICH member paid for WHICH club,
+// so the club unlocks automatically (format: <supabase user id>__<club>).
+export function stripeHref(club: Club, email?: string, userId?: string): string {
   if (!club.stripeLink) return "";
   const p = new URLSearchParams({ prefilled_promo_code: PROMO_CODE });
   if (email) p.set("prefilled_email", email);
+  if (userId) p.set("client_reference_id", `${userId}__${club.id}`);
   return `${club.stripeLink}${club.stripeLink.includes("?") ? "&" : "?"}${p.toString()}`;
 }
 

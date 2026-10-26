@@ -145,9 +145,9 @@ function InviteCard({ code, clubName }: { code: string; clubName: string }) {
   );
 }
 
-type Props = { isAdmin?: boolean; referralCode?: string | null; clubs?: ClubId[]; initialClub?: ClubId | null };
+type Props = { isAdmin?: boolean; referralCode?: string | null; clubs?: ClubId[]; initialClub?: ClubId | null; canManage?: boolean };
 
-export default function MembersArea({ isAdmin = false, referralCode = null, clubs = ["conversation"], initialClub = null }: Props) {
+export default function MembersArea({ isAdmin = false, referralCode = null, clubs = ["conversation"], initialClub = null, canManage = false }: Props) {
   const [tab, setTab] = useState("lessons");
   const [club, setClub] = useState<ClubId>(initialClub && clubs.includes(initialClub) ? initialClub : clubs[0]);
   const [loading, setLoading] = useState(true);
@@ -212,6 +212,18 @@ export default function MembersArea({ isAdmin = false, referralCode = null, club
     else if (l.video_url) window.open(l.video_url, "_blank");
   }
 
+  // Opens Stripe's page where members can cancel or change their card.
+  async function manage() {
+    try {
+      const r = await fetch("/api/portal", { method: "POST" });
+      const j = await r.json();
+      if (j.url) window.location.href = j.url;
+      else alert(j.error || "Couldn't open your membership page. Please message us on WhatsApp.");
+    } catch {
+      alert("Couldn't open your membership page. Please message us on WhatsApp.");
+    }
+  }
+
   async function logout() {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -225,6 +237,7 @@ export default function MembersArea({ isAdmin = false, referralCode = null, club
         <div className="mem-head-in">
           <img src="/logo-wordmark-white.png" alt="MundoLingu" />
           <div className="mem-head-r">
+            {canManage && <button className="mem-logout" onClick={manage}>Manage membership</button>}
             <button className="mem-logout" onClick={logout}>Log out</button>
           </div>
         </div>

@@ -48,6 +48,8 @@ export default async function MembersPage({
   const join = (
     <JoinMembership
       email={user.email ?? ""}
+      userId={user.id}
+      justPaid={sp.paid === "1"}
       referredBy={profile?.referred_by ?? null}
       owned={clubs}
       preselect={wanted}
@@ -62,5 +64,5 @@ export default async function MembersPage({
   // Admins get a link through to the opportunities editor from inside the hub.
   const isAdmin = adminEmails().includes((user.email ?? "").toLowerCase());
 
-  return <MembersArea isAdmin={isAdmin} referralCode={profile?.referral_code ?? null} clubs={clubs} initialClub={wanted} />;
+  return <MembersArea isAdmin={isAdmin} referralCode={profile?.referral_code ?? null} clubs={clubs} initialClub={wanted} canManage={!!profile?.stripe_customer_id} />;
 }

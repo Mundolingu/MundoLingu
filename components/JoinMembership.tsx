@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { MessageCircle, Check, CreditCard, Tag } from "lucide-react";
+import { MessageCircle, Check, CreditCard, Tag, Lock, Loader2 } from "lucide-react";
 import { CLUBS, CLUB_IDS, PROMO_CODE, PROMO_PERCENT, money, firstMonth, stripeHref, isClubId, type ClubId } from "@/lib/clubs";
 
 // Your WhatsApp number (country code, no +, spaces or dashes):
@@ -30,12 +30,14 @@ const PAY_INTL = {
 
 type Props = {
   email: string;
+  userId?: string;
+  justPaid?: boolean;
   referredBy?: string | null;
   owned?: ClubId[];
   preselect?: ClubId | null;
 };
 
-export default function JoinMembership({ email, referredBy = null, owned = [], preselect = null }: Props) {
+export default function JoinMembership({ email, userId, justPaid = false, referredBy = null, owned = [], preselect = null }: Props) {
   const [lang, setLang] = useState<"en" | "es">("en");
   const available = CLUB_IDS.filter((id) => !owned.includes(id));
   const [club, setClub] = useState<ClubId>(preselect && available.includes(preselect) ? preselect : available[0] || "conversation");
@@ -53,6 +55,13 @@ export default function JoinMembership({ email, referredBy = null, owned = [], p
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Back from Stripe: Stripe tells our site a few seconds later, so keep checking.
+  useEffect(() => {
+    if (!justPaid) return;
+    const t = setInterval(() => router.refresh(), 4000);
+    return () => clearInterval(t);
+  }, [justPaid, router]);
+
   async function logout() {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -64,7 +73,7 @@ export default function JoinMembership({ email, referredBy = null, owned = [], p
   const name = c.name[lang];
   const price = `$${money(c.usd)} · ${money(c.aed)} AED`;
   const first = `$${firstMonth(c.usd)} · ${firstMonth(c.aed)} AED`;
-  const card = stripeHref(c, email);
+  const card = stripeHref(c, email, userId);
   const isNew = owned.length === 0;
 
   const t = lang === "es"
@@ -77,7 +86,13 @@ export default function JoinMembership({ email, referredBy = null, owned = [], p
         promo: `${PROMO_PERCENT}% de descuento el primer mes con el código`,
         firstL: "Tu primer mes",
         thenL: "Después",
-        card: "Pagar con tarjeta",
+        card: "Pagar con tarjeta — seguro con Stripe",
+        cardNote: "Tarjeta, Apple Pay o Google Pay. Tu club se activa al instante. Cancela cuando quieras.",
+        s2card: "2. Paga de forma segura",
+        paidT: "¡Pago recibido! Activando tu club…",
+        paidP: "Esto tarda unos segundos. La página se actualiza sola.",
+        help: "¿Preguntas? Escríbenos por WhatsApp",
+        helpMsg: `¡Hola MundoLingu! Tengo una pregunta sobre el ${name}. Mi correo es ${email}.`,
         orBank: "o paga por transferencia bancaria",
         s2: "2. Paga por transferencia",
         mxTitle: "Desde México", mxPrice: "Paga el equivalente en pesos mexicanos",
@@ -98,7 +113,13 @@ export default function JoinMembership({ email, referredBy = null, owned = [], p
         promo: `${PROMO_PERCENT}% off your first month with code`,
         firstL: "Your first month",
         thenL: "Then",
-        card: "Pay by card",
+        card: "Pay by card — secure with Stripe",
+        cardNote: "Card, Apple Pay or Google Pay. Your club unlocks instantly. Cancel anytime.",
+        s2card: "2. Pay securely",
+        paidT: "Payment received! Unlocking your club…",
+        paidP: "This takes a few seconds. The page refreshes by itself.",
+        help: "Questions? Message us on WhatsApp",
+        helpMsg: `Hi MundoLingu! I have a question about the ${name}. My email is ${email}.`,
         orBank: "or pay by bank transfer",
         s2: "2. Pay by bank transfer",
         mxTitle: "From Mexico", mxPrice: "Pay the same amount in Mexican pesos",
@@ -112,11 +133,18 @@ export default function JoinMembership({ email, referredBy = null, owned = [], p
       };
 
   const waHref = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(t.waMsg)}`;
+  const helpHref = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(t.helpMsg)}`;
 
   return (
     <div className="join-root">
       <div className="join-card join-card--wide">
         <div className="join-logo"><img src="/logo-emblem.png" alt="MundoLingu" /></div>
+        {justPaid && (
+          <div className="join-paid">
+            <Loader2 size={20} className="join-spin" />
+            <div><b>{t.paidT}</b><span>{t.paidP}</span></div>
+          </div>
+        )}
         <h1>{t.title}</h1>
         <p className="join-sub">{t.sub}</p>
 
@@ -158,45 +186,50 @@ export default function JoinMembership({ email, referredBy = null, owned = [], p
           </div>
         </div>
 
-        {card && (
+        {card ? (
           <>
+            <p className="join-s1">{t.s2card}</p>
             <a className="join-card-btn" href={card}><CreditCard size={18} /> {t.card}</a>
-            <p className="join-or">{t.orBank}</p>
+            <p className="join-card-note"><Lock size={13} /> {t.cardNote}</p>
+            <a className="join-help" href={helpHref} target="_blank" rel="noreferrer">
+              <MessageCircle size={15} /> {t.help}
+            </a>
+          </>
+        ) : (
+          <>
+            {/* Shown only while this club has no Stripe link set up yet. */}
+            <p className="join-s1">{t.s2}</p>
+            <div className="join-pay">
+              <div className="join-method">
+                <div className="join-method-head"><span className="join-flag">🌎</span><h3>{t.intlTitle}</h3></div>
+                <div className="join-method-price">{t.intlPrice}</div>
+                <div className="join-bank">
+                  <div><span>{t.beneficiaryL}</span><b>{PAY_INTL.beneficiary}</b></div>
+                  <div><span>IBAN</span><b>{PAY_INTL.iban}</b></div>
+                  <div><span>BIC / SWIFT</span><b>{PAY_INTL.bic}</b></div>
+                  <div><span>{t.bankL}</span><b>{PAY_INTL.bank}</b></div>
+                  <div><span>{t.corrL}</span><b>{PAY_INTL.corr}</b></div>
+                </div>
+              </div>
+              <div className="join-method">
+                <div className="join-method-head"><span className="join-flag">🇲🇽</span><h3>{t.mxTitle}</h3></div>
+                <div className="join-method-price">{t.mxPrice}</div>
+                <div className="join-bank">
+                  <div><span>{t.bankL}</span><b>{PAY_MX.bank}</b></div>
+                  <div><span>{t.nameL}</span><b>{PAY_MX.name}</b></div>
+                  <div><span>{t.accountL}</span><b>{PAY_MX.account}</b></div>
+                  <div><span>CLABE</span><b>{PAY_MX.clabe}</b></div>
+                </div>
+              </div>
+            </div>
+            <div className="join-steps">
+              <div className="join-step"><h3>{t.s3}</h3><p>{t.s3p}</p></div>
+            </div>
+            <a className="join-wa" href={waHref} target="_blank" rel="noreferrer">
+              <MessageCircle size={19} /> {t.wa}
+            </a>
           </>
         )}
-
-        <p className="join-s1">{t.s2}</p>
-        <div className="join-pay">
-          <div className="join-method">
-            <div className="join-method-head"><span className="join-flag">🌎</span><h3>{t.intlTitle}</h3></div>
-            <div className="join-method-price">{t.intlPrice}</div>
-            <div className="join-bank">
-              <div><span>{t.beneficiaryL}</span><b>{PAY_INTL.beneficiary}</b></div>
-              <div><span>IBAN</span><b>{PAY_INTL.iban}</b></div>
-              <div><span>BIC / SWIFT</span><b>{PAY_INTL.bic}</b></div>
-              <div><span>{t.bankL}</span><b>{PAY_INTL.bank}</b></div>
-              <div><span>{t.corrL}</span><b>{PAY_INTL.corr}</b></div>
-            </div>
-          </div>
-          <div className="join-method">
-            <div className="join-method-head"><span className="join-flag">🇲🇽</span><h3>{t.mxTitle}</h3></div>
-            <div className="join-method-price">{t.mxPrice}</div>
-            <div className="join-bank">
-              <div><span>{t.bankL}</span><b>{PAY_MX.bank}</b></div>
-              <div><span>{t.nameL}</span><b>{PAY_MX.name}</b></div>
-              <div><span>{t.accountL}</span><b>{PAY_MX.account}</b></div>
-              <div><span>CLABE</span><b>{PAY_MX.clabe}</b></div>
-            </div>
-          </div>
-        </div>
-
-        <div className="join-steps">
-          <div className="join-step"><h3>{t.s3}</h3><p>{t.s3p}</p></div>
-        </div>
-
-        <a className="join-wa" href={waHref} target="_blank" rel="noreferrer">
-          <MessageCircle size={19} /> {t.wa}
-        </a>
         <p className="join-logout">
           {!isNew && (<><a href="/members">{t.back}</a>{" · "}</>)}
           <a onClick={logout}>{t.logout}</a>

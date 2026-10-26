@@ -1124,3 +1124,13 @@ body { background: #F5F6F7; }
 .ml-clubs-promo b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.06em;color:var(--orange-deep);background:rgba(242,107,42,.1);padding:4px 10px;border-radius:7px;}
 .ml-clubs-free{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;font-size:14.5px;color:var(--muted);}
 .ml-clubs-free svg{width:16px;height:16px;color:var(--teal);}
+
+/* Stripe checkout on the join page */
+.join-card-note{display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;color:var(--faint);margin:12px 0 18px;line-height:1.4;}
+.join-help{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:var(--teal);text-decoration:none;margin-bottom:10px;}
+.join-help:hover{text-decoration:underline;}
+.join-paid{display:flex;align-items:center;gap:12px;text-align:left;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.45);border-radius:12px;padding:14px 16px;margin-bottom:18px;}
+.join-paid b{display:block;font-size:15px;}
+.join-paid span{font-size:13px;opacity:.8;}
+.join-spin{animation:join-spin 1s linear infinite;flex-shrink:0;}
+@keyframes join-spin{to{transform:rotate(360deg);}}
