@@ -32,7 +32,7 @@ export const CLUBS: Record<ClubId, Club> = {
     id: "conversation",
     usd: 15,
     aed: 60,
-    stripeLink: process.env.NEXT_PUBLIC_STRIPE_LINK_CONVERSATION || "",
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_LINK_CONVERSATION || "https://buy.stripe.com/9B67sLgkl3zMf9CbvQgrS02",
     color: "var(--teal)",
     name: { en: "Conversation Club", es: "Club de conversación", ar: "نادي المحادثة" },
     for: {
@@ -50,7 +50,7 @@ export const CLUBS: Record<ClubId, Club> = {
     id: "spanish",
     usd: 15,
     aed: 60,
-    stripeLink: process.env.NEXT_PUBLIC_STRIPE_LINK_SPANISH || "",
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_LINK_SPANISH || "https://buy.stripe.com/fZu5kD1pr8U6aTmfM6grS03",
     color: "var(--orange)",
     name: { en: "Spanish Club", es: "Club de español", ar: "نادي الإسبانية" },
     for: {
@@ -68,7 +68,7 @@ export const CLUBS: Record<ClubId, Club> = {
     id: "exam",
     usd: 20,
     aed: 75,
-    stripeLink: process.env.NEXT_PUBLIC_STRIPE_LINK_EXAM || "",
+    stripeLink: process.env.NEXT_PUBLIC_STRIPE_LINK_EXAM || "https://buy.stripe.com/cNi00j8RT5HU5z2czUgrS01",
     color: "var(--navy)",
     name: { en: "Exam Club", es: "Club de exámenes", ar: "نادي الاختبارات" },
     for: {
