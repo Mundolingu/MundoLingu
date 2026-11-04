@@ -1,13 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 const CONFIGURED = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
 
 export default function LoginForm() {
-  const router = useRouter();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -47,22 +45,25 @@ export default function LoginForm() {
         return;
       }
       const { data } = await supabase.auth.getSession();
-      setLoading(false);
       if (data.session) {
-        router.push("/members");
-        router.refresh();
+        // Full page load so the new login cookie is always sent (keeps "Please wait…" showing meanwhile).
+        window.location.assign("/members");
+        return;
       } else {
+        setLoading(false);
         setMsg("Almost there — check your email to confirm your account, then log in.");
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      setLoading(false);
       if (error) {
+        setLoading(false);
         setMsg(error.message);
         return;
       }
-      router.push("/members");
-      router.refresh();
+      // Full page load (not a soft client-side navigation): the soft version could reuse a cached
+      // "not logged in" redirect and bounce back to /login, and it re-enabled the button too early,
+      // which is why it took several clicks. Keep "Please wait…" showing until the members page opens.
+      window.location.assign("/members");
     }
   }
 
