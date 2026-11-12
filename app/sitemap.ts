@@ -9,6 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/ielts-speaking-mock-test`, changeFrequency: "monthly", priority: 0.9 },
     { url: `${base}/ielts-for-nurses`, changeFrequency: "monthly", priority: 0.9 },
     { url: `${base}/ielts-band-check`, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${base}/ielts-plan`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/level-test`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/blog`, changeFrequency: "weekly", priority: 0.7 },
     ...POSTS.map((p) => ({ url: `${base}/blog/${p.slug}`, lastModified: p.date, changeFrequency: "monthly" as const, priority: 0.6 })),
